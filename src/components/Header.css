@@ -21,6 +21,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 56px;
   height: 64px;
   gap: var(--space-4);
 }
@@ -173,17 +174,41 @@
 }
 
 @media (max-width: 768px) {
+  .header {
+    overflow-x: hidden;
+  }
+
+  .nav-container {
+    padding: 0 var(--space-3);
+    min-height: 52px;
+    height: 52px;
+    gap: var(--space-2);
+  }
+
+  .nav-logo {
+    font-size: 1rem;
+    gap: var(--space-1);
+  }
+
+  .nav-logo .logo-image {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+  }
+
   .nav-overlay {
     display: block;
+    top: 52px;
   }
 
   .nav-menu {
     display: flex;
     position: fixed;
-    top: 64px;
+    top: 52px;
     left: 0;
     bottom: 0;
     width: min(280px, 85vw);
+    max-width: 280px;
     transform: translateX(-100%);
     background: var(--color-surface);
     border-right: 4px solid var(--color-border);
@@ -195,6 +220,8 @@
     transition: transform var(--transition-normal);
     align-items: stretch;
     justify-content: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .nav-menu.open {
@@ -205,20 +232,75 @@
     width: 100%;
     text-align: left;
     padding: var(--space-3) var(--space-4);
+    font-size: var(--text-base);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
 
   .nav-mobile-menu {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: var(--space-2);
+    flex-shrink: 0;
   }
 
   .nav-actions {
     gap: var(--space-2);
+    flex: 1;
+    min-width: 0;
+    justify-content: flex-end;
   }
 
   .header .search-container.header-search {
-    max-width: 100%;
+    max-width: 140px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .header .search-container .search-input-wrapper {
+    min-height: 38px;
+    padding: var(--space-2) var(--space-2);
+  }
+
+  .header .search-container .search-input {
+    font-size: 0.8125rem;
+  }
+
+  .header .search-container .search-btn {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .header .search-container .search-dropdown {
+    left: 0;
+    right: 0;
+    max-height: min(60vh, 280px);
+    width: 100%;
+  }
+
+  .nav-actions .theme-toggle {
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .nav-container {
+    padding: 0 var(--space-2);
+  }
+
+  .header .search-container.header-search {
+    max-width: 100px;
+  }
+
+  .nav-logo .logo-text {
+    font-size: 0.9rem;
   }
 }
 
