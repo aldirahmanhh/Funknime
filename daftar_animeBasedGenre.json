@@ -1,0 +1,666 @@
+{
+    "status": "success",
+    "creator": "Sanka Vollerei",
+    "statusCode": 200,
+    "statusMessage": "OK",
+    "message": "",
+    "ok": true,
+    "data": {
+      "animeList": [
+        {
+          "title": "Toujima Tanzaburou wa Kamen Rider ni Naritai",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2025/10/Toujima-Tanzaburou-wa-Kamen-Rider-ni-Naritai-Sub-Indo.jpg",
+          "studios": "LIDENFILMS",
+          "score": "7.67",
+          "episodes": null,
+          "season": "Fall 2025",
+          "animeId": "toujima-tanzaburou-wa-kamen-rider-ni-naritai-sub-indo",
+          "href": "/anime/anime/toujima-tanzaburou-wa-kamen-rider-ni-naritai-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/toujima-tanzaburou-wa-kamen-rider-ni-naritai-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Sejak kecil dulu, Tanzaburou Toujima memiliki cita-cita untuk menjadi seorang Kamen Rider. Sayangnya, hal tersebut urung terjadi. Kini, Toujima yang telah berusia 40 tahun telah mengubur mimpi tersebut dalam-dalam.",
+              "Namun suatu hari, Toujima yang berada di sebuah festival terlibat dalam kasus Shocker yang cukup menyita perhatian. Setelah berhasil mengalahkan para Shocker, Toujima kini menjadi viral dan dikenal oleh banyak orang."
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Adult Cast",
+              "genreId": "adult-cast",
+              "href": "/anime/genre/adult-cast",
+              "otakudesuUrl": "https://otakudesu.blog/genres/adult-cast/"
+            },
+            {
+              "title": "Comedy",
+              "genreId": "comedy",
+              "href": "/anime/genre/comedy",
+              "otakudesuUrl": "https://otakudesu.blog/genres/comedy/"
+            },
+            {
+              "title": "Seinen",
+              "genreId": "seinen",
+              "href": "/anime/genre/seinen",
+              "otakudesuUrl": "https://otakudesu.blog/genres/seinen/"
+            },
+            {
+              "title": "Super Power",
+              "genreId": "super-power",
+              "href": "/anime/genre/super-power",
+              "otakudesuUrl": "https://otakudesu.blog/genres/super-power/"
+            }
+          ]
+        },
+        {
+          "title": "Yuusha no Kuzu",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/Yuusha-no-Kuzu.jpg",
+          "studios": "OLM",
+          "score": "",
+          "episodes": 24,
+          "season": "Winter 2026",
+          "animeId": "yuusha-kuzu-sub-indo",
+          "href": "/anime/anime/yuusha-kuzu-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/yuusha-kuzu-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Bagi sebagian orang, menjadi pahlawan adalah sebuah pekerjaan yang hanya dilakukan oleh orang-orang sampah. Berlatar pada abad ke-21, di dunia bawah tanah Tokyo telah dikuasai oleh mafia yang kini menjadi Raja Iblis setelah mereka menjalani operasi Aether.",
+              "Maka dari itu, lahirlah para pemburu yang bertugas untuk mengalahkan Raja Iblis. Mereka yang bertugas dikenal dengan sebutah pahlawan. Setiap pahlawan yang ingin melawan Raja Iblis harus menggunakan obat yang dikenal dengan E-3.",
+              "Yashiro, salah satu orang yang bekerja sebagai pahlawan ini didatangi oleh gadis SMA bernama Jougamine. Ia mengaku sebagai murid dari Yashiro. Mau tidak mau, ia pun menerima gadis tersebut dan melibatkannya dalam berbagai kejadian."
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Organized Crime",
+              "genreId": "organized-crime",
+              "href": "/anime/genre/organized-crime",
+              "otakudesuUrl": "https://otakudesu.blog/genres/organized-crime/"
+            },
+            {
+              "title": "Sci-Fi",
+              "genreId": "sci-fi",
+              "href": "/anime/genre/sci-fi",
+              "otakudesuUrl": "https://otakudesu.blog/genres/sci-fi/"
+            },
+            {
+              "title": "Super Power",
+              "genreId": "super-power",
+              "href": "/anime/genre/super-power",
+              "otakudesuUrl": "https://otakudesu.blog/genres/super-power/"
+            }
+          ]
+        },
+        {
+          "title": "Fate/strange Fake",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2024/12/132201-1.jpg",
+          "studios": "A-1 Pictures",
+          "score": "8.19",
+          "episodes": null,
+          "season": "Winter 2025",
+          "animeId": "fate-fake-whisper-sub-indo",
+          "href": "/anime/anime/fate-fake-whisper-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/fate-fake-whisper-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Perang Cawan Suci merupakan sebuah perang yang melibatkan para Master (Penyihir) dan juga Roh Pahlawan (Servant). Keduanya berperang untuk memperebutkan Cawan Suci yang dapat mengabulkan semua keingingan pemenang.",
+              "Setelah bertahun-tahun sejak pertempuran Cawan Suci Kelimat di Jepang, kini sebuah daerah bernama Snowfield yang berlokasi di Amerika Serikat terpilih menjadi Lokasi untuk perang Cawan Suci Keenam. Seluruh Master dan Servant kini berkumpul disana. Termasuk Sajou Ayaka yang diminta untuk berpartisipasi pada perang kali ini."
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Fantasy",
+              "genreId": "fantasy",
+              "href": "/anime/genre/fantasy",
+              "otakudesuUrl": "https://otakudesu.blog/genres/fantasy/"
+            }
+          ]
+        },
+        {
+          "title": "Dead Account",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/154192.jpg",
+          "studios": "SynergySP",
+          "score": "",
+          "episodes": null,
+          "season": "Winter 2026",
+          "animeId": "dead-account-sub-indo",
+          "href": "/anime/anime/dead-account-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/dead-account-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Coba pikirkan, bagaimana nasib sebuah akun sosial media jika pemiliknya sudah meninggal? Nah, akun yang pemiliknya telah mati tersebut rupanya menyimpan banyak sekali penyesalan dan akhirnya hidup di dunia nyata sebagai hantu digital yang dikenal dengan Bakeaka.",
+              "Cerita pun berpusat kepada Souji Enishiro, salah satu streamer yang dikenal dengan nama panggungnya yakni Aoringo ini telah bekerja dengan sangat keras. Tujuannya cuman satu, yakni untuk membiaya pengobatan sang adik.",
+              "Suatu hari, Enjou yang terlibat dalam sebuah insiden telah membangunkan kekuatan bernama Dennou dan kini ia harus berada di Akademi Yaiden. Kekuatan milik Enjou rupanya mampu mengusir arwah digital dan kini ia harus berlatih untuk bisa memanfaatkan kemampuannya tersebut."
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Shounen",
+              "genreId": "shounen",
+              "href": "/anime/genre/shounen",
+              "otakudesuUrl": "https://otakudesu.blog/genres/shounen/"
+            },
+            {
+              "title": "Supernatural",
+              "genreId": "supernatural",
+              "href": "/anime/genre/supernatural",
+              "otakudesuUrl": "https://otakudesu.blog/genres/supernatural/"
+            }
+          ]
+        },
+        {
+          "title": "Trigun Stargaze",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/154541.jpg",
+          "studios": "Orange",
+          "score": "",
+          "episodes": 12,
+          "season": "Winter 2026",
+          "animeId": "trigun-stargaze-sub-indo",
+          "href": "/anime/anime/trigun-stargaze-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/trigun-stargaze-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Beberapa tahun lalu, sebuah kejadian bernama Lost July telah berhasil meluluhlantakkan sebuah kota. Meryl, salah satu reporter senior kini mencari Vash bersama dengan juniornya yakni Milly. Dalam perjalanannya, ia bertemu dengan Nicholas dan kembali membayangkan sebuah faksi Millions Knives sebagai dalang di balik insiden perampokan Plant.",
+              "Sementara itu, di satu sisi ada Vash yang kini telah tinggal di kota terpencil bernama Eriks. Ia didatangi oleh gadis bernama Jessica dan menyampaikan bahwa terdapat sinyal SOS dari kapal bernama Home. Mendengar hal tersebut, Vash memutuskan untuk pergi dan melindungi orang-orang yang ada di kapal tersebut.",
+              " "
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Adult Cast",
+              "genreId": "adult-cast",
+              "href": "/anime/genre/adult-cast",
+              "otakudesuUrl": "https://otakudesu.blog/genres/adult-cast/"
+            },
+            {
+              "title": "Adventure",
+              "genreId": "adventure",
+              "href": "/anime/genre/adventure",
+              "otakudesuUrl": "https://otakudesu.blog/genres/adventure/"
+            },
+            {
+              "title": "Sci-Fi",
+              "genreId": "sci-fi",
+              "href": "/anime/genre/sci-fi",
+              "otakudesuUrl": "https://otakudesu.blog/genres/sci-fi/"
+            },
+            {
+              "title": "Shounen",
+              "genreId": "shounen",
+              "href": "/anime/genre/shounen",
+              "otakudesuUrl": "https://otakudesu.blog/genres/shounen/"
+            }
+          ]
+        },
+        {
+          "title": "Tensei shitara Dragon no Tamago datta",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/Tensei-shitara-Dragon-no-Tamago-datta.jpg",
+          "studios": "Felix Film, Ga-Crew",
+          "score": "",
+          "episodes": null,
+          "season": "Winter 2026",
+          "animeId": "tensei-shitara-dragon-tamago-sub-indo",
+          "href": "/anime/anime/tensei-shitara-dragon-tamago-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/tensei-shitara-dragon-tamago-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Menceritakan seorang pria yang berienkarnasi menjadi sebuah telur naga. Awalnya, ia tidak menyangka bahwa dirinya kini hidup kembali sebagai sebuah telur.",
+              "Tentu saja, ini adalah hal yang tidak masuk akal. Sebab, dalam wujud teluru tersebut dirinya hanyalah santapan bagi monster lain. Namun, seiring berjalannya waktu ia mulai mengalami evolusi menjadi seekor naga.",
+              "Berbekal bimbingan dari sebuah suara misterius, Illusia sang Naga memulai petualangannya."
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Adventure",
+              "genreId": "adventure",
+              "href": "/anime/genre/adventure",
+              "otakudesuUrl": "https://otakudesu.blog/genres/adventure/"
+            },
+            {
+              "title": "Fantasy",
+              "genreId": "fantasy",
+              "href": "/anime/genre/fantasy",
+              "otakudesuUrl": "https://otakudesu.blog/genres/fantasy/"
+            },
+            {
+              "title": "Isekai",
+              "genreId": "isekai",
+              "href": "/anime/genre/isekai",
+              "otakudesuUrl": "https://otakudesu.blog/genres/isekai/"
+            },
+            {
+              "title": "Reincarnation",
+              "genreId": "reincarnation",
+              "href": "/anime/genre/reincarnation",
+              "otakudesuUrl": "https://otakudesu.blog/genres/reincarnation/"
+            }
+          ]
+        },
+        {
+          "title": "Enen no Shouboutai: San no Shou Part 2",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/152472.jpg",
+          "studios": "David Production",
+          "score": "7.41",
+          "episodes": 13,
+          "season": "Winter 2026",
+          "animeId": "enen-shouboutai-season-3-p2-sub-indo",
+          "href": "/anime/anime/enen-shouboutai-season-3-p2-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/enen-shouboutai-season-3-p2-sub-indo/",
+          "synopsis": {
+            "paragraphs": []
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Fantasy",
+              "genreId": "fantasy",
+              "href": "/anime/genre/fantasy",
+              "otakudesuUrl": "https://otakudesu.blog/genres/fantasy/"
+            },
+            {
+              "title": "Sci-Fi",
+              "genreId": "sci-fi",
+              "href": "/anime/genre/sci-fi",
+              "otakudesuUrl": "https://otakudesu.blog/genres/sci-fi/"
+            },
+            {
+              "title": "Shounen",
+              "genreId": "shounen",
+              "href": "/anime/genre/shounen",
+              "otakudesuUrl": "https://otakudesu.blog/genres/shounen/"
+            },
+            {
+              "title": "Urban Fantasy",
+              "genreId": "urban-fantasy",
+              "href": "/anime/genre/urban-fantasy",
+              "otakudesuUrl": "https://otakudesu.blog/genres/urban-fantasy/"
+            }
+          ]
+        },
+        {
+          "title": "Hell Mode",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/152479.jpg",
+          "studios": "Yokohama Animation Lab",
+          "score": "",
+          "episodes": null,
+          "season": "Winter 2026",
+          "animeId": "mode-hell-sub-indo",
+          "href": "/anime/anime/mode-hell-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/mode-hell-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Yamada Kenichi adalah pria kantoran berusia 35 tahun yang muak dengan segalanya yang serba instan. Baginya, gim tanpa tantangan hanyalah membuang waktu. Pencariannya selama satu dekade berakhir ketika ia menemukan sebuah gim daring misterius tanpa nama dengan tingkat kesulitan tertinggi: “Hell Mode.”",
+              "Namun, saat ia menekan tombol start, Kenichi tidak sekadar bermain—ia terlempar ke dunia lain dan terbangun sebagai Allen, seorang anak dari kasta budak yang tidak memiliki apa-apa. Di dunia tanpa buku panduan, tanpa forum internet, dan sistem naik level yang mencekik, Allen harus mengandalkan bakat misteriusnya sebagai seorang “Summoner”.",
+              "Inilah kisah perjuangan berdarah-darah di dunia yang tidak mengenal kata kompromi. Karena baginya, semakin mustahil rintangannya, semakin manis kemenangannya!",
+              " "
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Adventure",
+              "genreId": "adventure",
+              "href": "/anime/genre/adventure",
+              "otakudesuUrl": "https://otakudesu.blog/genres/adventure/"
+            },
+            {
+              "title": "Fantasy",
+              "genreId": "fantasy",
+              "href": "/anime/genre/fantasy",
+              "otakudesuUrl": "https://otakudesu.blog/genres/fantasy/"
+            },
+            {
+              "title": "Isekai",
+              "genreId": "isekai",
+              "href": "/anime/genre/isekai",
+              "otakudesuUrl": "https://otakudesu.blog/genres/isekai/"
+            },
+            {
+              "title": "Reincarnation",
+              "genreId": "reincarnation",
+              "href": "/anime/genre/reincarnation",
+              "otakudesuUrl": "https://otakudesu.blog/genres/reincarnation/"
+            }
+          ]
+        },
+        {
+          "title": "Omae Gotoki ga Maou ni Kateru to Omouna",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/Omae-Gotoki-ga-Maou-ni-Kateru-to-Omouna.jpg",
+          "studios": "A.C.G.T.",
+          "score": "",
+          "episodes": 12,
+          "season": "Winter 2026",
+          "animeId": "omae-gotoki-maou-kateru-omouna-sub-indo",
+          "href": "/anime/anime/omae-gotoki-maou-kateru-omouna-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/omae-gotoki-maou-kateru-omouna-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Mengisahkan Flum yang kini telah bergabung dengan Party Pahlawan sesuai ramalam. Walau bergabung dengan sebuah party besar, nyatanya bakal Flum tidak ada. Hal yang ia miliki yakni kemampuan Reverse atau Pembalikan.",
+              "Tentu, tanpa kemampuan bertarung, Flum hanya menjadi beban untuk partynya. Walau begitu, ia tetap memilih untuk tidak menyerah dan terus melatih kemampuannya.",
+              "Di sisi lain, ada Sean yang setiap harinya menganggu Flum dan membuatnya dijual pada pedagang budak. Merasa bahwa hidupnya tidaklah baik-baik saja, Flum dihadapkan pada dua pilihan yakni dimakan oleh monster atau melawan menggunakan sebuah pedang terkutuk.",
+              " "
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Adventure",
+              "genreId": "adventure",
+              "href": "/anime/genre/adventure",
+              "otakudesuUrl": "https://otakudesu.blog/genres/adventure/"
+            },
+            {
+              "title": "Fantasy",
+              "genreId": "fantasy",
+              "href": "/anime/genre/fantasy",
+              "otakudesuUrl": "https://otakudesu.blog/genres/fantasy/"
+            },
+            {
+              "title": "Girls Love",
+              "genreId": "girls-love",
+              "href": "/anime/genre/girls-love",
+              "otakudesuUrl": "https://otakudesu.blog/genres/girls-love/"
+            }
+          ]
+        },
+        {
+          "title": "Jujutsu Kaisen Season 3",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/154488.jpg",
+          "studios": "MAPPA",
+          "score": "7.57",
+          "episodes": null,
+          "season": "Winter 2026",
+          "animeId": "jjk-s3-sub-indo",
+          "href": "/anime/anime/jjk-s3-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/jjk-s3-sub-indo/",
+          "synopsis": {
+            "paragraphs": []
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "School",
+              "genreId": "school",
+              "href": "/anime/genre/school",
+              "otakudesuUrl": "https://otakudesu.blog/genres/school/"
+            },
+            {
+              "title": "Shounen",
+              "genreId": "shounen",
+              "href": "/anime/genre/shounen",
+              "otakudesuUrl": "https://otakudesu.blog/genres/shounen/"
+            },
+            {
+              "title": "Supernatural",
+              "genreId": "supernatural",
+              "href": "/anime/genre/supernatural",
+              "otakudesuUrl": "https://otakudesu.blog/genres/supernatural/"
+            }
+          ]
+        },
+        {
+          "title": "Mato Seihei no Slave Season 2",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/148737.jpg",
+          "studios": "Passione, Hayabusa Film",
+          "score": "7.06",
+          "episodes": 12,
+          "season": "Winter 2026",
+          "animeId": "mato-seihei-slave-s2-sub-indo",
+          "href": "/anime/anime/mato-seihei-slave-s2-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/mato-seihei-slave-s2-sub-indo/",
+          "synopsis": {
+            "paragraphs": []
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Ecchi",
+              "genreId": "ecchi",
+              "href": "/anime/genre/ecchi",
+              "otakudesuUrl": "https://otakudesu.blog/genres/ecchi/"
+            },
+            {
+              "title": "Fantasy",
+              "genreId": "fantasy",
+              "href": "/anime/genre/fantasy",
+              "otakudesuUrl": "https://otakudesu.blog/genres/fantasy/"
+            },
+            {
+              "title": "Harem",
+              "genreId": "harem",
+              "href": "/anime/genre/harem",
+              "otakudesuUrl": "https://otakudesu.blog/genres/harem/"
+            },
+            {
+              "title": "Shounen",
+              "genreId": "shounen",
+              "href": "/anime/genre/shounen",
+              "otakudesuUrl": "https://otakudesu.blog/genres/shounen/"
+            }
+          ]
+        },
+        {
+          "title": "Yuusha-kei ni Shosu",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/151911.jpg",
+          "studios": "Studio KAI",
+          "score": "8.25",
+          "episodes": 12,
+          "season": "Winter 2026",
+          "animeId": "yuusha-shosu-sub-indo",
+          "href": "/anime/anime/yuusha-shosu-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/yuusha-shosu-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Bagi sebagian orang, menjadi pahlawan adalah sebuah hukuman paling dihindari. Sebab, mereka yang berbuat jahat akan diberikan status Pahlawan dan diharuskan melawan Raja Iblis.",
+              "Xylo Forbatz, mantan komandan dari regu Ksatria Suci ini akhirnya memimpin para pahlawan di garis terdepan. Di sana, ia bertemu dengan Teoritta, sang Dewi Pedang.",
+              "Setelah pertemuannya dengan Teoritta, Xylo akhirnya menjalin kontrak dan bertekad untuk membalaskan dendam atas perlakuan tidak adil yang ia terima.",
+              " "
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Adventure",
+              "genreId": "adventure",
+              "href": "/anime/genre/adventure",
+              "otakudesuUrl": "https://otakudesu.blog/genres/adventure/"
+            },
+            {
+              "title": "Fantasy",
+              "genreId": "fantasy",
+              "href": "/anime/genre/fantasy",
+              "otakudesuUrl": "https://otakudesu.blog/genres/fantasy/"
+            }
+          ]
+        },
+        {
+          "title": "Yuusha Party wo Oidasareta Kiyoubinbou",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/Yuusha-Party-wo-Oidasareta-Kiyoubinbou.jpg",
+          "studios": "animation studio42",
+          "score": "",
+          "episodes": null,
+          "season": "Winter 2026",
+          "animeId": "yuusha-party-kiyoubinbou-sub-indo",
+          "href": "/anime/anime/yuusha-party-kiyoubinbou-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/yuusha-party-kiyoubinbou-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Orn Doula diusir dari “Partai Pahlawan” oleh teman masa kecilnya, Oliver, karena dianggap tidak kompeten. Meski telah berkorban dengan beralih profesi menjadi penyihir demi kebutuhan tim, Orn justru dicemooh sebagai sosok yang tidak memiliki keahlian khusus.",
+              "Kecewa atas pengkhianatan rekan-rekannya, Orn memilih berkarier solo sebagai penjelajah. Di tengah petualangan barunya, ia mulai mengungkap misteri masa lalu dan membuktikan bahwa kemampuan “serbabisa” yang ia miliki adalah kunci untuk menjadi pahlawan terkuat demi melindungi orang-orang yang ia sayangi.",
+              " "
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Adventure",
+              "genreId": "adventure",
+              "href": "/anime/genre/adventure",
+              "otakudesuUrl": "https://otakudesu.blog/genres/adventure/"
+            },
+            {
+              "title": "Fantasy",
+              "genreId": "fantasy",
+              "href": "/anime/genre/fantasy",
+              "otakudesuUrl": "https://otakudesu.blog/genres/fantasy/"
+            }
+          ]
+        },
+        {
+          "title": "Shibou Yuugi de Meshi wo Kuu.",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/Shibou-Yuugi-de-Meshi-wo-Kuu..jpg",
+          "studios": "Studio Deen",
+          "score": "7.44",
+          "episodes": 11,
+          "season": "Winter 2026",
+          "animeId": "shibou-yuugi-meshi-kuu-sub-indo",
+          "href": "/anime/anime/shibou-yuugi-meshi-kuu-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/shibou-yuugi-meshi-kuu-sub-indo/",
+          "synopsis": {
+            "paragraphs": [
+              "Di sebuah dunia distopia di mana nyawa manusia menjadi tontonan ilegal kaum elit, Yuki, gadis berusia 17 tahun, menjalani profesi yang tak lazim: seorang pemain tetap dalam permainan maut yang disiarkan secara rahasia. Bagi Yuki, ini bukan soal paksaan atau dendam, melainkan pekerjaan profesional demi bertahan hidup di tengah kerasnya sistem ekonomi yang runtuh.",
+              "Setiap malam adalah pertaruhan nyawa. Dari labirin mematikan hingga perburuan antar manusia, Yuki telah melewati 98 arena dengan ketenangan yang mengerikan. Kini, ia berada di ambang rekor sejarah: Permainan ke-99.",
+              "Namun, saat ia menjadi target utama bagi penyelenggara yang menginginkan kematiannya demi rating tertinggi, Yuki harus membuktikan bahwa ia bukan sekadar pion hiburan. Di permainan terakhir ini, batas antara menjadi pemenang atau menjadi mayat menjadi sangat tipis, sementara dunia menonton dengan napas tertahan.",
+              " "
+            ]
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Suspense",
+              "genreId": "suspense",
+              "href": "/anime/genre/suspense",
+              "otakudesuUrl": "https://otakudesu.blog/genres/suspense/"
+            }
+          ]
+        },
+        {
+          "title": "Golden Kamuy Season 5",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2026/01/154763.jpg",
+          "studios": "Brain's Base",
+          "score": "",
+          "episodes": null,
+          "season": "Winter 2026",
+          "animeId": "kamuy-golden-season-5-sub-indo",
+          "href": "/anime/anime/kamuy-golden-season-5-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/kamuy-golden-season-5-sub-indo/",
+          "synopsis": {
+            "paragraphs": []
+          },
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Adventure",
+              "genreId": "adventure",
+              "href": "/anime/genre/adventure",
+              "otakudesuUrl": "https://otakudesu.blog/genres/adventure/"
+            },
+            {
+              "title": "Historical",
+              "genreId": "historical",
+              "href": "/anime/genre/historical",
+              "otakudesuUrl": "https://otakudesu.blog/genres/historical/"
+            },
+            {
+              "title": "Military",
+              "genreId": "military",
+              "href": "/anime/genre/military",
+              "otakudesuUrl": "https://otakudesu.blog/genres/military/"
+            },
+            {
+              "title": "Seinen",
+              "genreId": "seinen",
+              "href": "/anime/genre/seinen",
+              "otakudesuUrl": "https://otakudesu.blog/genres/seinen/"
+            }
+          ]
+        }
+      ]
+    },
+    "pagination": {
+      "currentPage": 1,
+      "hasPrevPage": false,
+      "prevPage": null,
+      "hasNextPage": true,
+      "nextPage": 2,
+      "totalPages": 44
+    }
+  }

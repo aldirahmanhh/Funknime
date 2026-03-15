@@ -1,0 +1,171 @@
+/* Genres Page – Neobrutalism */
+.genres-page {
+  max-width: var(--breakpoint-xl);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4);
+}
+
+.genres-hero {
+  margin-bottom: var(--space-8);
+}
+
+.genres-hero .main-title {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  font-family: var(--font-heading);
+  margin-bottom: var(--space-2);
+}
+
+.genres-hero .subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.genres-loading {
+  text-align: center;
+  padding: var(--space-10);
+}
+
+.genres-loading .spinner {
+  margin: 0 auto var(--space-4);
+}
+
+/* Genre section wrapper */
+.genre-section {
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-hard);
+  margin-bottom: var(--space-8);
+}
+
+.genre-section-label {
+  margin-bottom: var(--space-4);
+  display: block;
+}
+
+.genre-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-3);
+}
+
+.genre-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.genre-card {
+  background: var(--color-bg);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: center;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-soft);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.genre-card:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0 var(--color-border);
+  background: var(--color-surface);
+}
+
+.genre-card.active {
+  background: var(--color-primary);
+  color: var(--color-primary-ink);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-medium);
+}
+
+.genre-name {
+  font-weight: 700;
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+/* Anime-by-genre section */
+.genre-anime-section {
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-hard);
+}
+
+.genre-anime-section .section-header-neo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.clear-genre-btn {
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: var(--shadow-soft);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.clear-genre-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--color-border);
+  background: var(--color-surface);
+}
+
+.genre-anime-section .loading-more {
+  text-align: center;
+  padding: var(--space-8);
+}
+
+.genre-anime-section .no-data {
+  padding: var(--space-6);
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+@media (max-width: 768px) {
+  .genres-page {
+    padding: var(--space-4);
+  }
+
+  .genres-hero .main-title {
+    font-size: var(--text-2xl);
+  }
+
+  .genre-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--space-2);
+  }
+
+  .genre-card {
+    padding: var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  .genre-anime-section .section-header-neo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clear-genre-btn {
+    width: 100%;
+  }
+}

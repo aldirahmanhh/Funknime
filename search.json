@@ -1,0 +1,54 @@
+{
+    "status": "success",
+    "creator": "Sanka Vollerei",
+    "statusCode": 200,
+    "statusMessage": "OK",
+    "message": "",
+    "ok": true,
+    "data": {
+      "animeList": [
+        {
+          "title": "Boruto: Naruto Next Generations Subtitle Indonesia",
+          "poster": "https://otakudesu.blog/wp-content/uploads/2020/05/Boruto-Sub-Indo.jpg",
+          "status": "Ongoing",
+          "score": "6.15",
+          "animeId": "borot-sub-indo",
+          "href": "/anime/anime/borot-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/anime/borot-sub-indo/",
+          "genreList": [
+            {
+              "title": "Action",
+              "genreId": "action",
+              "href": "/anime/genre/action",
+              "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+            },
+            {
+              "title": "Adventure",
+              "genreId": "adventure",
+              "href": "/anime/genre/adventure",
+              "otakudesuUrl": "https://otakudesu.blog/genres/adventure/"
+            },
+            {
+              "title": "Martial Arts",
+              "genreId": "martial-arts",
+              "href": "/anime/genre/martial-arts",
+              "otakudesuUrl": "https://otakudesu.blog/genres/martial-arts/"
+            },
+            {
+              "title": "Shounen",
+              "genreId": "shounen",
+              "href": "/anime/genre/shounen",
+              "otakudesuUrl": "https://otakudesu.blog/genres/shounen/"
+            },
+            {
+              "title": "Super Power",
+              "genreId": "super-power",
+              "href": "/anime/genre/super-power",
+              "otakudesuUrl": "https://otakudesu.blog/genres/super-power/"
+            }
+          ]
+        }
+      ]
+    },
+    "pagination": null
+  }

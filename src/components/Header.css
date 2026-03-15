@@ -1,0 +1,234 @@
+/* Header – Neobrutalism */
+
+.header {
+  background: var(--color-surface);
+  border-bottom: 4px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 0 var(--color-border);
+}
+
+[data-theme="dark"] .header {
+  background: var(--color-surface);
+  border-bottom-color: var(--color-border);
+}
+
+.nav-container {
+  max-width: var(--breakpoint-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  gap: var(--space-4);
+}
+
+.nav-brand {
+  flex-shrink: 0;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 800;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  letter-spacing: -0.03em;
+}
+
+.nav-logo:hover {
+  color: var(--color-text);
+}
+
+.logo-emoji {
+  font-size: 1.4rem;
+}
+
+.logo-text {
+  color: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+}
+
+.nav-menu {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  max-width: 520px;
+}
+
+.nav-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+  font-family: var(--font-sans);
+}
+
+.nav-link:hover {
+  color: var(--color-text);
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+.nav-link.active {
+  color: var(--color-primary-ink, var(--color-text));
+  background: var(--color-primary);
+  border-color: var(--color-border);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+/* SearchBar selaras dengan Navbar (border, radius, tinggi sama) */
+.header .search-container.header-search {
+  max-width: 220px;
+}
+
+.header .search-container .search-input-wrapper {
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  min-height: 40px;
+  box-shadow: none;
+  background: var(--color-bg);
+}
+
+.header .search-container .search-input-wrapper:focus-within {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: 2px 2px 0 var(--color-border);
+}
+
+.header .search-container .search-input {
+  font-size: var(--text-sm);
+  padding: 0 var(--space-2);
+}
+
+.header .search-container .search-btn {
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 2px 2px 0 var(--color-border);
+}
+
+.header .search-container .search-btn:hover {
+  box-shadow: 1px 1px 0 var(--color-border);
+}
+
+.header .search-container .search-dropdown {
+  border: 2px solid var(--color-border);
+}
+
+.nav-mobile-menu {
+  display: none;
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nav-mobile-menu:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--color-border);
+}
+
+.hamburger {
+  display: block;
+}
+
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  top: 64px;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .nav-overlay {
+    display: block;
+  }
+
+  .nav-menu {
+    display: flex;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    width: min(280px, 85vw);
+    transform: translateX(-100%);
+    background: var(--color-surface);
+    border-right: 4px solid var(--color-border);
+    padding: var(--space-4);
+    flex-direction: column;
+    gap: var(--space-2);
+    box-shadow: 4px 0 0 var(--color-border);
+    z-index: 999;
+    transition: transform var(--transition-normal);
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .nav-menu.open {
+    transform: translateX(0);
+  }
+
+  .nav-link {
+    width: 100%;
+    text-align: left;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .nav-mobile-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-actions {
+    gap: var(--space-2);
+  }
+
+  .header .search-container.header-search {
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .nav-menu {
+    gap: var(--space-2);
+  }
+
+  .nav-link {
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.8125rem;
+  }
+}

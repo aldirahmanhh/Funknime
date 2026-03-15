@@ -1,0 +1,229 @@
+{
+    "status": "success",
+    "creator": "Sanka Vollerei",
+    "statusCode": 200,
+    "statusMessage": "OK",
+    "message": "",
+    "ok": true,
+    "data": {
+      "genreList": [
+        {
+          "title": "Action",
+          "genreId": "action",
+          "href": "/anime/genre/action",
+          "otakudesuUrl": "https://otakudesu.blog/genres/action/"
+        },
+        {
+          "title": "Adventure",
+          "genreId": "adventure",
+          "href": "/anime/genre/adventure",
+          "otakudesuUrl": "https://otakudesu.blog/genres/adventure/"
+        },
+        {
+          "title": "Comedy",
+          "genreId": "comedy",
+          "href": "/anime/genre/comedy",
+          "otakudesuUrl": "https://otakudesu.blog/genres/comedy/"
+        },
+        {
+          "title": "Demons",
+          "genreId": "demons",
+          "href": "/anime/genre/demons",
+          "otakudesuUrl": "https://otakudesu.blog/genres/demons/"
+        },
+        {
+          "title": "Drama",
+          "genreId": "drama",
+          "href": "/anime/genre/drama",
+          "otakudesuUrl": "https://otakudesu.blog/genres/drama/"
+        },
+        {
+          "title": "Ecchi",
+          "genreId": "ecchi",
+          "href": "/anime/genre/ecchi",
+          "otakudesuUrl": "https://otakudesu.blog/genres/ecchi/"
+        },
+        {
+          "title": "Fantasy",
+          "genreId": "fantasy",
+          "href": "/anime/genre/fantasy",
+          "otakudesuUrl": "https://otakudesu.blog/genres/fantasy/"
+        },
+        {
+          "title": "Game",
+          "genreId": "game",
+          "href": "/anime/genre/game",
+          "otakudesuUrl": "https://otakudesu.blog/genres/game/"
+        },
+        {
+          "title": "Harem",
+          "genreId": "harem",
+          "href": "/anime/genre/harem",
+          "otakudesuUrl": "https://otakudesu.blog/genres/harem/"
+        },
+        {
+          "title": "Historical",
+          "genreId": "historical",
+          "href": "/anime/genre/historical",
+          "otakudesuUrl": "https://otakudesu.blog/genres/historical/"
+        },
+        {
+          "title": "Horror",
+          "genreId": "horror",
+          "href": "/anime/genre/horror",
+          "otakudesuUrl": "https://otakudesu.blog/genres/horror/"
+        },
+        {
+          "title": "Josei",
+          "genreId": "josei",
+          "href": "/anime/genre/josei",
+          "otakudesuUrl": "https://otakudesu.blog/genres/josei/"
+        },
+        {
+          "title": "Magic",
+          "genreId": "magic",
+          "href": "/anime/genre/magic",
+          "otakudesuUrl": "https://otakudesu.blog/genres/magic/"
+        },
+        {
+          "title": "Martial Arts",
+          "genreId": "martial-arts",
+          "href": "/anime/genre/martial-arts",
+          "otakudesuUrl": "https://otakudesu.blog/genres/martial-arts/"
+        },
+        {
+          "title": "Mecha",
+          "genreId": "mecha",
+          "href": "/anime/genre/mecha",
+          "otakudesuUrl": "https://otakudesu.blog/genres/mecha/"
+        },
+        {
+          "title": "Military",
+          "genreId": "military",
+          "href": "/anime/genre/military",
+          "otakudesuUrl": "https://otakudesu.blog/genres/military/"
+        },
+        {
+          "title": "Music",
+          "genreId": "music",
+          "href": "/anime/genre/music",
+          "otakudesuUrl": "https://otakudesu.blog/genres/music/"
+        },
+        {
+          "title": "Mystery",
+          "genreId": "mystery",
+          "href": "/anime/genre/mystery",
+          "otakudesuUrl": "https://otakudesu.blog/genres/mystery/"
+        },
+        {
+          "title": "Psychological",
+          "genreId": "psychological",
+          "href": "/anime/genre/psychological",
+          "otakudesuUrl": "https://otakudesu.blog/genres/psychological/"
+        },
+        {
+          "title": "Parody",
+          "genreId": "parody",
+          "href": "/anime/genre/parody",
+          "otakudesuUrl": "https://otakudesu.blog/genres/parody/"
+        },
+        {
+          "title": "Police",
+          "genreId": "police",
+          "href": "/anime/genre/police",
+          "otakudesuUrl": "https://otakudesu.blog/genres/police/"
+        },
+        {
+          "title": "Romance",
+          "genreId": "romance",
+          "href": "/anime/genre/romance",
+          "otakudesuUrl": "https://otakudesu.blog/genres/romance/"
+        },
+        {
+          "title": "Samurai",
+          "genreId": "samurai",
+          "href": "/anime/genre/samurai",
+          "otakudesuUrl": "https://otakudesu.blog/genres/samurai/"
+        },
+        {
+          "title": "School",
+          "genreId": "school",
+          "href": "/anime/genre/school",
+          "otakudesuUrl": "https://otakudesu.blog/genres/school/"
+        },
+        {
+          "title": "Sci-Fi",
+          "genreId": "sci-fi",
+          "href": "/anime/genre/sci-fi",
+          "otakudesuUrl": "https://otakudesu.blog/genres/sci-fi/"
+        },
+        {
+          "title": "Seinen",
+          "genreId": "seinen",
+          "href": "/anime/genre/seinen",
+          "otakudesuUrl": "https://otakudesu.blog/genres/seinen/"
+        },
+        {
+          "title": "Shoujo",
+          "genreId": "shoujo",
+          "href": "/anime/genre/shoujo",
+          "otakudesuUrl": "https://otakudesu.blog/genres/shoujo/"
+        },
+        {
+          "title": "Shoujo Ai",
+          "genreId": "shoujo-ai",
+          "href": "/anime/genre/shoujo-ai",
+          "otakudesuUrl": "https://otakudesu.blog/genres/shoujo-ai/"
+        },
+        {
+          "title": "Shounen",
+          "genreId": "shounen",
+          "href": "/anime/genre/shounen",
+          "otakudesuUrl": "https://otakudesu.blog/genres/shounen/"
+        },
+        {
+          "title": "Slice of Life",
+          "genreId": "slice-of-life",
+          "href": "/anime/genre/slice-of-life",
+          "otakudesuUrl": "https://otakudesu.blog/genres/slice-of-life/"
+        },
+        {
+          "title": "Sports",
+          "genreId": "sports",
+          "href": "/anime/genre/sports",
+          "otakudesuUrl": "https://otakudesu.blog/genres/sports/"
+        },
+        {
+          "title": "Space",
+          "genreId": "space",
+          "href": "/anime/genre/space",
+          "otakudesuUrl": "https://otakudesu.blog/genres/space/"
+        },
+        {
+          "title": "Super Power",
+          "genreId": "super-power",
+          "href": "/anime/genre/super-power",
+          "otakudesuUrl": "https://otakudesu.blog/genres/super-power/"
+        },
+        {
+          "title": "Supernatural",
+          "genreId": "supernatural",
+          "href": "/anime/genre/supernatural",
+          "otakudesuUrl": "https://otakudesu.blog/genres/supernatural/"
+        },
+        {
+          "title": "Thriller",
+          "genreId": "thriller",
+          "href": "/anime/genre/thriller",
+          "otakudesuUrl": "https://otakudesu.blog/genres/thriller/"
+        },
+        {
+          "title": "Vampire",
+          "genreId": "vampire",
+          "href": "/anime/genre/vampire",
+          "otakudesuUrl": "https://otakudesu.blog/genres/vampire/"
+        }
+      ]
+    },
+    "pagination": null
+  }

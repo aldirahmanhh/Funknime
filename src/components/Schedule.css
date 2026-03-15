@@ -1,0 +1,74 @@
+/* Schedule Page – Neobrutalism */
+.schedule-page {
+  max-width: var(--breakpoint-xl);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4);
+}
+
+.schedule-hero {
+  margin-bottom: var(--space-8);
+}
+
+.schedule-hero .main-title {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  font-family: var(--font-heading);
+  margin-bottom: var(--space-2);
+}
+
+.schedule-hero .subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.schedule-section {
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-hard);
+}
+
+.schedule-day-section {
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-hard);
+  margin-bottom: var(--space-6);
+}
+
+.schedule-day-section:last-child {
+  margin-bottom: 0;
+}
+
+.schedule-day-section .section-header-neo {
+  margin-bottom: var(--space-5);
+}
+
+.schedule-no-data {
+  padding: var(--space-8);
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+@media (max-width: 768px) {
+  .schedule-page {
+    padding: var(--space-4);
+  }
+
+  .schedule-hero .main-title {
+    font-size: var(--text-2xl);
+  }
+
+  .schedule-day-section {
+    padding: var(--space-4);
+    margin-bottom: var(--space-5);
+  }
+}

@@ -1,0 +1,426 @@
+{
+  "status": "success",
+  "creator": "Sanka Vollerei",
+  "statusCode": 200,
+  "statusMessage": "OK",
+  "message": "",
+  "ok": true,
+  "data": {
+    "title": "Jingai Kyoushitsu no Ningengirai Kyoushi Episode 10 Subtitle Indonesia",
+    "animeId": "jingai-kyoushitsu-ningengirai-kyoushi-sub-indo",
+    "releaseTime": "Release on 11:48 pm",
+    "defaultStreamingUrl": "https://desustream.info/dstream/ondesu/v5/index.php?id=UG9GSk16TGwzNUwwOERCd0laOTJrdz09",
+    "hasPrevEpisode": true,
+    "prevEpisode": {
+      "title": "Prev",
+      "episodeId": "jknk-episode-9-sub-indo",
+      "href": "/anime/episode/jknk-episode-9-sub-indo",
+      "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-9-sub-indo/"
+    },
+    "hasNextEpisode": false,
+    "nextEpisode": null,
+    "server": {
+      "qualities": [
+        {
+          "title": "360p",
+          "serverList": [
+            {
+              "title": "vidhide",
+              "serverId": "6E96AC-5-8B5u",
+              "href": "/anime/server/6E96AC-5-8B5u"
+            },
+            {
+              "title": "filedon",
+              "serverId": "6E96AC-6-8B5u",
+              "href": "/anime/server/6E96AC-6-8B5u"
+            },
+            {
+              "title": "mega",
+              "serverId": "6E96AC-7-8B5u",
+              "href": "/anime/server/6E96AC-7-8B5u"
+            }
+          ]
+        },
+        {
+          "title": "480p",
+          "serverList": [
+            {
+              "title": "ondesu",
+              "serverId": "6E96AC-5-9D5u",
+              "href": "/anime/server/6E96AC-5-9D5u"
+            },
+            {
+              "title": "vidhide",
+              "serverId": "6E96AC-6-9D5u",
+              "href": "/anime/server/6E96AC-6-9D5u"
+            },
+            {
+              "title": "filedon",
+              "serverId": "6E96AC-7-9D5u",
+              "href": "/anime/server/6E96AC-7-9D5u"
+            },
+            {
+              "title": "mega",
+              "serverId": "6E96AC-8-9D5u",
+              "href": "/anime/server/6E96AC-8-9D5u"
+            }
+          ]
+        },
+        {
+          "title": "720p",
+          "serverList": [
+            {
+              "title": "filedon ",
+              "serverId": "6E96AC-5-C75u",
+              "href": "/anime/server/6E96AC-5-C75u"
+            },
+            {
+              "title": "ondesuhd ",
+              "serverId": "6E96AC-6-C75u",
+              "href": "/anime/server/6E96AC-6-C75u"
+            },
+            {
+              "title": "vidhide ",
+              "serverId": "6E96AC-7-C75u",
+              "href": "/anime/server/6E96AC-7-C75u"
+            },
+            {
+              "title": "mega ",
+              "serverId": "6E96AC-8-C75u",
+              "href": "/anime/server/6E96AC-8-C75u"
+            }
+          ]
+        }
+      ]
+    },
+    "downloadUrl": {
+      "qualities": [
+        {
+          "title": "Mp4_360p",
+          "size": "32.4 MB",
+          "urls": [
+            {
+              "title": "ODFiles ",
+              "url": "https://otakufiles.net/jm33rjadaw9s/Otakudesu.io_JKNK--10_360p.mp4.html"
+            },
+            {
+              "title": "Pdrain",
+              "url": "https://pixeldrain.com/u/eQYQ24mp"
+            },
+            {
+              "title": "Acefile",
+              "url": "https://acefile.co/f/111372159/otakudesu-io_jknk-10_360p-mp4"
+            },
+            {
+              "title": "GoFile ",
+              "url": "https://gofile.io/d/OUcNNI"
+            },
+            {
+              "title": "Mega ",
+              "url": "https://mega.nz/file/M2pznbiA#f3s2lp5Y-bqDTnnep0mkyQEzd-xLFuJCE7ZriGqTPnw"
+            },
+            {
+              "title": "KFiles",
+              "url": "https://krakenfiles.com/view/pFuzGXu3A9/file.html"
+            }
+          ]
+        },
+        {
+          "title": "Mp4_480p",
+          "size": "53.3 MB",
+          "urls": [
+            {
+              "title": "ODFiles ",
+              "url": "https://otakufiles.net/5zeh7mjmgbu4/Otakudesu.io_JKNK--10_480p.mp4.html"
+            },
+            {
+              "title": "Pdrain",
+              "url": "https://pixeldrain.com/u/uBdQApqG"
+            },
+            {
+              "title": "Acefile",
+              "url": "https://acefile.co/f/111372160/otakudesu-io_jknk-10_480p-mp4"
+            },
+            {
+              "title": "GoFile ",
+              "url": "https://gofile.io/d/OUcNNI"
+            },
+            {
+              "title": "Mega ",
+              "url": "https://mega.nz/file/9zZTUDiL#eflDL8YVfU4_LRfWPaWaCc50ycEe8SC_2FBeZ_FRbr0"
+            },
+            {
+              "title": "KFiles",
+              "url": "https://krakenfiles.com/view/yPvV9D4KIq/file.html"
+            }
+          ]
+        },
+        {
+          "title": "Mp4_720p",
+          "size": "90.4 MB",
+          "urls": [
+            {
+              "title": "ODFiles ",
+              "url": "https://otakufiles.net/zoc3vzwa3rdb/Otakudesu.io_JKNK--10_720p.mp4.html"
+            },
+            {
+              "title": "Pdrain",
+              "url": "https://pixeldrain.com/u/hKfNQETD"
+            },
+            {
+              "title": "Acefile",
+              "url": "https://acefile.co/f/111372161/otakudesu-io_jknk-10_720p-mp4"
+            },
+            {
+              "title": "GoFile ",
+              "url": "https://gofile.io/d/OUcNNI"
+            },
+            {
+              "title": "Mega ",
+              "url": "https://mega.nz/file/03AixKpD#DfXS-vT1MyYUXEZCWkeFmLSjmyOeOf6STKepQyHXRog"
+            },
+            {
+              "title": "KFiles",
+              "url": "https://krakenfiles.com/view/Bq49ICxLb4/file.html"
+            }
+          ]
+        },
+        {
+          "title": "Mp4_1080p",
+          "size": "160.7 MB",
+          "urls": [
+            {
+              "title": "ODFiles ",
+              "url": "https://otakufiles.net/x48t07ggxfit/Otakudesu.io_JKNK--10_1080p.mp4.html"
+            },
+            {
+              "title": "Pdrain",
+              "url": "https://pixeldrain.com/u/j7kJZVjP"
+            },
+            {
+              "title": "Acefile",
+              "url": "https://acefile.co/f/111372162/otakudesu-io_jknk-10_1080p-mp4"
+            },
+            {
+              "title": "GoFile",
+              "url": "https://gofile.io/d/OUcNNI"
+            },
+            {
+              "title": "Mega ",
+              "url": "https://mega.nz/file/03AixKpD#DfXS-vT1MyYUXEZCWkeFmLSjmyOeOf6STKepQyHXRog"
+            },
+            {
+              "title": "KFiles",
+              "url": "https://krakenfiles.com/view/0ZR3VXFmKS/file.html"
+            }
+          ]
+        },
+        {
+          "title": "MKV_480p",
+          "size": "52.5 MB",
+          "urls": [
+            {
+              "title": "ODFiles ",
+              "url": "https://otakufiles.net/16pis6xjv742/Otakudesu.io_JKNK--10_Mkv480p.mkv.html"
+            },
+            {
+              "title": "Pdrain",
+              "url": "https://pixeldrain.com/u/QMsbdFA4"
+            },
+            {
+              "title": "Acefile",
+              "url": "https://acefile.co/f/111372163/otakudesu-io_jknk-10_mkv480p-mkv"
+            },
+            {
+              "title": "GoFile ",
+              "url": "https://gofile.io/d/OUcNNI"
+            },
+            {
+              "title": "Mega ",
+              "url": "https://mega.nz/file/9j4iEYQK#xR3QaO5ZTeTPAHHK3MFCf69X9OPwx8HZfviJvtLufT4"
+            },
+            {
+              "title": "KFiles",
+              "url": "https://krakenfiles.com/view/LdA0A9hJZb/file.html"
+            }
+          ]
+        },
+        {
+          "title": "MKV_720p",
+          "size": "89.7 MB",
+          "urls": [
+            {
+              "title": "ODFiles ",
+              "url": "https://otakufiles.net/8uc5z8ngv2z1/Otakudesu.io_JKNK--10_Mkv720p.mkv.html"
+            },
+            {
+              "title": "Pdrain",
+              "url": "https://pixeldrain.com/u/66ouwvVU"
+            },
+            {
+              "title": "Acefile",
+              "url": "https://acefile.co/f/111372164/otakudesu-io_jknk-10_mkv720p-mkv"
+            },
+            {
+              "title": "GoFile ",
+              "url": "https://gofile.io/d/OUcNNI"
+            },
+            {
+              "title": "Mega ",
+              "url": "https://mega.nz/file/x75hyJQb#t3eM2ZTIyDI7yPjkLAYECAmZEXZOMBCOPYXqJWVqZI8"
+            },
+            {
+              "title": "KFiles",
+              "url": "https://krakenfiles.com/view/HxEIoJqT07/file.html"
+            }
+          ]
+        },
+        {
+          "title": "MKV_1080p",
+          "size": "185.8 MB",
+          "urls": [
+            {
+              "title": "ODFiles ",
+              "url": "https://otakufiles.net/ey6fjkiqu3j7/Otakudesu.io_JKNK--10_Mkv1080p.mkv.html"
+            },
+            {
+              "title": "Pdrain",
+              "url": "https://pixeldrain.com/u/y7AtzqxG"
+            },
+            {
+              "title": "Acefile",
+              "url": "https://acefile.co/f/111372166/otakudesu-io_jknk-10_mkv1080p-mkv"
+            },
+            {
+              "title": "GoFile ",
+              "url": "https://gofile.io/d/OUcNNI"
+            },
+            {
+              "title": "Mega ",
+              "url": "https://mega.nz/file/p2hG2Lha#ZupjshNWZcQkVFKPoYVOkR89a35ExnWGv7WB8QkCsu0"
+            },
+            {
+              "title": "KFiles",
+              "url": "https://krakenfiles.com/view/6tOVCeqWS5/file.html"
+            }
+          ]
+        }
+      ]
+    },
+    "info": {
+      "credit": "Huntersekai",
+      "encoder": "Otakudesu",
+      "duration": "23 min. per ep.",
+      "type": "TV",
+      "genreList": [
+        {
+          "title": "Drama",
+          "genreId": "drama",
+          "href": "/anime/genre/drama",
+          "otakudesuUrl": "https://otakudesu.blog/genres/drama/"
+        },
+        {
+          "title": "School",
+          "genreId": "school",
+          "href": "/anime/genre/school",
+          "otakudesuUrl": "https://otakudesu.blog/genres/school/"
+        },
+        {
+          "title": "Supernatural",
+          "genreId": "supernatural",
+          "href": "/anime/genre/supernatural",
+          "otakudesuUrl": "https://otakudesu.blog/genres/supernatural/"
+        },
+        {
+          "title": "Workplace",
+          "genreId": "workplace",
+          "href": "/anime/genre/workplace",
+          "otakudesuUrl": "https://otakudesu.blog/genres/workplace/"
+        }
+      ],
+      "episodeList": [
+        {
+          "title": "Episode 10",
+          "eps": 10,
+          "date": "",
+          "episodeId": "jknk-episode-10-sub-indo",
+          "href": "/anime/episode/jknk-episode-10-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-10-sub-indo/"
+        },
+        {
+          "title": "Episode 9",
+          "eps": 9,
+          "date": "",
+          "episodeId": "jknk-episode-9-sub-indo",
+          "href": "/anime/episode/jknk-episode-9-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-9-sub-indo/"
+        },
+        {
+          "title": "Episode 8",
+          "eps": 8,
+          "date": "",
+          "episodeId": "jknk-episode-8-sub-indo",
+          "href": "/anime/episode/jknk-episode-8-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-8-sub-indo/"
+        },
+        {
+          "title": "Episode 7",
+          "eps": 7,
+          "date": "",
+          "episodeId": "jknk-episode-7-sub-indo",
+          "href": "/anime/episode/jknk-episode-7-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-7-sub-indo/"
+        },
+        {
+          "title": "Episode 6",
+          "eps": 6,
+          "date": "",
+          "episodeId": "jknk-episode-6-sub-indo",
+          "href": "/anime/episode/jknk-episode-6-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-6-sub-indo/"
+        },
+        {
+          "title": "Episode 5",
+          "eps": 5,
+          "date": "",
+          "episodeId": "jknk-episode-5-sub-indo",
+          "href": "/anime/episode/jknk-episode-5-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-5-sub-indo/"
+        },
+        {
+          "title": "Episode 4",
+          "eps": 4,
+          "date": "",
+          "episodeId": "jknk-episode-4-sub-indo",
+          "href": "/anime/episode/jknk-episode-4-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-4-sub-indo/"
+        },
+        {
+          "title": "Episode 3",
+          "eps": 3,
+          "date": "",
+          "episodeId": "jknk-episode-3-sub-indo",
+          "href": "/anime/episode/jknk-episode-3-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-3-sub-indo/"
+        },
+        {
+          "title": "Episode 2",
+          "eps": 2,
+          "date": "",
+          "episodeId": "jknk-episode-2-sub-indo",
+          "href": "/anime/episode/jknk-episode-2-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-2-sub-indo/"
+        },
+        {
+          "title": "Episode 1",
+          "eps": 1,
+          "date": "",
+          "episodeId": "jknk-episode-1-sub-indo",
+          "href": "/anime/episode/jknk-episode-1-sub-indo",
+          "otakudesuUrl": "https://otakudesu.blog/episode/jknk-episode-1-sub-indo/"
+        }
+      ]
+    }
+  },
+  "pagination": null
+}

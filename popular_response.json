@@ -1,0 +1,101 @@
+{
+  "status": 200,
+  "creator": "Sanka Vollerei",
+  "data": [
+    {
+      "title": "Boruto",
+      "poster": "https://anime-indo.lol/img/84460l.jpg",
+      "slug": "boruto-naruto-next-generations",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Martial Arts",
+        "Shounen",
+        "Super Power",
+        "Animeindo"
+      ]
+    },
+    {
+      "title": "One Piece",
+      "poster": "https://anime-indo.lol/img/135253l.jpg",
+      "slug": "one-piece",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Comedy",
+        "Drama",
+        "Fantasy",
+        "Anime indo",
+        "Shounen",
+        "Super Power  "
+      ]
+    },
+    {
+      "title": "One Punch Man Season 2",
+      "poster": "https://anime-indo.lol/img/99571.jpg",
+      "slug": "one-punch-man-2nd-season",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Animeindo",
+        "Parody",
+        "Fi",
+        "Seinen",
+        "Super Power",
+        "Supernatural  "
+      ]
+    },
+    {
+      "title": "Captain Tsubasa 2018",
+      "poster": "https://anime-indo.lol/img/91270.jpg",
+      "slug": "captain-tsubasa-2018",
+      "genres": [
+        "Action",
+        "Shounen",
+        "Animeindo",
+        "Sports  "
+      ]
+    },
+    {
+      "title": "Black Clover",
+      "poster": "https://anime-indo.lol/img/88336.jpg",
+      "slug": "black-clover",
+      "genres": [
+        "Animeindo",
+        "Action",
+        "Comedy",
+        "Fantasy",
+        "Magic",
+        "Shounen"
+      ]
+    },
+    {
+      "title": "Dragon Ball Super",
+      "poster": "https://anime-indo.lol/img/74606.jpg",
+      "slug": "dragon-ball-super",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Comedy",
+        "Anime indo",
+        "Fantasy",
+        "Martial Arts",
+        "Shounen",
+        "Super Power"
+      ]
+    },
+    {
+      "title": "Naruto Shippuden",
+      "poster": "https://anime-indo.lol/img/17407.jpg",
+      "slug": "naruto-shippuden",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Martial Arts",
+        "Shounen",
+        "Super Power",
+        "Animeindo"
+      ]
+    }
+  ]
+}

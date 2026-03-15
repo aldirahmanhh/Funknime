@@ -1,0 +1,248 @@
+/* AnimeCarousel – 1 slide = 1 anime, layout persegi panjang penuh hero */
+
+.anime-carousel {
+  width: 100%;
+  margin-top: var(--space-6);
+}
+
+.anime-carousel-hero .anime-carousel-viewport {
+  height: 280px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 3px solid var(--color-border);
+  box-shadow: var(--shadow-hard);
+}
+
+@media (min-width: 769px) {
+  .anime-carousel-hero .anime-carousel-viewport {
+    height: 360px;
+  }
+}
+
+.anime-carousel-header {
+  margin-bottom: var(--space-4);
+}
+
+.anime-carousel-title {
+  font-size: 1rem;
+  font-weight: 800;
+  font-family: var(--font-heading);
+  color: var(--color-text-muted);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.anime-carousel-viewport {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.anime-carousel-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+  height: 100%;
+}
+
+/* Satu slide = 100% lebar, satu judul anime, penuh persegi panjang */
+.anime-carousel-item {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 100%;
+  height: 100%;
+}
+
+.anime-carousel-card {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: var(--color-text);
+  position: relative;
+}
+
+/* Persegi panjang: gambar penuh + gradient overlay + judul & tombol */
+.anime-carousel-poster-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+/* Gradient overlay – gelap bawah, samar samping */
+.anime-carousel-poster-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.92) 0%,
+    rgba(0,0,0,0.7) 25%,
+    rgba(0,0,0,0.35) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.anime-carousel-poster-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.4) 0%,
+    transparent 20%,
+    transparent 80%,
+    rgba(0,0,0,0.4) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.anime-carousel-poster {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.anime-carousel-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.anime-carousel-card-title {
+  margin: 0;
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  font-weight: 800;
+  font-family: var(--font-heading);
+  line-height: 1.25;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+}
+
+.anime-carousel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.anime-carousel-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-family: var(--font-sans);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 44px;
+}
+
+.anime-carousel-cta-primary {
+  background: var(--color-primary);
+  color: var(--color-primary-ink);
+  box-shadow: var(--shadow-soft);
+}
+
+.anime-carousel-cta-primary:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--color-border);
+  color: var(--color-primary-ink);
+}
+
+.anime-carousel-cta-secondary {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border-color: rgba(255,255,255,0.6);
+  backdrop-filter: blur(6px);
+}
+
+.anime-carousel-cta-secondary:hover {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(255,255,255,0.3);
+}
+
+.anime-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-primary-ink);
+  font-size: 1.5rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 2;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.anime-carousel-btn:hover:not(:disabled) {
+  transform: translateY(-50%) translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--color-border);
+}
+
+.anime-carousel-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.anime-carousel-btn-prev {
+  left: var(--space-3);
+}
+
+.anime-carousel-btn-next {
+  right: var(--space-3);
+}
+
+.anime-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.anime-carousel-dot {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.anime-carousel-dot:hover {
+  background: var(--color-bg);
+}
+
+.anime-carousel-dot.active {
+  background: var(--color-primary);
+  transform: scale(1.15);
+}

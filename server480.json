@@ -1,0 +1,12 @@
+{
+  "status": "success",
+  "creator": "Sanka Vollerei",
+  "statusCode": 200,
+  "statusMessage": "OK",
+  "message": "",
+  "ok": true,
+  "data": {
+    "url": "https://desustream.info/dstream/ondesu/v5/index.php?id=UG9GSk16TGwzNUwwOERCd0laOTJrdz09"
+  },
+  "pagination": null
+}

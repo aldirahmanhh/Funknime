@@ -1,0 +1,208 @@
+/* A-Z List Page – Neobrutalism */
+.az-list-page {
+  max-width: var(--breakpoint-xl);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4);
+}
+
+.az-hero {
+  margin-bottom: var(--space-8);
+}
+
+.az-hero .main-title {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  font-family: var(--font-heading);
+  margin-bottom: var(--space-2);
+}
+
+.az-hero .subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.az-loading {
+  text-align: center;
+  padding: var(--space-10);
+}
+
+.az-loading .spinner {
+  margin: 0 auto var(--space-4);
+}
+
+/* Alphabet section */
+.az-alphabet-section {
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-hard);
+  margin-bottom: var(--space-8);
+}
+
+.az-section-label {
+  margin-bottom: var(--space-4);
+  display: block;
+}
+
+.alphabet-bar {
+  padding: 0;
+}
+
+.letter-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.letter-btn {
+  background: var(--color-bg);
+  border: 3px solid var(--color-border);
+  color: var(--color-text);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  font-family: var(--font-heading);
+  box-shadow: var(--shadow-soft);
+  min-width: 40px;
+}
+
+.letter-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0 var(--color-border);
+  background: var(--color-surface);
+}
+
+.letter-btn.active {
+  background: var(--color-primary);
+  color: var(--color-primary-ink);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-medium);
+}
+
+/* No data state */
+.az-no-data {
+  padding: var(--space-6);
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Results section */
+.az-results-section {
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-hard);
+}
+
+.az-results-section .section-header-neo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.az-results-count {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  padding: var(--space-1) var(--space-3);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+/* List layout (no poster – unlimited API has no image) */
+.az-anime-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.az-anime-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 600;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.az-anime-row:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0 var(--color-border);
+  background: var(--color-primary);
+  color: var(--color-primary-ink);
+  border-color: var(--color-border);
+}
+
+.az-anime-title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.az-anime-arrow {
+  flex-shrink: 0;
+  font-size: var(--text-lg);
+  font-weight: 800;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .az-list-page {
+    padding: var(--space-4);
+  }
+
+  .az-hero .main-title {
+    font-size: var(--text-2xl);
+  }
+
+  .letter-buttons {
+    gap: var(--space-1);
+  }
+
+  .letter-btn {
+    padding: var(--space-2) var(--space-2);
+    font-size: var(--text-xs);
+    min-width: 36px;
+  }
+
+  .az-anime-title {
+    white-space: normal;
+    line-height: var(--leading-tight);
+  }
+
+  .az-results-section .section-header-neo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
