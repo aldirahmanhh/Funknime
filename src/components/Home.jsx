@@ -239,24 +239,26 @@ const Home = () => {
         <section className="section">
           <div className="section-header">
             <h2 className="section-title">💜 Top Donatur</h2>
-            <a href="https://teer.id/anrizz" target="_blank" rel="noopener noreferrer" className="view-all">Donasi juga →</a>
+            <a href="https://teer.id/anrizz" target="_blank" rel="noopener noreferrer" className="view-all">Donasi juga</a>
           </div>
-          <div style={{ background: 'var(--color-surface)', border: '2px solid var(--color-border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-            {topDonors.slice(0, 5).map((donor, idx) => (
-              <div key={donor.order_id || idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderBottom: idx < 4 ? '1px solid var(--color-border)' : 'none' }}>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: idx === 0 ? '#FFD700' : idx === 1 ? '#C0C0C0' : idx === 2 ? '#CD7F32' : 'var(--color-text-muted)', minWidth: '28px' }}>
-                  {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
-                </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 'var(--text-sm)' }}>{donor.creator_name || 'Anonim'}</div>
-                  {donor.support_message && <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{donor.support_message}</div>}
+          <div className="donor-list">
+            {topDonors.slice(0, 5).map((donor, idx) => {
+              const rankClass = idx === 0 ? 'donor-rank--gold' : idx === 1 ? 'donor-rank--silver' : idx === 2 ? 'donor-rank--bronze' : '';
+              const rankIcon = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+              return (
+                <div key={donor.order_id || idx} className="donor-row">
+                  <span className={`donor-rank ${rankClass}`}>{rankIcon}</span>
+                  <div className="donor-info">
+                    <div className="donor-name">{donor.creator_name || 'Anonim'}</div>
+                    {donor.support_message && <div className="donor-message">{donor.support_message}</div>}
+                  </div>
+                  <div className="donor-amount">
+                    <div className="donor-quantity">{donor.quantity}x {donor.unit_name}</div>
+                    <div className="donor-rupiah">Rp {(donor.amount || 0).toLocaleString('id-ID')}</div>
+                  </div>
                 </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 'var(--text-sm)', color: 'var(--color-primary)' }}>{donor.quantity}x {donor.unit_name}</div>
-                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-dim)' }}>Rp {(donor.amount || 0).toLocaleString('id-ID')}</div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

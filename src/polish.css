@@ -1,0 +1,548 @@
+/* =================================================================
+   Polish layer — neobrutalism v2.1
+   Applied AFTER index.css and App.css. Use this to refine spacing,
+   focus, hover, disabled states, and replace inline styles with
+   reusable classes. Safe overrides only — no identity changes.
+   ================================================================= */
+
+/* ── 1. Global focus ring — accessible & on-brand ──────────────── */
+:focus-visible {
+  outline: 3px solid var(--color-primary-light);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+button:focus-visible,
+a:focus-visible,
+.btn:focus-visible {
+  outline-offset: 3px;
+  outline-width: 3px;
+}
+/* Hide focus ring when not coming from keyboard */
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── 2. Buttons — disabled state + sharper press feel ──────────── */
+.btn {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+}
+.btn:focus-visible {
+  outline: 3px solid var(--color-primary-light);
+  outline-offset: 4px;
+}
+.btn[disabled],
+.btn[aria-disabled="true"],
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  filter: grayscale(0.4);
+  transform: none !important;
+  box-shadow: var(--shadow-sm) !important;
+  pointer-events: none;
+}
+
+.btn-large {
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--text-base);
+  border-width: 3px;
+  box-shadow: var(--shadow-lg);
+}
+.btn-large:hover { box-shadow: var(--shadow-press); }
+
+/* Icon-only button helper */
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  flex-shrink: 0;
+  font-size: var(--text-lg);
+}
+
+/* ── 3. Cards — punchier hover, polished transitions ───────────── */
+.anime-card,
+.card {
+  isolation: isolate;
+}
+.card:hover,
+.anime-card:hover {
+  transform: translate(-2px, -4px);
+  border-color: var(--color-primary);
+  box-shadow:
+    6px 8px 0 var(--color-border),
+    var(--shadow-glow);
+}
+.card:focus-within {
+  border-color: var(--color-primary);
+  box-shadow:
+    4px 6px 0 var(--color-border),
+    var(--shadow-glow);
+}
+
+.card-image-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(10,10,15,0.6) 100%);
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity var(--transition-normal);
+}
+.card:hover .card-image-wrapper::after { opacity: 0; }
+
+/* Crispier badges */
+.anime-card-badge {
+  font-weight: 800;
+  border-width: var(--border-thin);
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* ── 4. Section headers — brutalist accent stripe ──────────────── */
+.section-header {
+  position: relative;
+  padding-left: calc(var(--space-4) + 8px);
+}
+.section-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 60%;
+  background: var(--anime-gradient);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+/* ── 5. View-all link — chevron animation ──────────────────────── */
+.view-all {
+  position: relative;
+  padding-right: 0;
+}
+.view-all::after {
+  content: '→';
+  margin-left: 4px;
+  transition: transform var(--transition-fast);
+  display: inline-block;
+}
+.view-all:hover::after { transform: translateX(3px); }
+.view-all:has(+ *) { /* keep selector working */ }
+
+/* ── 6. Page header — bigger statement ─────────────────────────── */
+.page-header {
+  position: relative;
+}
+.page-header::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  background: radial-gradient(circle, var(--color-primary) 2px, transparent 2.5px);
+  background-size: 8px 8px;
+  opacity: 0.35;
+  pointer-events: none;
+  border-radius: var(--radius-sm);
+}
+
+/* ── 7. Inputs — glow on focus, better placeholders ────────────── */
+input,
+select,
+textarea {
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
+}
+input:hover:not(:focus),
+select:hover:not(:focus),
+textarea:hover:not(:focus) {
+  border-color: var(--color-text-muted);
+}
+
+/* ── 8. Pagination — neobrutalism styled, disabled-aware ───────── */
+.pagination {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  margin-top: var(--space-10);
+  position: relative;
+}
+.pagination::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--anime-gradient);
+}
+.pagination .page-info {
+  padding: 0 var(--space-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+/* ── 9. Loading & empty & error — visual upgrades ──────────────── */
+.spinner {
+  border-width: 3px;
+  width: 40px;
+  height: 40px;
+}
+.loading-container {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-10) var(--space-4);
+  margin: var(--space-6) auto;
+  max-width: 600px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  position: relative;
+}
+.loading-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--anime-gradient);
+}
+
+.empty-state {
+  background: var(--color-surface);
+  border: var(--border-width) dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-10) var(--space-5);
+  margin: var(--space-6) auto;
+  max-width: 600px;
+}
+.empty-state p {
+  font-size: var(--text-base);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.error-container {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-error);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-5);
+  margin: var(--space-6) auto;
+  max-width: 600px;
+  position: relative;
+  overflow: hidden;
+}
+.error-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--color-error);
+}
+
+/* ── 10. Hero / Home rail polish ───────────────────────────────── */
+.home-hero {
+  padding: var(--space-10) var(--space-5);
+}
+.home-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -50%;
+  right: -10%;
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, var(--color-glow) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-rail-card {
+  transition: transform var(--transition-fast);
+}
+.home-rail-card:hover { transform: translateY(-2px); }
+
+/* ── 11. Schedule summary — interactive feel ───────────────────── */
+.schedule-summary tr {
+  transition: background var(--transition-fast);
+}
+.schedule-summary tr:hover td {
+  background: var(--color-surface-hover);
+  border-left: 3px solid var(--color-primary);
+}
+.schedule-summary tr:hover td:first-child { padding-left: calc(var(--space-4) - 3px); }
+
+/* ── 12. AnimeCarousel — refined indicators ────────────────────── */
+.carousel-dots {
+  gap: 6px;
+}
+.carousel-dot {
+  width: 22px !important;
+  height: 4px !important;
+  border-radius: 2px !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border: none !important;
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--transition-fast);
+}
+.carousel-dot.active {
+  background: var(--color-primary) !important;
+  width: 36px !important;
+}
+.carousel-dot:hover { background: rgba(255, 255, 255, 0.5) !important; }
+
+/* ── 13. Breadcrumb — separator polish ─────────────────────────── */
+.breadcrumb-sep { color: var(--color-text-dim); margin: 0 2px; }
+.breadcrumb-current {
+  color: var(--color-text);
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+/* ── 14. Episode card improvements ─────────────────────────────── */
+.episode-card {
+  background: var(--color-surface);
+  border: var(--border-thin) solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  transition: all var(--transition-fast);
+  flex-wrap: wrap;
+}
+.episode-card:hover {
+  border-color: var(--color-primary);
+  background: var(--color-surface-hover);
+  transform: translateX(2px);
+}
+.episode-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.episode-number { font-weight: 700; font-size: var(--text-sm); }
+.episode-date {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* ── 15. AZList letter buttons — uniform ───────────────────────── */
+.az-letter-btn {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: var(--border-thin) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-heading);
+}
+.az-letter-btn:hover:not([aria-pressed="true"]) {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+  transform: translateY(-1px);
+}
+.az-letter-btn[aria-pressed="true"] {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 12px var(--color-glow);
+}
+.az-letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: var(--space-6);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.az-result-count {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+  font-weight: 600;
+}
+
+/* ── 16. Top donors leaderboard — replace inline styles ───────── */
+.donor-list {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+}
+.donor-list::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--anime-gradient);
+}
+.donor-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  transition: background var(--transition-fast);
+}
+.donor-row:last-child { border-bottom: none; }
+.donor-row:hover { background: var(--color-surface-hover); }
+.donor-rank {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-text-muted);
+  min-width: 32px;
+  text-align: center;
+}
+.donor-rank--gold { color: #FFD700; }
+.donor-rank--silver { color: #C0C0C0; }
+.donor-rank--bronze { color: #CD7F32; }
+.donor-info { flex: 1; min-width: 0; }
+.donor-name {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.donor-message {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.donor-amount { text-align: right; flex-shrink: 0; }
+.donor-quantity {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+}
+.donor-rupiah {
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+}
+
+/* ── 17. Theme selector — floating refined ─────────────────────── */
+.theme-selector {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-6);
+  z-index: 100;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-2);
+  align-items: center;
+}
+.theme-toggle-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border-strong);
+  cursor: pointer;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
+}
+.theme-toggle-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-press);
+  border-color: var(--color-primary);
+}
+.theme-option {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: var(--border-thin) solid var(--color-border);
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  animation: scaleIn 0.2s ease-out;
+}
+.theme-option:hover {
+  border-color: var(--color-primary);
+  transform: scale(1.1);
+}
+.theme-option.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 0 16px var(--color-glow);
+}
+.theme-selector.collapsed .theme-option { display: none; }
+
+/* ── 18. Skeleton — match neobrutalism border ──────────────────── */
+.skeleton-anime-card {
+  border: var(--border-thin) solid var(--color-border) !important;
+}
+
+/* ── 19. Anchor underline hover ────────────────────────────────── */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+a:hover { color: var(--color-primary-light); }
+
+/* ── 20. Selection color ───────────────────────────────────────── */
+::selection {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* ── 21. Mobile polish ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page-header::after { display: none; }
+  .pagination { padding: var(--space-2) var(--space-3); margin-top: var(--space-6); }
+  .theme-selector { right: var(--space-3); bottom: var(--space-3); }
+  .theme-toggle-btn { width: 44px; height: 44px; font-size: 1.1rem; }
+  .theme-option { width: 36px; height: 36px; }
+  .home-hero { padding: var(--space-6) var(--space-3); }
+  .home-hero::after { width: 200px; height: 200px; bottom: -40%; right: -20%; }
+  .empty-state, .loading-container, .error-container {
+    padding: var(--space-6) var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .az-letters { padding: var(--space-2); gap: 4px; }
+  .az-letter-btn { width: 32px; height: 32px; font-size: var(--text-xs); }
+}
+
+/* ── 22. Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .floating-shape { display: none; }
+}

@@ -95,7 +95,7 @@ const DonghuaOngoing = () => {
       )}
 
       {/* Pagination */}
-      <div className="pagination" style={{ marginTop: '40px', display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+      <div className="pagination">
         <button
           type="button"
           className="btn btn-secondary"
@@ -104,9 +104,7 @@ const DonghuaOngoing = () => {
         >
           ← Previous
         </button>
-        <span className="btn" style={{ background: 'var(--color-surface)' }}>
-          Page {page}
-        </span>
+        <span className="page-info">Page {page}</span>
         <button
           type="button"
           className="btn btn-primary"

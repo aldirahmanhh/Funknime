@@ -35,22 +35,15 @@ const DonghuaAZList = () => {
       </header>
 
       {/* A-Z Buttons */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center', marginBottom: 'var(--space-6)' }}>
+      <div className="az-letters">
         {letters.map(letter => (
           <button
             key={letter}
             type="button"
+            className="az-letter-btn"
+            aria-pressed={selectedLetter === letter}
+            aria-label={`Letter ${letter.toUpperCase()}`}
             onClick={() => { setSelectedLetter(letter); setPage(1); }}
-            style={{
-              width: '38px', height: '38px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: selectedLetter === letter ? 'var(--color-primary)' : 'var(--color-surface)',
-              color: selectedLetter === letter ? '#fff' : 'var(--color-text-muted)',
-              border: `1px solid ${selectedLetter === letter ? 'var(--color-primary)' : 'var(--color-border)'}`,
-              borderRadius: 'var(--radius-sm)',
-              fontWeight: 700, fontSize: 'var(--text-sm)',
-              cursor: 'pointer', transition: 'all 0.15s ease',
-            }}
           >
             {letter.toUpperCase()}
           </button>
@@ -61,16 +54,16 @@ const DonghuaAZList = () => {
       {error && <div className="error-container"><p className="error-message">{error}</p></div>}
 
       {!loading && donghua.length > 0 && (
-        <>
-          <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-4)' }}>
-            {donghua.length} donghua dengan huruf "{selectedLetter.toUpperCase()}"
-          </p>
-          <div className="anime-grid">
-            {donghua.map((item, idx) => (
-              <AnimeCard key={item.slug || idx} anime={{ ...item, animeId: item.slug, provider: 'donghua' }} index={idx} providerHint="Donghua" />
-            ))}
-          </div>
-        </>
+        <p className="az-result-count">
+          {donghua.length} donghua dengan huruf "{selectedLetter.toUpperCase()}"
+        </p>
+      )}
+      {!loading && donghua.length > 0 && (
+        <div className="anime-grid">
+          {donghua.map((item, idx) => (
+            <AnimeCard key={item.slug || idx} anime={{ ...item, animeId: item.slug, provider: 'donghua' }} index={idx} providerHint="Donghua" />
+          ))}
+        </div>
       )}
 
       {!loading && donghua.length === 0 && !error && (
@@ -78,7 +71,7 @@ const DonghuaAZList = () => {
       )}
 
       {donghua.length > 0 && (
-        <div className="pagination" style={{ marginTop: 'var(--space-6)', display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="pagination">
           <button
             type="button"
             className="btn btn-secondary"

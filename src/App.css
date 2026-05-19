@@ -276,7 +276,8 @@
   .detail-poster { width: 160px; }
   .detail-meta { justify-content: center; }
   .episode-navigation { flex-direction: column; }
-  .video-player-wrapper { border-radius: var(--radius-md) var(--radius-md) 0 0; }\n  .server-selector { border-radius: 0 0 var(--radius-md) var(--radius-md); padding: var(--space-2) var(--space-3); }
+  .video-player-wrapper { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+  .server-selector { border-radius: 0 0 var(--radius-md) var(--radius-md); padding: var(--space-2) var(--space-3); }
   .schedule-summary { font-size: var(--text-xs); }
 }
 
