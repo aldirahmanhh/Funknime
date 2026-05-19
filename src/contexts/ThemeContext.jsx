@@ -31,7 +31,7 @@ export const ThemeProvider = ({ children }) => {
     try {
       window.localStorage.setItem(STORAGE_KEY, theme);
     } catch {
-      // ignore
+      // localStorage may be unavailable (private mode)
     }
   }, [theme]);
 

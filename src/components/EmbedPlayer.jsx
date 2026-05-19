@@ -1,11 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
 
-/**
- * Enhanced iframe embed wrapper with:
- * - Loading skeleton before iframe loads
- * - Always-visible reload + fullscreen controls (touch + keyboard friendly)
- * - referrerpolicy=no-referrer to avoid leaking our URL to embed servers
- */
 const EmbedPlayer = ({ src, title, onLoad }) => {
   const [loaded, setLoaded] = useState(false);
   const iframeRef = useRef(null);
@@ -42,7 +36,6 @@ const EmbedPlayer = ({ src, title, onLoad }) => {
         overflow: 'hidden',
       }}
     >
-      {/* Loading skeleton */}
       {!loaded && (
         <div
           style={{

@@ -1,11 +1,3 @@
-/* =================================================================
-   Polish layer — neobrutalism v2.1
-   Applied AFTER index.css and App.css. Use this to refine spacing,
-   focus, hover, disabled states, and replace inline styles with
-   reusable classes. Safe overrides only — no identity changes.
-   ================================================================= */
-
-/* ── 1. Global focus ring — accessible & on-brand ──────────────── */
 :focus-visible {
   outline: 3px solid var(--color-primary-light);
   outline-offset: 2px;
@@ -17,10 +9,8 @@ a:focus-visible,
   outline-offset: 3px;
   outline-width: 3px;
 }
-/* Hide focus ring when not coming from keyboard */
 :focus:not(:focus-visible) { outline: none; }
 
-/* ── 2. Buttons — disabled state + sharper press feel ──────────── */
 .btn {
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -49,7 +39,6 @@ a:focus-visible,
 }
 .btn-large:hover { box-shadow: var(--shadow-press); }
 
-/* Icon-only button helper */
 .btn-icon {
   width: 44px;
   height: 44px;
@@ -58,7 +47,6 @@ a:focus-visible,
   font-size: var(--text-lg);
 }
 
-/* ── 3. Cards — punchier hover, polished transitions ───────────── */
 .anime-card,
 .card {
   isolation: isolate;
@@ -89,7 +77,6 @@ a:focus-visible,
 }
 .card:hover .card-image-wrapper::after { opacity: 0; }
 
-/* Crispier badges */
 .anime-card-badge {
   font-weight: 800;
   border-width: var(--border-thin);
@@ -97,7 +84,6 @@ a:focus-visible,
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-/* ── 4. Section headers — brutalist accent stripe ──────────────── */
 .section-header {
   position: relative;
   padding-left: calc(var(--space-4) + 8px);
@@ -120,7 +106,6 @@ a:focus-visible,
   margin: 0;
 }
 
-/* ── 5. View-all link — chevron animation ──────────────────────── */
 .view-all {
   position: relative;
   padding-right: 0;
@@ -132,9 +117,8 @@ a:focus-visible,
   display: inline-block;
 }
 .view-all:hover::after { transform: translateX(3px); }
-.view-all:has(+ *) { /* keep selector working */ }
+.view-all:has(+ *) {}
 
-/* ── 6. Page header — bigger statement ─────────────────────────── */
 .page-header {
   position: relative;
 }
@@ -152,7 +136,6 @@ a:focus-visible,
   border-radius: var(--radius-sm);
 }
 
-/* ── 7. Inputs — glow on focus, better placeholders ────────────── */
 input,
 select,
 textarea {
@@ -167,7 +150,6 @@ textarea:hover:not(:focus) {
   border-color: var(--color-text-muted);
 }
 
-/* ── 8. Pagination — neobrutalism styled, disabled-aware ───────── */
 .pagination {
   background: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
@@ -190,7 +172,6 @@ textarea:hover:not(:focus) {
   font-weight: 700;
 }
 
-/* ── 9. Loading & empty & error — visual upgrades ──────────────── */
 .spinner {
   border-width: 3px;
   width: 40px;
@@ -248,7 +229,6 @@ textarea:hover:not(:focus) {
   background: var(--color-error);
 }
 
-/* ── 10. Hero / Home rail polish ───────────────────────────────── */
 .home-hero {
   padding: var(--space-10) var(--space-5);
 }
@@ -269,7 +249,6 @@ textarea:hover:not(:focus) {
 }
 .home-rail-card:hover { transform: translateY(-2px); }
 
-/* ── 11. Schedule summary — interactive feel ───────────────────── */
 .schedule-summary tr {
   transition: background var(--transition-fast);
 }
@@ -279,7 +258,7 @@ textarea:hover:not(:focus) {
 }
 .schedule-summary tr:hover td:first-child { padding-left: calc(var(--space-4) - 3px); }
 
-/* ── 12. AnimeCarousel — refined indicators ────────────────────── */
+/* !important overrides AnimeCarousel component's inline dot styles */
 .carousel-dots {
   gap: 6px;
 }
@@ -299,7 +278,6 @@ textarea:hover:not(:focus) {
 }
 .carousel-dot:hover { background: rgba(255, 255, 255, 0.5) !important; }
 
-/* ── 13. Breadcrumb — separator polish ─────────────────────────── */
 .breadcrumb-sep { color: var(--color-text-dim); margin: 0 2px; }
 .breadcrumb-current {
   color: var(--color-text);
@@ -307,7 +285,6 @@ textarea:hover:not(:focus) {
   text-transform: capitalize;
 }
 
-/* ── 14. Episode card improvements ─────────────────────────────── */
 .episode-card {
   background: var(--color-surface);
   border: var(--border-thin) solid var(--color-border);
@@ -333,7 +310,6 @@ textarea:hover:not(:focus) {
   font-weight: 500;
 }
 
-/* ── 15. AZList letter buttons — uniform ───────────────────────── */
 .az-letter-btn {
   width: 38px;
   height: 38px;
@@ -381,7 +357,6 @@ textarea:hover:not(:focus) {
   font-weight: 600;
 }
 
-/* ── 16. Top donors leaderboard — replace inline styles ───────── */
 .donor-list {
   background: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
@@ -442,7 +417,6 @@ textarea:hover:not(:focus) {
   color: var(--color-text-dim);
 }
 
-/* ── 17. Theme selector — floating refined ─────────────────────── */
 .theme-selector {
   position: fixed;
   right: var(--space-4);
@@ -498,12 +472,10 @@ textarea:hover:not(:focus) {
 }
 .theme-selector.collapsed .theme-option { display: none; }
 
-/* ── 18. Skeleton — match neobrutalism border ──────────────────── */
 .skeleton-anime-card {
   border: var(--border-thin) solid var(--color-border) !important;
 }
 
-/* ── 19. Anchor underline hover ────────────────────────────────── */
 a {
   color: var(--color-primary);
   text-decoration: none;
@@ -511,13 +483,11 @@ a {
 }
 a:hover { color: var(--color-primary-light); }
 
-/* ── 20. Selection color ───────────────────────────────────────── */
 ::selection {
   background: var(--color-primary);
   color: #fff;
 }
 
-/* ── 21. Mobile polish ─────────────────────────────────────────── */
 @media (max-width: 768px) {
   .page-header::after { display: none; }
   .pagination { padding: var(--space-2) var(--space-3); margin-top: var(--space-6); }
@@ -536,7 +506,6 @@ a:hover { color: var(--color-primary-light); }
   .az-letter-btn { width: 32px; height: 32px; font-size: var(--text-xs); }
 }
 
-/* ── 22. Reduced motion ─────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
