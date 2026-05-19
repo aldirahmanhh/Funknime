@@ -14,18 +14,13 @@ const DonghuaDetail = () => {
       try {
         setLoading(true);
         setError(null);
-        
-        console.log('[DonghuaDetail] Fetching slug:', slug);
+
         const response = await animeAPI.getDonghuaDetail(slug);
-        
-        console.log('[DonghuaDetail] API Response:', response);
-        
+
         // Extract donghua data
         const donghuaData = response?.data || response;
         setDonghua(donghuaData);
-        
       } catch (err) {
-        console.error('[DonghuaDetail] Error:', err);
         setError(err?.message ?? 'Gagal memuat detail donghua');
       } finally {
         setLoading(false);
@@ -125,24 +120,31 @@ const DonghuaDetail = () => {
               </div>
             )}
 
-            {Array.isArray(episodes) && episodes.length > 0 && (
-              <div className="action-buttons">
-                <Link 
-                  to={`/watch/${episodes[episodes.length - 1].slug || episodes[episodes.length - 1].episodeId}`}
-                  className="btn btn-primary btn-large"
-                >
-                  ▶ Mulai Episode 1
-                </Link>
-                {episodes.length > 1 && (
-                  <Link 
-                    to={`/watch/${episodes[0].slug || episodes[0].episodeId}`}
-                    className="btn btn-secondary btn-large"
+            {Array.isArray(episodes) && episodes.length > 0 && (() => {
+              // API returns episodes newest-first. First playable = oldest (Episode 1).
+              const firstEp = episodes[episodes.length - 1];
+              const latestEp = episodes[0];
+              const firstSlug = firstEp.slug || firstEp.episodeId;
+              const latestSlug = latestEp.slug || latestEp.episodeId;
+              return (
+                <div className="action-buttons">
+                  <Link
+                    to={`/watch/${firstSlug}`}
+                    className="btn btn-primary btn-large"
                   >
-                    Episode Terbaru
+                    ▶ Mulai Episode 1
                   </Link>
-                )}
-              </div>
-            )}
+                  {episodes.length > 1 && (
+                    <Link
+                      to={`/watch/${latestSlug}`}
+                      className="btn btn-secondary btn-large"
+                    >
+                      Episode Terbaru
+                    </Link>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </section>

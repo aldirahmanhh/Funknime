@@ -4,6 +4,8 @@ import { animeAPI } from '../services/api';
 import AnimeCard from './AnimeCard';
 import { SkeletonAnimeGrid } from './Skeleton';
 
+const PAGE_SIZE_HINT = 24;
+
 const DonghuaCompleted = () => {
   const [donghua, setDonghua] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,30 +13,31 @@ const DonghuaCompleted = () => {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchDonghua = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await animeAPI.getDonghuaCompleted(page);
-        
-        console.log('[DonghuaCompleted] API Response:', response);
-        
-        // Response structure: { status, creator, completed_donghua: [...] }
+        if (cancelled) return;
         const donghuaList = response?.completed_donghua || [];
-        
-        console.log('[DonghuaCompleted] Extracted list:', donghuaList);
-        
         setDonghua(Array.isArray(donghuaList) ? donghuaList : []);
       } catch (err) {
+        if (cancelled) return;
         setError(err?.message ?? 'Gagal memuat donghua completed');
-        console.error('Donghua completed error:', err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     fetchDonghua();
+    return () => { cancelled = true; };
   }, [page]);
 
-  if (loading) {
+  // The API doesn't expose total pages, so we infer "has more" from page size.
+  // If the current page returns fewer items than the typical full page, assume end.
+  const hasMore = donghua.length >= PAGE_SIZE_HINT;
+
+  if (loading && donghua.length === 0) {
     return (
       <div className="main-container">
         <header className="page-header">
@@ -46,11 +49,11 @@ const DonghuaCompleted = () => {
     );
   }
 
-  if (error) {
+  if (error && donghua.length === 0) {
     return (
       <div className="error-container main-container">
         <p className="error-message">Gagal memuat donghua: {error}</p>
-        <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
+        <button type="button" className="btn btn-primary" onClick={() => setPage(1)}>
           Coba Lagi
         </button>
         <Link to="/" className="btn btn-secondary">Kembali ke Beranda</Link>
@@ -94,21 +97,24 @@ const DonghuaCompleted = () => {
       )}
 
       {/* Pagination */}
-      <div className="pagination" style={{ marginTop: '40px', display: 'flex', gap: '12px', justifyContent: 'center' }}>
-        {page > 1 && (
-          <button 
-            className="btn btn-secondary" 
-            onClick={() => setPage(page - 1)}
-          >
-            ← Previous
-          </button>
-        )}
+      <div className="pagination" style={{ marginTop: '40px', display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page === 1 || loading}
+        >
+          ← Previous
+        </button>
         <span className="btn" style={{ background: 'var(--color-surface)' }}>
           Page {page}
         </span>
-        <button 
-          className="btn btn-primary" 
-          onClick={() => setPage(page + 1)}
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => setPage((p) => p + 1)}
+          disabled={!hasMore || loading}
+          aria-disabled={!hasMore || loading}
         >
           Next →
         </button>

@@ -1,25 +1,37 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Home from './components/Home'
 import Header from './components/Header'
 import './App.css'
-import Ongoing from './components/Ongoing'
-import Completed from './components/Completed'
-import DonghuaOngoing from './components/DonghuaOngoing'
-import DonghuaCompleted from './components/DonghuaCompleted'
-import DonghuaDetail from './components/DonghuaDetail'
-import DonghuaGenres from './components/DonghuaGenres'
-import DonghuaGenreFilter from './components/DonghuaGenreFilter'
-import DonghuaAZList from './components/DonghuaAZList'
-import UnifiedSearch from './components/UnifiedSearch'
-import AnimeDetail from './components/AnimeDetail'
-import Watch from './components/Watch'
-import Genres from './components/Genres'
-import AZList from './components/AZList'
-import Schedule from './components/Schedule'
-import WatchHistory from './components/WatchHistory'
-import ThemeSelector from './components/ThemeSelector'
 import { ThemeProvider } from './contexts/ThemeContext'
+import ErrorBoundary from './components/ErrorBoundary'
+import ThemeSelector from './components/ThemeSelector'
 import InstallBanner from './components/InstallBanner'
+
+// Code-split the heavy / less-frequent routes. The video player
+// pulls in @videojs/react which is by far the biggest dep.
+const Ongoing = lazy(() => import('./components/Ongoing'))
+const Completed = lazy(() => import('./components/Completed'))
+const DonghuaOngoing = lazy(() => import('./components/DonghuaOngoing'))
+const DonghuaCompleted = lazy(() => import('./components/DonghuaCompleted'))
+const DonghuaDetail = lazy(() => import('./components/DonghuaDetail'))
+const DonghuaGenres = lazy(() => import('./components/DonghuaGenres'))
+const DonghuaGenreFilter = lazy(() => import('./components/DonghuaGenreFilter'))
+const DonghuaAZList = lazy(() => import('./components/DonghuaAZList'))
+const UnifiedSearch = lazy(() => import('./components/UnifiedSearch'))
+const AnimeDetail = lazy(() => import('./components/AnimeDetail'))
+const Watch = lazy(() => import('./components/Watch'))
+const Genres = lazy(() => import('./components/Genres'))
+const AZList = lazy(() => import('./components/AZList'))
+const Schedule = lazy(() => import('./components/Schedule'))
+const WatchHistory = lazy(() => import('./components/WatchHistory'))
+
+const RouteFallback = () => (
+  <div className="loading-container main-container" role="status" aria-live="polite">
+    <div className="spinner" aria-hidden="true" />
+    <p>Memuat halaman...</p>
+  </div>
+);
 
 function App() {
   return (
@@ -35,25 +47,29 @@ function App() {
         <ThemeSelector />
         <InstallBanner />
         <main id="main-content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/ongoing" element={<Ongoing />} />
-          <Route path="/completed" element={<Completed />} />
-          <Route path="/donghua-ongoing" element={<DonghuaOngoing />} />
-          <Route path="/donghua-completed" element={<DonghuaCompleted />} />
-          <Route path="/donghua-genres" element={<DonghuaGenres />} />
-          <Route path="/donghua-genre/:slug" element={<DonghuaGenreFilter />} />
-          <Route path="/donghua-az" element={<DonghuaAZList />} />
-          <Route path="/donghua/:slug" element={<DonghuaDetail />} />
-          <Route path="/genres" element={<Genres />} />
-          <Route path="/az-list" element={<AZList />} />
-          <Route path="/schedule" element={<Schedule />} />
-          <Route path="/history" element={<WatchHistory />} />
-          <Route path="/search" element={<UnifiedSearch />} />
-          <Route path="/anime/:animeId" element={<AnimeDetail />} />
-          <Route path="/anime/:provider/:animeId" element={<AnimeDetail />} />
-          <Route path="/watch/:episodeId" element={<Watch />} />
-        </Routes>
+          <ErrorBoundary>
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/ongoing" element={<Ongoing />} />
+                <Route path="/completed" element={<Completed />} />
+                <Route path="/donghua-ongoing" element={<DonghuaOngoing />} />
+                <Route path="/donghua-completed" element={<DonghuaCompleted />} />
+                <Route path="/donghua-genres" element={<DonghuaGenres />} />
+                <Route path="/donghua-genre/:slug" element={<DonghuaGenreFilter />} />
+                <Route path="/donghua-az" element={<DonghuaAZList />} />
+                <Route path="/donghua/:slug" element={<DonghuaDetail />} />
+                <Route path="/genres" element={<Genres />} />
+                <Route path="/az-list" element={<AZList />} />
+                <Route path="/schedule" element={<Schedule />} />
+                <Route path="/history" element={<WatchHistory />} />
+                <Route path="/search" element={<UnifiedSearch />} />
+                <Route path="/anime/:animeId" element={<AnimeDetail />} />
+                <Route path="/anime/:provider/:animeId" element={<AnimeDetail />} />
+                <Route path="/watch/:episodeId" element={<Watch />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </main>
       </div>
     </ThemeProvider>

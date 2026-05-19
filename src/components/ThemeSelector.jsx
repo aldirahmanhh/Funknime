@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 
 const THEMES = [
   { id: 'dark', icon: '🌙', label: 'Dark' },
@@ -7,50 +8,42 @@ const THEMES = [
 ];
 
 const ThemeSelector = () => {
-  const [currentTheme, setCurrentTheme] = useState('dark');
+  const { theme, setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('funknime-theme') || 'dark';
-    setCurrentTheme(savedTheme);
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  }, []);
-
   const changeTheme = (themeId) => {
-    setCurrentTheme(themeId);
-    document.documentElement.setAttribute('data-theme', themeId);
-    localStorage.setItem('funknime-theme', themeId);
+    setTheme(themeId);
     setIsOpen(false);
   };
 
-  const toggleOpen = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const currentThemeData = THEMES.find(t => t.id === currentTheme);
+  const currentThemeData = THEMES.find(t => t.id === theme);
 
   return (
     <div className={`theme-selector ${!isOpen ? 'collapsed' : ''}`}>
       <button
         className="theme-toggle-btn"
-        onClick={toggleOpen}
+        type="button"
+        onClick={() => setIsOpen((v) => !v)}
         aria-label="Toggle theme selector"
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
         title="Change theme"
       >
         {currentThemeData?.icon || '🎨'}
       </button>
-      
-      {isOpen && THEMES.map(theme => (
+
+      {isOpen && THEMES.map(t => (
         <button
-          key={theme.id}
-          className={`theme-option ${currentTheme === theme.id ? 'active' : ''}`}
-          onClick={() => changeTheme(theme.id)}
-          data-theme={theme.id}
-          aria-label={`Switch to ${theme.label} theme`}
-          title={theme.label}
+          key={t.id}
+          type="button"
+          className={`theme-option ${theme === t.id ? 'active' : ''}`}
+          onClick={() => changeTheme(t.id)}
+          data-theme={t.id}
+          aria-label={`Switch to ${t.label} theme`}
+          aria-pressed={theme === t.id}
+          title={t.label}
         >
-          {theme.icon}
+          {t.icon}
         </button>
       ))}
     </div>

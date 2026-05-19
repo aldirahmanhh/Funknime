@@ -6,6 +6,7 @@ import AnimeCard from './AnimeCard';
 import AnimeCarousel from './AnimeCarousel';
 import Footer from './Footer';
 import { getWatchHistory, formatTime } from '../utils/watchHistory';
+import { mergeAnimeLists } from '../utils/animeUtils';
 
 const DAY_ORDER = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
@@ -36,28 +37,10 @@ const Home = () => {
         const sameOngoing = sameOngoingRes?.data?.animeList || [];
         const sameCompleted = sameCompletedRes?.data?.animeList || [];
 
-        const normalizeKey = (item) => (item.title || item.name || '').toString().toLowerCase().replace(/\s+/g, '').trim();
-
-        const mergeLists = (otakList, sameList, status) => {
-          const map = new Map();
-          otakList.forEach((a) => {
-            const key = normalizeKey(a);
-            const existing = map.get(key) || {};
-            map.set(key, { ...existing, ...a, providers: [...new Set([...(existing.providers || []), 'otakudesu'])], provider: 'otakudesu', status });
-          });
-          sameList.forEach((a) => {
-            const key = normalizeKey(a);
-            const existing = map.get(key);
-            if (existing) {
-              map.set(key, { ...existing, providers: [...new Set([...(existing.providers || []), 'samehadaku'])] });
-            } else {
-              map.set(key, { ...a, providers: ['samehadaku'], provider: 'samehadaku', status });
-            }
-          });
-          return Array.from(map.values());
-        };
-
-        setHomeData({ ongoing: mergeLists(otakOngoing, sameOngoing, 'Ongoing'), completed: mergeLists(otakCompleted, sameCompleted, 'Completed') });
+        setHomeData({
+          ongoing: mergeAnimeLists(otakOngoing, sameOngoing, 'Ongoing'),
+          completed: mergeAnimeLists(otakCompleted, sameCompleted, 'Completed'),
+        });
         setDonghuaData({ ongoing: donghuaOngoingRes?.ongoing_donghua || [], completed: donghuaCompletedRes?.completed_donghua || [] });
         if (scheduleRes?.data) setScheduleData(scheduleRes);
       } catch (err) {
@@ -75,7 +58,9 @@ const Home = () => {
       .then(d => {
         if (d?.result?.data) setTopDonors(d.result.data);
       })
-      .catch((err) => console.log('Trakteer fetch failed:', err));
+      .catch(() => {
+        // ignore — Trakteer is non-critical
+      });
 
     // Show donate popup on every visit (delay 2s for smooth UX)
     const timer = setTimeout(() => setShowDonatePopup(true), 2000);
@@ -181,7 +166,7 @@ const Home = () => {
                 <Link to={`/watch/${item.episodeId}`} state={{ provider: item.provider, backAnimeId: item.animeId }} className="anime-card card">
                   <div className="card-image-wrapper">
                     <span className="anime-card-badge anime-card-badge--ongoing">Lanjut</span>
-                    {item.poster ? <img src={item.poster} alt={item.animeTitle} className="poster" /> : <div style={{ width: '100%', height: '100%', background: 'var(--color-surface-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🎬</div>}
+                    {item.poster ? <img src={item.poster} alt={item.animeTitle} className="poster" loading="lazy" decoding="async" /> : <div style={{ width: '100%', height: '100%', background: 'var(--color-surface-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🎬</div>}
                     <div className="card-overlay"><span className="play-icon" aria-hidden>▶</span></div>
                     {item.currentTime > 0 && item.duration > 0 && (
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: 'rgba(255,255,255,0.15)', zIndex: 3 }}>

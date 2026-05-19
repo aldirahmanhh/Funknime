@@ -49,7 +49,7 @@ const WatchHistory = () => {
           >
             <div className="card-image-wrapper">
               <span className="anime-card-badge anime-card-badge--ongoing">Lanjut</span>
-              {item.poster && <img src={item.poster} alt={item.animeTitle} className="poster" />}
+              {item.poster && <img src={item.poster} alt={item.animeTitle} className="poster" loading="lazy" decoding="async" />}
               <div className="card-overlay">
                 <span className="play-icon" aria-hidden>▶</span>
               </div>

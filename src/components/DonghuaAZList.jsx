@@ -77,11 +77,26 @@ const DonghuaAZList = () => {
         <div className="empty-state"><p>Tidak ada donghua dengan huruf "{selectedLetter.toUpperCase()}"</p></div>
       )}
 
-      {donghua.length >= 10 && (
-        <div className="pagination">
-          {page > 1 && <button className="btn btn-secondary" onClick={() => setPage(page - 1)}>← Prev</button>}
+      {donghua.length > 0 && (
+        <div className="pagination" style={{ marginTop: 'var(--space-6)', display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1 || loading}
+          >
+            ← Prev
+          </button>
           <span className="page-info">Hal {page}</span>
-          <button className="btn btn-primary" onClick={() => setPage(page + 1)}>Next →</button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={donghua.length < 10 || loading}
+            aria-disabled={donghua.length < 10 || loading}
+          >
+            Next →
+          </button>
         </div>
       )}
     </div>

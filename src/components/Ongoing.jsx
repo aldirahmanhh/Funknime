@@ -1,44 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { animeAPI } from '../services/api';
 import { SkeletonAnimeGrid } from './Skeleton';
 import AnimeCard from './AnimeCard';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
-
-const normalizeKey = (item) => {
-  const raw = (item.title || item.name || '').toString().toLowerCase();
-  return raw.replace(/\s+/g, ' ').trim();
-};
-
-const mergeAnimeLists = (list1, list2) => {
-  const map = new Map();
-  
-  list1.forEach((a) => {
-    const key = normalizeKey(a);
-    map.set(key, { ...a, providers: ['otakudesu'], provider: 'otakudesu' });
-  });
-  
-  list2.forEach((a) => {
-    const key = normalizeKey(a);
-    const existing = map.get(key);
-    if (existing) {
-      map.set(key, { ...existing, providers: ['otakudesu', 'samehadaku'] });
-    } else {
-      map.set(key, { ...a, providers: ['samehadaku'], provider: 'samehadaku' });
-    }
-  });
-  
-  return Array.from(map.values());
-};
+import { mergeAnimeLists } from '../utils/animeUtils';
 
 const fetchOngoingData = async (page) => {
   const [otakRes, sameRes] = await Promise.all([
     animeAPI.getOngoing(page).catch(() => ({ data: { animeList: [] } })),
     animeAPI.getOngoingSamehadaku().catch(() => ({ data: { animeList: [] } })),
   ]);
-  
+
   const otakList = otakRes?.data?.animeList || [];
   const sameList = sameRes?.data?.animeList || [];
-  
+
   return mergeAnimeLists(otakList, sameList);
 };
 

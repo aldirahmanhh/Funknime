@@ -8,6 +8,10 @@ import '@videojs/react/video/skin.css';
 import WatchLoading from './WatchLoading';
 import EmbedPlayer from './EmbedPlayer';
 
+const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV;
+const devWarn = (...args) => { if (isDev) console.warn(...args); };
+const devLog = (...args) => { if (isDev) console.log(...args); };
+
 const Player = createPlayer({ features: videoFeatures });
 
 const Watch = () => {
@@ -185,7 +189,7 @@ const Watch = () => {
     // Auto-recover from playback errors (FFmpeg demuxer, network stall, etc)
     const onError = () => {
       const lastPos = vid.currentTime || 0;
-      console.warn(`[Watch] Video error at ${lastPos}s, retry #${retryCountRef.current + 1}`);
+      devWarn(`[Watch] Video error at ${lastPos}s, retry #${retryCountRef.current + 1}`);
 
       if (retryCountRef.current < 3) {
         retryCountRef.current++;
@@ -202,7 +206,7 @@ const Watch = () => {
         }, 1000);
       } else {
         // After 3 retries, fallback to iframe
-        console.warn('[Watch] Max retries reached, falling back to iframe');
+        devWarn('[Watch] Max retries reached, falling back to iframe');
         setVideoFailed(true);
       }
     };
@@ -212,7 +216,7 @@ const Watch = () => {
     const onStalled = () => {
       stallTimer = setTimeout(() => {
         if (vid.readyState < 3 && !vid.paused) {
-          console.warn('[Watch] Video stalled, attempting recovery');
+          devWarn('[Watch] Video stalled, attempting recovery');
           const pos = vid.currentTime;
           vid.load();
           vid.addEventListener('loadeddata', () => {
@@ -385,7 +389,7 @@ const Watch = () => {
                     videoElRef.current = el;
                     if (el) {
                       el.onerror = () => {
-                        console.log('[Watch] Video.js failed, falling back to iframe');
+                        devLog('[Watch] Video.js failed, falling back to iframe');
                         setVideoFailed(true);
                         setSwitching(false);
                       };
@@ -440,7 +444,7 @@ const Watch = () => {
       {animeData && (
         <div className="detail-header" style={{ marginTop: '20px' }}>
           <div className="detail-poster" style={{ width: '140px' }}>
-            <img src={animeData.poster || animeData.poster_url} alt={animeData.title} />
+            <img src={animeData.poster || animeData.poster_url} alt={animeData.title} loading="lazy" decoding="async" />
           </div>
           <div className="detail-info">
             <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '8px' }}>{animeData.title}</h2>

@@ -1,3 +1,8 @@
+// Dev-only logger. Stripped/silent in production.
+const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV;
+const devLog = (...args) => { if (isDev) console.log(...args); };
+const devError = (...args) => { if (isDev) console.error(...args); };
+
 const API_BASE_URL = 'https://www.sankavollerei.com/anime';
 
 // ═══════════════════════════════════════════════════════
@@ -89,7 +94,7 @@ export const logAPIError = (error, context = {}) => {
     context,
   };
   
-  console.error('API Error:', errorData);
+  devError('API Error:', errorData);
   
   // Log to error tracking service (if available)
   if (typeof window !== 'undefined' && window.onerror) {
@@ -164,9 +169,14 @@ export const clearCachePattern = (pattern) => {
 };
 
 // Enhanced API fetching with smart cache, global rate limit, and request queue
-const fetchAnime = async (endpoint, provider = 'default', { priority = false } = {}) => {
+const fetchAnime = async (endpoint, provider = 'default', { priority = false, signal } = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
+  // Abort early if caller already cancelled
+  if (signal?.aborted) {
+    throw new DOMException('Aborted', 'AbortError');
+  }
+
   // 1. Check cache first — no network needed
   const cachedData = getFromCache(url);
   if (cachedData) return cachedData;
@@ -181,6 +191,7 @@ const fetchAnime = async (endpoint, provider = 'default', { priority = false } =
 
   // 3. Priority requests skip queue (episode detail, server fetch)
   const doFetch = async () => {
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     const cached2 = getFromCache(url);
     if (cached2) return cached2;
     trackRequest();
@@ -189,6 +200,7 @@ const fetchAnime = async (endpoint, provider = 'default', { priority = false } =
       const response = await fetch(url, {
         method: 'GET',
         headers: { 'Accept': 'application/json' },
+        signal,
       });
 
       const contentType = response.headers.get('content-type') || '';
@@ -197,7 +209,7 @@ const fetchAnime = async (endpoint, provider = 'default', { priority = false } =
         // Rate limited by server — wait and retry once
         if (response.status === 429) {
           await new Promise(r => setTimeout(r, 3000));
-          const retry = await fetch(url, { headers: { 'Accept': 'application/json' } });
+          const retry = await fetch(url, { headers: { 'Accept': 'application/json' }, signal });
           if (retry.ok) {
             const retryData = await retry.json();
             setCache(url, retryData);
@@ -208,7 +220,7 @@ const fetchAnime = async (endpoint, provider = 'default', { priority = false } =
 
         let parsed = null;
         if (contentType.includes('application/json')) {
-          try { parsed = await response.json(); } catch {}
+          try { parsed = await response.json(); } catch { /* ignore */ }
         }
 
         if (response.status === 404) {
@@ -224,6 +236,7 @@ const fetchAnime = async (endpoint, provider = 'default', { priority = false } =
       setCache(url, data);
       return data;
     } catch (error) {
+      if (error?.name === 'AbortError') throw error;
       if (error instanceof APIError) throw error;
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
         throw new Error('Gagal terhubung ke server. Periksa koneksi internet.');
@@ -522,7 +535,7 @@ export const animeAPI = {
          }
        } catch (error) {
          // Any error = treat as empty results for this provider
-         console.error(`Error searching in ${providerKey}:`, error.message);
+          devError(`Error searching in ${providerKey}:`, error.message);
          searchResults[providerKey] = {
            data: {
              animeList: [],
@@ -553,9 +566,9 @@ export const animeAPI = {
          if (providerAPI.search) {
            return await providerAPI.search(keyword);
          }
-       } catch (e) {
-         console.log(`Search failed in ${provider}, trying next...`);
-       }
+        } catch {
+          devLog(`Search failed in ${provider}, trying next...`);
+        }
      }
      
      throw new Error('No providers available for search');
@@ -657,7 +670,7 @@ export const animeAPI = {
       }
       return await providerAPI.getAZList();
     } catch (error) {
-      console.error(`Failed to fetch A-Z list from ${provider}:`, error);
+      devError(`Failed to fetch A-Z list from ${provider}:`, error);
       throw error;
     }
   },
@@ -671,7 +684,7 @@ export const animeAPI = {
         if (i === retries - 1) {
           throw error;
         }
-        console.log(`Retry ${i + 1} for ${endpoint}...`);
+        devLog(`Retry ${i + 1} for ${endpoint}...`);
         await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
       }
     }

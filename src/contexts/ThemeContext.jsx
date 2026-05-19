@@ -1,42 +1,55 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
-const ThemeContext = createContext();
+const ThemeContext = createContext(null);
 
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+const STORAGE_KEY = 'funknime-theme';
+const VALID_THEMES = ['dark', 'minimal', 'neobrutalism'];
+const DEFAULT_THEME = 'dark';
+
+const readInitialTheme = () => {
+  try {
+    const saved = typeof window !== 'undefined'
+      ? window.localStorage.getItem(STORAGE_KEY)
+      : null;
+    if (saved && VALID_THEMES.includes(saved)) return saved;
+  } catch {
+    // localStorage may be unavailable (private mode)
   }
-  return context;
+  return DEFAULT_THEME;
 };
 
+// Set <html data-theme> as early as possible to avoid flash
+if (typeof document !== 'undefined') {
+  document.documentElement.setAttribute('data-theme', readInitialTheme());
+}
+
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState('dark');
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState(readInitialTheme);
 
   useEffect(() => {
-    setMounted(true);
-    const savedTheme = localStorage.getItem('theme');
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const initialTheme = savedTheme || systemTheme;
-    setTheme(initialTheme);
-    document.documentElement.setAttribute('data-theme', initialTheme);
-  }, []);
+    document.documentElement.setAttribute('data-theme', theme);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      // ignore
+    }
+  }, [theme]);
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
+  const setTheme = (next) => {
+    if (VALID_THEMES.includes(next)) setThemeState(next);
   };
 
-  if (!mounted) {
-    return null; // Prevent hydration mismatch
-  }
+  const value = { theme, setTheme, themes: VALID_THEMES };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
+};
+
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
+  return ctx;
 };

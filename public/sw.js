@@ -1,16 +1,19 @@
 // Service Worker for Funknime PWA
-const CACHE_NAME = 'funknime-v1';
-const RUNTIME_CACHE = 'funknime-runtime';
+// IMPORTANT: bump CACHE_VERSION on every release. Both the precache and the
+// runtime cache key derive from it, so old caches are wiped on activation.
+const CACHE_VERSION = 'v3';
+const CACHE_NAME = `funknime-${CACHE_VERSION}`;
+const RUNTIME_CACHE = `funknime-runtime-${CACHE_VERSION}`;
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/favicon.svg'
+  '/favicon.svg',
 ];
 
-// Install event - cache essential assets
+// Install — cache shell, then take over immediately
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -19,7 +22,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate event - clean up old caches
+// Activate — purge any cache that doesn't match the current version
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -32,53 +35,70 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Helpers
+const isHashedAsset = (url) => /\/assets\/.+\.[a-f0-9]{8,}\.\w+$/i.test(url.pathname);
+const isStaticExt = (pathname) =>
+  /\.(js|mjs|css|png|jpg|jpeg|svg|gif|webp|woff2?)$/i.test(pathname);
+
+// Fetch — strategy depends on request type:
+// - navigation HTML → network-first (so users see new releases ASAP)
+// - hashed assets   → cache-first (immutable URLs are safe to cache forever)
+// - other GET       → cache-first with background revalidate
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  if (request.method !== 'GET') return;
+
   const url = new URL(request.url);
 
   // Skip cross-origin requests
-  if (url.origin !== location.origin) {
+  if (url.origin !== location.origin) return;
+
+  // NEVER cache API endpoints or sitemap/robots — they must hit network fresh
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.pathname === '/sitemap.xml' ||
+    url.pathname === '/robots.txt'
+  ) {
     return;
   }
 
-  // For navigation requests (HTML pages), always serve index.html from cache or network
+  // Navigation requests — network-first, fall back to cached shell
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
+        .then((res) => {
+          // Update cached shell so offline users get latest snapshot
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', copy));
+          }
+          return res;
+        })
         .catch(() => caches.match('/index.html'))
     );
     return;
   }
 
-  // For other requests, try cache first, then network
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+  // Static assets — cache-first with background update
+  if (isStaticExt(url.pathname)) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const fetchAndUpdate = fetch(request)
+          .then((res) => {
+            if (res && res.ok && res.status === 200) {
+              const copy = res.clone();
+              caches.open(RUNTIME_CACHE).then((cache) => {
+                // Hashed assets are safe to keep; non-hashed also fine because
+                // we drop the whole runtime cache on every version bump.
+                cache.put(request, copy);
+              });
+            }
+            return res;
+          })
+          .catch(() => cached);
 
-      return fetch(request).then((response) => {
-        // Don't cache non-successful responses
-        if (!response || response.status !== 200 || response.type === 'error') {
-          return response;
-        }
-
-        // Clone the response
-        const responseToCache = response.clone();
-
-        // Cache static assets
-        if (request.method === 'GET' && (
-          request.url.includes('/assets/') ||
-          request.url.match(/\.(js|css|png|jpg|jpeg|svg|gif|webp|woff|woff2)$/)
-        )) {
-          caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(request, responseToCache);
-          });
-        }
-
-        return response;
-      });
-    })
-  );
+        return cached || fetchAndUpdate;
+      })
+    );
+  }
 });
