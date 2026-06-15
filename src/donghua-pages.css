@@ -13,35 +13,14 @@
   gap: var(--space-4);
 }
 
-/* Donghua detail header */
-.donghua-detail-header {
-  display: flex;
-  gap: var(--space-6);
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  margin-bottom: var(--space-6);
-  position: relative;
-  overflow: hidden;
-}
-
-.donghua-detail-header::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--anime-gradient);
-}
-
-/* Breadcrumb */
+/* ── Breadcrumb ── */
 .breadcrumb {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-text-muted);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
   flex-wrap: wrap;
 }
 .breadcrumb a {
@@ -50,15 +29,16 @@
   transition: color var(--transition-fast);
 }
 .breadcrumb a:hover { color: var(--color-primary-light); }
+.breadcrumb-sep { opacity: .4; }
 
-/* Genre tags */
-.genre-tags {
+/* ── Genre tags ── */
+.genre-tags,
+.dd-genres {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-bottom: var(--space-4);
 }
-
 .genre-tag {
   padding: var(--space-1) var(--space-3);
   background: var(--color-surface-hover);
@@ -69,19 +49,19 @@
   color: var(--color-text-muted);
   text-decoration: none;
   transition: all var(--transition-fast);
+  cursor: default;
 }
 .genre-tag:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
-/* Episode grid for donghua */
+/* ── Episode grid (shared) ── */
 .episode-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: var(--space-2);
 }
-
 .episode-btn {
   padding: var(--space-2) var(--space-3);
   background: var(--color-surface);
@@ -98,27 +78,353 @@
 .episode-btn:hover {
   border-color: var(--color-primary);
   color: var(--color-text);
-  background: rgba(255, 62, 154, 0.06);
+  background: rgba(147, 51, 234, 0.08);
 }
 
+/* ════════════════════════════════════════════
+   DONGHUA DETAIL — Redesign
+   ════════════════════════════════════════════ */
+.dd {
+  animation: fadeInUp 0.4s ease-out;
+  padding-bottom: var(--space-16);
+}
+
+/* ── Loading skeleton ── */
+.dd-loading {
+  padding-top: var(--space-8);
+}
+.dd-loading__inner {
+  display: flex;
+  gap: var(--space-6);
+}
+.dd-loading__poster,
+.dd-loading__line {
+  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-hover) 50%, var(--color-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-md);
+}
+.dd-loading__poster {
+  width: 180px;
+  min-width: 180px;
+  height: 270px;
+  flex-shrink: 0;
+}
+.dd-loading__lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+}
+.dd-loading__line { height: 18px; border-radius: var(--radius-sm); }
+.dd-loading__line--title  { width: 60%; height: 32px; }
+.dd-loading__line--sub    { width: 40%; }
+.dd-loading__line--meta   { width: 75%; }
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ── Hero section ── */
+.dd-hero {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: var(--space-8);
+  border: var(--border-width) solid var(--color-border);
+}
+.dd-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--anime-gradient);
+  z-index: 2;
+}
+.dd-hero__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  filter: blur(28px) brightness(0.22) saturate(1.4);
+  transform: scale(1.08);
+  z-index: 0;
+}
+.dd-hero__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: var(--space-8);
+  padding: var(--space-8);
+  background: linear-gradient(
+    135deg,
+    rgba(10, 10, 15, 0.72) 0%,
+    rgba(22, 22, 31, 0.58) 100%
+  );
+  backdrop-filter: blur(2px);
+}
+
+/* ── Poster ── */
+.dd-hero__poster-wrap {
+  flex-shrink: 0;
+  position: relative;
+  width: 200px;
+}
+.dd-hero__poster {
+  width: 200px;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--color-border);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
+  display: block;
+}
+.dd-hero__badge {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  font-family: var(--font-heading);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--badge-color, var(--color-text-muted));
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+/* ── Info column ── */
+.dd-hero__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  justify-content: center;
+}
+.dd-hero__label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-primary-light);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.dd-hero__title {
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-xl), 3vw, var(--text-3xl));
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  color: var(--color-text);
+  margin: 0;
+  word-break: break-word;
+}
+
+/* ── Meta pills ── */
+.dd-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+}
+.dd-meta__item { display: contents; }
+.dd-meta__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: rgba(255,255,255,.06);
+  border: var(--border-thin) solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+.dd-meta__pill--accent {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+/* ── CTA ── */
+.dd-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* ── Content layout ── */
+.dd-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ── Section title ── */
+.dd-section-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ── Synopsis ── */
+.dd-synopsis__text {
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-muted);
+  margin: 0;
+  white-space: pre-line;
+}
+
+/* ── Episodes ── */
+.dd-episodes__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.dd-episodes__header .dd-section-title { margin-bottom: 0; }
+.dd-episodes__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 22px;
+  padding: 0 var(--space-2);
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: #fff;
+}
+.dd-episodes__search-input {
+  height: 36px;
+  padding: 0 var(--space-4);
+  background: var(--color-surface-hover);
+  border: var(--border-thin) solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  width: 200px;
+}
+.dd-episodes__search-input:focus {
+  border-color: var(--color-primary);
+}
+.dd-episodes__empty {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  padding: var(--space-4) 0;
+}
+
+/* Episode grid — compact cards */
+.dd-ep-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dd-ep-item { display: contents; }
+.dd-ep-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) var(--space-3);
+  background: var(--color-surface);
+  border: var(--border-thin) solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+.dd-ep-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--color-primary);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.dd-ep-btn:hover,
+.dd-ep-btn:focus-visible {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+  background: var(--color-surface-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.dd-ep-btn:hover::before,
+.dd-ep-btn:focus-visible::before { opacity: 1; }
+.dd-ep-btn__title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-family: var(--font-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dd-ep-btn__date {
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+}
+.dd-ep-btn__icon {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  color: var(--color-primary);
+}
+.dd-ep-btn:hover .dd-ep-btn__icon,
+.dd-ep-btn:focus-visible .dd-ep-btn__icon { opacity: 1; }
+
+/* ── Responsive ── */
 @media (max-width: 768px) {
-  .donghua-detail-header {
+  .dd-hero__body {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    padding: var(--space-6);
+    gap: var(--space-5);
   }
-  .donghua-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: var(--space-3);
-  }
-  .episode-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  }
+  .dd-hero__poster-wrap { width: 160px; }
+  .dd-hero__poster { width: 160px; }
+  .dd-meta { justify-content: center; }
+  .dd-genres { justify-content: center; }
+  .dd-cta { justify-content: center; }
+  .dd-episodes__header { flex-direction: column; align-items: flex-start; }
+  .dd-episodes__search-input { width: 100%; }
+  .dd-ep-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .donghua-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: var(--space-3); }
+  .episode-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
 }
 
 @media (max-width: 480px) {
-  .donghua-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-2);
-  }
+  .dd-hero__body { padding: var(--space-4); }
+  .dd-hero__title { font-size: var(--text-xl); }
+  .dd-ep-grid { grid-template-columns: repeat(2, 1fr); }
+  .donghua-grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
 }
+

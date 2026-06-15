@@ -6,9 +6,11 @@ const devError = (...args) => { if (isDev) console.error(...args); };
 const API_BASE_URL = 'https://www.sankavollerei.web.id/anime';
 
 // ═══════════════════════════════════════════════════════
-// SMART CACHE — different TTL based on data type
+// TWO-LAYER CACHE — L1: in-memory (fast), L2: localStorage (persistent)
 // ═══════════════════════════════════════════════════════
-const cache = new Map();
+const L1 = new Map(); // in-memory, cleared on page reload
+const LS_PREFIX = 'fnk_cache_';
+const LS_MAX_ENTRIES = 60; // guard against localStorage bloat
 
 const CACHE_TTL = {
   long:   30 * 60 * 1000,  // 30 min — genres, az-list, schedule
@@ -24,27 +26,67 @@ const getCacheTTL = (url) => {
   return CACHE_TTL.medium;
 };
 
+// Prune expired localStorage entries to stay under LS_MAX_ENTRIES
+const pruneLS = () => {
+  try {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith(LS_PREFIX));
+    const now = Date.now();
+    let expired = keys.filter(k => {
+      try { return now > JSON.parse(localStorage.getItem(k)).expiry; } catch { return true; }
+    });
+    expired.forEach(k => localStorage.removeItem(k));
+    // If still too many, remove oldest by expiry
+    const remaining = Object.keys(localStorage).filter(k => k.startsWith(LS_PREFIX));
+    if (remaining.length > LS_MAX_ENTRIES) {
+      const sorted = remaining
+        .map(k => { try { return { k, expiry: JSON.parse(localStorage.getItem(k)).expiry }; } catch { return { k, expiry: 0 }; } })
+        .sort((a, b) => a.expiry - b.expiry);
+      sorted.slice(0, sorted.length - LS_MAX_ENTRIES).forEach(({ k }) => localStorage.removeItem(k));
+    }
+  } catch { /* localStorage unavailable */ }
+};
+
 const getFromCache = (url) => {
-  const entry = cache.get(url);
-  if (!entry) return null;
-  if (Date.now() > entry.expiry) { cache.delete(url); return null; }
-  return entry.data;
+  // L1 hit — fastest path
+  const l1 = L1.get(url);
+  if (l1) {
+    if (Date.now() <= l1.expiry) return l1.data;
+    L1.delete(url);
+  }
+  // L2 hit — localStorage survives page reload
+  try {
+    const raw = localStorage.getItem(LS_PREFIX + url);
+    if (raw) {
+      const entry = JSON.parse(raw);
+      if (Date.now() <= entry.expiry) {
+        L1.set(url, entry); // promote to L1
+        return entry.data;
+      }
+      localStorage.removeItem(LS_PREFIX + url);
+    }
+  } catch { /* ignore parse errors */ }
+  return null;
 };
 
 const setCache = (url, data) => {
   const ttl = getCacheTTL(url);
-  cache.set(url, { data, expiry: Date.now() + ttl });
+  const entry = { data, expiry: Date.now() + ttl };
+  L1.set(url, entry);
+  try {
+    pruneLS();
+    localStorage.setItem(LS_PREFIX + url, JSON.stringify(entry));
+  } catch { /* quota exceeded — L1 only */ }
 };
 
 // ═══════════════════════════════════════════════════════
 // GLOBAL RATE LIMITER — 40 req/min (safe margin from 50)
+// Only blocks when approaching limit — requests are parallel by default
 // ═══════════════════════════════════════════════════════
 const globalRequests = [];
 const MAX_REQUESTS_PER_MINUTE = 40;
 
 const isRateLimited = () => {
   const now = Date.now();
-  // Remove entries older than 60s
   while (globalRequests.length > 0 && now - globalRequests[0] > 60000) {
     globalRequests.shift();
   }
@@ -55,24 +97,18 @@ const trackRequest = () => {
   globalRequests.push(Date.now());
 };
 
-// ═══════════════════════════════════════════════════════
-// REQUEST QUEUE — serialize requests to avoid burst
-// ═══════════════════════════════════════════════════════
-let requestQueue = Promise.resolve();
-const MIN_DELAY_MS = 100; // min 100ms between requests
-
-const enqueue = (fn) => {
-  requestQueue = requestQueue.then(() =>
-    new Promise((resolve) => setTimeout(resolve, MIN_DELAY_MS))
-  ).then(fn);
-  return requestQueue;
+// Wait until under rate limit (non-blocking for other parallel requests)
+const waitForRateLimit = async () => {
+  let attempts = 0;
+  while (isRateLimited() && attempts < 5) {
+    await new Promise(r => setTimeout(r, 1500));
+    attempts++;
+  }
+  if (isRateLimited()) throw new Error('Server sedang sibuk. Tunggu sebentar lalu coba lagi.');
 };
 
-// Direct fetch (skip queue) for high-priority requests like episode detail
-const fetchDirect = async (fn) => {
-  trackRequest();
-  return fn();
-};
+// enqueue kept for backward compat but now just parallel with rate-limit guard
+const enqueue = (fn) => fn();
 
 // Debounce function
 export const debounce = (fn, delay) => {
@@ -155,17 +191,25 @@ export const formatServerData = (data) => {
 
 // Cache management
 export const clearCache = () => {
-  cache.clear();
+  L1.clear();
+  try {
+    Object.keys(localStorage)
+      .filter(k => k.startsWith(LS_PREFIX))
+      .forEach(k => localStorage.removeItem(k));
+  } catch { /* ignore */ }
 };
 
-export const getCacheSize = () => cache.size;
+export const getCacheSize = () => L1.size;
 
-export const getCacheKeys = () => Array.from(cache.keys());
+export const getCacheKeys = () => Array.from(L1.keys());
 
 // Clear cache for specific pattern
 export const clearCachePattern = (pattern) => {
-  const keys = Array.from(cache.keys()).filter(key => pattern.test(key));
-  keys.forEach(key => cache.delete(key));
+  const keys = Array.from(L1.keys()).filter(key => pattern.test(key));
+  keys.forEach(key => {
+    L1.delete(key);
+    try { localStorage.removeItem(LS_PREFIX + key); } catch { /* ignore */ }
+  });
 };
 
 // Enhanced API fetching with smart cache, global rate limit, and request queue
@@ -181,12 +225,9 @@ const fetchAnime = async (endpoint, provider = 'default', { priority = false, si
   const cachedData = getFromCache(url);
   if (cachedData) return cachedData;
 
-  // 2. Check global rate limit
+  // 2. Check global rate limit — only blocks when near threshold
   if (isRateLimited()) {
-    await new Promise(r => setTimeout(r, 1500));
-    if (isRateLimited()) {
-      throw new Error('Server sedang sibuk. Tunggu sebentar lalu coba lagi.');
-    }
+    await waitForRateLimit();
   }
 
   // 3. Priority requests skip queue (episode detail, server fetch)
