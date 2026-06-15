@@ -7,6 +7,9 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import ThemeSelector from './components/ThemeSelector'
 import InstallBanner from './components/InstallBanner'
+import MaintenancePage from './components/MaintenancePage'
+
+const IS_MAINTENANCE = import.meta.env.VITE_MAINTENANCE_MODE === 'true'
 
 // Code-split the heavy / less-frequent routes. The video player
 // pulls in @videojs/react which is by far the biggest dep.
@@ -34,6 +37,10 @@ const RouteFallback = () => (
 );
 
 function App() {
+  if (IS_MAINTENANCE) {
+    return <MaintenancePage />;
+  }
+
   return (
     <ThemeProvider>
       <a href="#main-content" className="skip-link">Lewati ke konten</a>

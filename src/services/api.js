@@ -3,7 +3,7 @@ const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.me
 const devLog = (...args) => { if (isDev) console.log(...args); };
 const devError = (...args) => { if (isDev) console.error(...args); };
 
-const API_BASE_URL = 'https://www.sankavollerei.com/anime';
+const API_BASE_URL = 'https://sankavollerei.web.id/anime';
 
 // ═══════════════════════════════════════════════════════
 // SMART CACHE — different TTL based on data type
