@@ -10,7 +10,7 @@
   [![Trakteer](https://img.shields.io/badge/Trakteer-Donasi-red?logo=buymeacoffee&logoColor=white)](https://teer.id/anrizz)
 
   <br/>
-  <a href="https://kenkazumi.biz.id"><b>🌐 Live Site</b></a> &nbsp;·&nbsp;
+  <a href="https://www.mrfunk.my.id"><b>🌐 Live Site</b></a> &nbsp;·&nbsp;
   <a href="https://teer.id/anrizz"><b>☕ Trakteer</b></a> &nbsp;·&nbsp;
   <a href="https://github.com/aldirahmanhh/Funknime/issues"><b>🐛 Report Bug</b></a>
 </div>
@@ -29,7 +29,7 @@ Fitur utamanya:
 
 ## Screenshot
 
-> _coming soon_
+> _Lihat langsung di [mrfunk.my.id](https://www.mrfunk.my.id)_
 
 ## Tech
 
@@ -38,7 +38,7 @@ Fitur utamanya:
 | Frontend | React 19 + Vite 8 |
 | Routing | React Router v7 |
 | Hosting | Vercel (serverless) |
-| Data | [Sankavollerei API](https://www.sankavollerei.com) |
+| Data | [Sankavollerei API](https://www.sankavollerei.web.id) |
 | Donasi | [Trakteer API](https://trakteer.id) |
 
 ## Jalanin di lokal
@@ -83,7 +83,7 @@ src/
 
 ## Credits
 
-- **API** — [Sankavollerei](https://www.sankavollerei.com) (gratis, rate limit 50 req/min)
+- **API** — [Sankavollerei](https://www.sankavollerei.web.id) (gratis, rate limit 50 req/min)
 - **Donasi** — [Trakteer](https://teer.id/anrizz)
 - **Icons** — Emoji native
 

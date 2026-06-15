@@ -139,11 +139,19 @@ const Home = () => {
       {/* Hero */}
       <header className="page-header home-hero home-hero--streaming">
         <div className="home-hero-copy">
+          <div className="home-hero-eyebrow">✨ Gratis · Tanpa Login · Multi-Provider</div>
           <h1 className="main-title text-gradient" data-text="MRFUNK">MRFUNK</h1>
-          <p className="subtitle">Tempat nonton anime & donghua sub Indo paling lengkap. Gratis, tanpa ribet.</p>
+          <p className="subtitle">Nonton anime &amp; donghua sub Indo. Semua provider, satu tempat.</p>
           <div className="home-hero-actions">
-            <Link to="/search" className="btn btn-primary">🔍 Cari Anime</Link>
+            <Link to="/search" className="btn btn-primary btn-large">🔍 Cari Anime</Link>
             <Link to="/ongoing" className="btn btn-secondary">📺 Sedang Tayang</Link>
+          </div>
+          <div className="home-hero-stats">
+            <span className="home-stat"><strong>2</strong> Provider</span>
+            <span className="home-stat-sep">·</span>
+            <span className="home-stat">Donghua ✓</span>
+            <span className="home-stat-sep">·</span>
+            <span className="home-stat">Resume otomatis ✓</span>
           </div>
         </div>
         {ongoing.length > 0 && (
@@ -216,20 +224,27 @@ const Home = () => {
       {days.length > 0 && (
         <section className="section">
           <div className="section-header"><h2 className="section-title">📅 Jadwal Tayang</h2><Link to="/schedule" className="view-all">Buka jadwal</Link></div>
-          <div className="schedule-summary">
-            <table>
-              <thead><tr><th>Hari</th><th>Total</th><th>Aksi</th></tr></thead>
-              <tbody>
-                {days.sort((a, b) => {
-                  const ai = DAY_ORDER.indexOf(a.day || '');
-                  const bi = DAY_ORDER.indexOf(b.day || '');
-                  return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
-                }).map((row) => {
-                  const count = (row.anime_list ?? row.animeList ?? []).length;
-                  return <tr key={row.day}><td>{row.day}</td><td>{count} anime</td><td><Link to="/schedule" className="schedule-buka">Buka</Link></td></tr>;
-                })}
-              </tbody>
-            </table>
+          <div className="schedule-summary-grid">
+            {days.sort((a, b) => {
+              const ai = DAY_ORDER.indexOf(a.day || '');
+              const bi = DAY_ORDER.indexOf(b.day || '');
+              return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+            }).map((row) => {
+              const count = (row.anime_list ?? row.animeList ?? []).length;
+              const todayIdx = new Date().getDay();
+              const isToday = DAY_ORDER[todayIdx] === row.day;
+              return (
+                <Link
+                  key={row.day}
+                  to="/schedule"
+                  className={`schedule-day-pill${isToday ? ' schedule-day-pill--today' : ''}`}
+                >
+                  {isToday && <span className="schedule-day-pill-dot" aria-hidden="true" />}
+                  <span className="schedule-day-pill-name">{row.day}</span>
+                  <span className="schedule-day-pill-count">{count}</span>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}
@@ -239,26 +254,30 @@ const Home = () => {
         <section className="section">
           <div className="section-header">
             <h2 className="section-title">💜 Top Donatur</h2>
-            <a href="https://teer.id/anrizz" target="_blank" rel="noopener noreferrer" className="view-all">Donasi juga</a>
+            <a href="https://teer.id/anrizz" target="_blank" rel="noopener noreferrer" className="view-all">Donasi juga →</a>
           </div>
           <div className="donor-list">
             {topDonors.slice(0, 5).map((donor, idx) => {
-              const rankClass = idx === 0 ? 'donor-rank--gold' : idx === 1 ? 'donor-rank--silver' : idx === 2 ? 'donor-rank--bronze' : '';
               const rankIcon = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+              const rankClass = idx === 0 ? 'donor-rank--gold' : idx === 1 ? 'donor-rank--silver' : idx === 2 ? 'donor-rank--bronze' : '';
               return (
                 <div key={donor.order_id || idx} className="donor-row">
-                  <span className={`donor-rank ${rankClass}`}>{rankIcon}</span>
+                  <span className={`donor-rank ${rankClass}`} aria-label={`Peringkat ${idx + 1}`}>{rankIcon}</span>
                   <div className="donor-info">
                     <div className="donor-name">{donor.creator_name || 'Anonim'}</div>
-                    {donor.support_message && <div className="donor-message">{donor.support_message}</div>}
+                    {donor.support_message && <div className="donor-message">"{donor.support_message}"</div>}
                   </div>
                   <div className="donor-amount">
-                    <div className="donor-quantity">{donor.quantity}x {donor.unit_name}</div>
+                    <div className="donor-quantity">{donor.quantity}× {donor.unit_name}</div>
                     <div className="donor-rupiah">Rp {(donor.amount || 0).toLocaleString('id-ID')}</div>
                   </div>
                 </div>
               );
             })}
+            <a href="https://teer.id/anrizz" target="_blank" rel="noopener noreferrer" className="donor-cta-row">
+              <span>☕ Trakteer MrFunk</span>
+              <span className="donor-cta-arrow">→</span>
+            </a>
           </div>
         </section>
       )}

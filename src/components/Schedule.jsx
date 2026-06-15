@@ -1,21 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { animeAPI } from '../services/api';
 import { SkeletonAnimeGrid } from './Skeleton';
 import AnimeCard from './AnimeCard';
 import ErrorPage from './ErrorPage';
 import './Schedule.css';
 
-const normalizeKey = (item) => 
+const DAY_ORDER = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+const normalizeKey = (item) =>
   (item.title || item.name || '').toString().toLowerCase().replace(/\s+/g, ' ').trim();
 
 const mergeScheduleLists = (list1, list2) => {
   const map = new Map();
-  
+
   list1.forEach((a) => {
     const key = normalizeKey(a);
     map.set(key, { ...a, providers: ['otakudesu'], provider: 'otakudesu' });
   });
-  
+
   list2.forEach((a) => {
     const key = normalizeKey(a);
     const existing = map.get(key);
@@ -25,7 +27,7 @@ const mergeScheduleLists = (list1, list2) => {
       map.set(key, { ...a, providers: ['samehadaku'], provider: 'samehadaku' });
     }
   });
-  
+
   return Array.from(map.values());
 };
 
@@ -33,6 +35,11 @@ const Schedule = () => {
   const [scheduleData, setScheduleData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeDay, setActiveDay] = useState(null);
+  const dayRefs = useRef({});
+  const tabsRef = useRef(null);
+
+  const todayName = DAY_ORDER[new Date().getDay()];
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -41,46 +48,62 @@ const Schedule = () => {
           animeAPI.getSchedule().catch(() => null),
           animeAPI.getScheduleSamehadaku().catch(() => null),
         ]);
-        
-        // Merge schedules from both providers
+
         const otakDays = Array.isArray(otakRes?.data) ? otakRes.data : [];
         const sameDays = Array.isArray(sameRes?.data?.schedule) ? sameRes.data.schedule : [];
-        
-        // Combine by day
+
         const dayMap = new Map();
-        const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        
+
         const processDay = (dayItem, provider) => {
-          const dayName = dayItem.day || dayNames[dayNames.indexOf(dayItem.day)];
+          const dayName = dayItem.day;
           const list = dayItem.anime_list ?? dayItem.animeList ?? dayItem.list ?? [];
-          
-          if (!dayMap.has(dayName)) {
-            dayMap.set(dayName, []);
-          }
-          
+          if (!dayName) return;
+          if (!dayMap.has(dayName)) dayMap.set(dayName, []);
           const merged = mergeScheduleLists(dayMap.get(dayName), list.map(a => ({ ...a, provider })));
           dayMap.set(dayName, merged);
         };
-        
+
         otakDays.forEach(d => processDay(d, 'otakudesu'));
         sameDays.forEach(d => processDay(d, 'samehadaku'));
-        
-        const mergedDays = Array.from(dayMap.entries()).map(([day, animeList]) => ({
-          day,
-          animeList,
-        }));
-        
+
+        const mergedDays = DAY_ORDER
+          .filter(d => dayMap.has(d))
+          .map(day => ({ day, animeList: dayMap.get(day) }));
+
+        // Also include any days not in DAY_ORDER
+        dayMap.forEach((list, day) => {
+          if (!DAY_ORDER.includes(day)) mergedDays.push({ day, animeList: list });
+        });
+
         setScheduleData({ data: mergedDays });
+
+        // Default active = today if present, else first day
+        const todayPresent = mergedDays.find(d => d.day === todayName);
+        setActiveDay(todayPresent ? todayName : (mergedDays[0]?.day ?? null));
       } catch (err) {
-        const msg = (err?.message ?? (typeof err?.toString === 'function' ? err.toString() : String(err))) || 'Gagal memuat jadwal';
+        const msg = (err?.message ?? String(err)) || 'Gagal memuat jadwal';
         setError(String(msg));
-        console.error('Schedule fetch error:', err);
       } finally {
         setLoading(false);
       }
     };
     fetchSchedule();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const scrollToDay = (dayName) => {
+    setActiveDay(dayName);
+    const el = dayRefs.current[dayName];
+    if (el) {
+      const offset = 80; // account for sticky tabs height
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+    // scroll tab into view
+    if (tabsRef.current) {
+      const btn = tabsRef.current.querySelector(`[data-day="${dayName}"]`);
+      btn?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  };
 
   if (loading) {
     return (
@@ -89,7 +112,12 @@ const Schedule = () => {
           <div className="skeleton skeleton-text" style={{ height: 40, width: 200 }} />
           <div className="skeleton skeleton-text" style={{ height: 20, width: 320, marginTop: 8 }} />
         </header>
-        <section className="schedule-section section section-neo">
+        <div className="schedule-tabs-skeleton">
+          {DAY_ORDER.map(d => (
+            <div key={d} className="skeleton" style={{ height: 36, width: 72, borderRadius: 8, flexShrink: 0 }} />
+          ))}
+        </div>
+        <section className="section section-neo">
           <SkeletonAnimeGrid count={6} />
         </section>
       </div>
@@ -102,32 +130,67 @@ const Schedule = () => {
         <ErrorPage
           title="Jadwal Tayang"
           message={`Gagal memuat jadwal: ${error}`}
-          hint="Server mungkin sedang bermasalah (mis. error 500). Coba lagi nanti."
+          hint="Server mungkin sedang bermasalah. Coba lagi nanti."
           onRetry={() => window.location.reload()}
         />
       </div>
     );
   }
 
-  // API returns { data: [ { day, anime_list: [ { title, slug, url, poster } ] }, ... ] }
-  const days = Array.isArray(scheduleData?.data) ? scheduleData.data : (scheduleData?.schedule ?? []);
-  const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const days = Array.isArray(scheduleData?.data) ? scheduleData.data : [];
 
   return (
     <div className="schedule-page main-container">
-      <header className="page-header schedule-hero section section-neo">
+      <header className="page-header schedule-hero">
         <h1 className="main-title text-gradient">Jadwal Tayang</h1>
-        <p className="subtitle">Anime yang tayang per hari</p>
+        <p className="subtitle">Anime yang tayang per hari — hari ini: <strong>{todayName}</strong></p>
       </header>
+
+      {/* Sticky day tabs */}
+      {days.length > 0 && (
+        <div className="schedule-tabs-wrapper" role="navigation" aria-label="Navigasi hari">
+          <div className="schedule-tabs" ref={tabsRef}>
+            {days.map((dayItem) => {
+              const isToday = dayItem.day === todayName;
+              const isActive = dayItem.day === activeDay;
+              const count = (dayItem.animeList ?? []).length;
+              return (
+                <button
+                  key={dayItem.day}
+                  type="button"
+                  data-day={dayItem.day}
+                  className={`schedule-tab${isActive ? ' active' : ''}${isToday ? ' today' : ''}`}
+                  onClick={() => scrollToDay(dayItem.day)}
+                  aria-pressed={isActive}
+                  aria-current={isToday ? 'date' : undefined}
+                >
+                  {isToday && <span className="schedule-tab-dot" aria-hidden="true" />}
+                  {dayItem.day}
+                  <span className="schedule-tab-count">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {days.length > 0 ? (
         days.map((dayItem, idx) => {
-          const dayName = dayItem.day ?? dayItem.day ?? `Day ${idx + 1}`;
+          const dayName = dayItem.day ?? `Day ${idx + 1}`;
           const list = dayItem.animeList ?? dayItem.anime_list ?? dayItem.anime ?? [];
+          const isToday = dayName === todayName;
           return (
-            <section key={`${dayName}-${idx}`} className="schedule-day-section section section-neo">
-              <div className="section-header section-header-neo">
-                <h2 className="section-title section-title-neo">{dayName}</h2>
+            <section
+              key={`${dayName}-${idx}`}
+              className={`schedule-day-section section section-neo${isToday ? ' schedule-day-section--today' : ''}`}
+              ref={el => { dayRefs.current[dayName] = el; }}
+            >
+              <div className="section-header section-header-neo schedule-section-header">
+                <h2 className="section-title section-title-neo">
+                  {isToday && <span className="schedule-today-badge" aria-label="Hari ini">HARI INI</span>}
+                  {dayName}
+                </h2>
+                <span className="schedule-day-count">{list.length} anime</span>
               </div>
               <div className="anime-grid">
                 {list.map((anime, i) => {
@@ -135,7 +198,7 @@ const Schedule = () => {
                   const hasOtak = providers.includes('otakudesu');
                   const hasSame = providers.includes('samehadaku');
                   const providerHint = hasOtak && hasSame ? 'Otakudesu & Samehadaku' : (hasSame ? 'Samehadaku' : 'Otakudesu');
-                  
+
                   return (
                     <AnimeCard
                       key={anime.animeId ?? anime.slug ?? i}
@@ -150,7 +213,9 @@ const Schedule = () => {
           );
         })
       ) : (
-        <div className="schedule-no-data no-data">Belum ada data jadwal.</div>
+        <div className="schedule-no-data empty-state" style={{ textAlign: 'center' }}>
+          <p>Belum ada data jadwal.</p>
+        </div>
       )}
     </div>
   );

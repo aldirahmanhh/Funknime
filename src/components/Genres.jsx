@@ -123,9 +123,15 @@ const Genres = () => {
 
   return (
     <div className="genres-page main-container">
-      <header className="page-header">
-        <h1 className="main-title text-gradient">Jelajahi Genre</h1>
-        <p className="subtitle">Temukan anime berdasarkan genre favorit</p>
+      <header className="page-header genres-hero">
+        <div className="genres-hero-copy">
+          <h1 className="main-title text-gradient">Jelajahi Genre</h1>
+          <p className="subtitle">
+            {genres.length > 0
+              ? `${genres.length} genre tersedia dari Otakudesu &amp; Samehadaku`
+              : 'Temukan anime berdasarkan genre favorit'}
+          </p>
+        </div>
       </header>
 
       {loading ? (
@@ -133,24 +139,39 @@ const Genres = () => {
       ) : (
         <>
           <div className="genres-grid">
-            {genres.map((genre, idx) => (
-              <button
-                key={idx}
-                type="button"
-                className={`genre-card ${selectedGenre === genre ? 'active' : ''}`}
-                onClick={() => handleGenreClick(genre)}
-                style={selectedGenre === genre ? { borderColor: 'var(--color-primary)', background: 'rgba(255,62,154,0.08)' } : {}}
-              >
-                <span>{genre.title || genre.name}</span>
-              </button>
-            ))}
+            {genres.map((genre, idx) => {
+              const hasBoth = genre.providers?.length > 1;
+              const isSelected = selectedGenre === genre;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`genre-card${isSelected ? ' active' : ''}`}
+                  onClick={() => handleGenreClick(genre)}
+                  aria-pressed={isSelected}
+                >
+                  <span className="genre-card-name">{genre.title || genre.name}</span>
+                  {hasBoth && <span className="genre-card-badge" aria-label="Tersedia di kedua provider">2P</span>}
+                </button>
+              );
+            })}
           </div>
 
           {selectedGenre && (
-            <section style={{ marginTop: 'var(--space-8)' }}>
-              <div className="section-header">
-                <h2 className="section-title">{selectedGenre.title}</h2>
-                <button type="button" className="btn btn-secondary" onClick={() => { setSelectedGenre(null); setAnimeByGenre([]); }} style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}>
+            <section className="genres-result-section">
+              <div className="section-header genres-result-header">
+                <div className="genres-result-title-group">
+                  <h2 className="section-title">{selectedGenre.title}</h2>
+                  <span className="genres-result-count">
+                    {genreLoading ? '…' : `${animeByGenre.length} anime`}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary genres-clear-btn"
+                  onClick={() => { setSelectedGenre(null); setAnimeByGenre([]); }}
+                  aria-label="Hapus filter genre"
+                >
                   ✕ Hapus
                 </button>
               </div>
@@ -158,7 +179,9 @@ const Genres = () => {
               {genreLoading ? (
                 <div className="loading-container"><div className="spinner" /><p>Memuat anime...</p></div>
               ) : animeByGenre.length === 0 ? (
-                <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '40px 0' }}>Tidak ada anime di genre ini.</p>
+                <div className="empty-state" style={{ textAlign: 'center' }}>
+                  <p>Tidak ada anime di genre <strong>{selectedGenre.title}</strong>.</p>
+                </div>
               ) : (
                 <div className="anime-grid">
                   {animeByGenre.map((anime, idx) => (
