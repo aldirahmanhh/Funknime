@@ -31,7 +31,11 @@ const AnimeCarousel = ({ items = [], maxItems = 8 }) => {
                   src={posterUrl}
                   alt={title}
                   className="carousel-img"
-                  loading={idx < 2 ? 'eager' : 'lazy'}
+                  loading={idx === 0 ? 'eager' : 'lazy'}
+                  decoding={idx === 0 ? 'sync' : 'async'}
+                  fetchPriority={idx === 0 ? 'high' : 'auto'}
+                  width={600}
+                  height={340}
                 />
                 <div className="carousel-gradient" />
                 <div className="carousel-content">

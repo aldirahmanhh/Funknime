@@ -21,50 +21,85 @@ const Home = () => {
   const [showDonatePopup, setShowDonatePopup] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    let cancelled = false;
+
+    // Phase 1: Fetch only what's above-the-fold (hero section)
+    const fetchCritical = async () => {
       try {
-        const [homeRes, sameOngoingRes, sameCompletedRes, scheduleRes, donghuaOngoingRes, donghuaCompletedRes] = await Promise.all([
-          animeAPI.getHome(),
-          animeAPI.getOngoingSamehadaku().catch(() => null),
-          animeAPI.getCompletedSamehadaku().catch(() => null),
-          animeAPI.getSchedule().catch(() => null),
-          animeAPI.getDonghuaOngoing(1).catch(() => null),
-          animeAPI.getDonghuaCompleted(1).catch(() => null),
-        ]);
+        const homeRes = await animeAPI.getHome();
+        if (cancelled) return;
 
         const otakOngoing = homeRes?.data?.ongoing?.animeList || [];
         const otakCompleted = homeRes?.data?.completed?.animeList || [];
-        const sameOngoing = sameOngoingRes?.data?.animeList || [];
-        const sameCompleted = sameCompletedRes?.data?.animeList || [];
 
-        setHomeData({
-          ongoing: mergeAnimeLists(otakOngoing, sameOngoing, 'Ongoing'),
-          completed: mergeAnimeLists(otakCompleted, sameCompleted, 'Completed'),
-        });
-        setDonghuaData({ ongoing: donghuaOngoingRes?.ongoing_donghua || [], completed: donghuaCompletedRes?.completed_donghua || [] });
-        if (scheduleRes?.data) setScheduleData(scheduleRes);
+        // Render immediately with Otakudesu data
+        setHomeData({ ongoing: otakOngoing, completed: otakCompleted });
+        setLoading(false);
+
+        // Phase 2: After first paint, merge in secondary providers + extras
+        requestIdleCallback(
+          () => {
+            if (!cancelled) fetchSecondary(otakOngoing, otakCompleted);
+          },
+          { timeout: 2000 },
+        );
       } catch (err) {
-        setError(err?.message ?? 'Gagal memuat data');
-      } finally {
+        if (!cancelled) setError(err?.message ?? 'Gagal memuat data');
         setLoading(false);
       }
     };
-    fetchData();
+
+    // Phase 2: Non-critical data — doesn't block first paint
+    const fetchSecondary = async (otakOngoing, otakCompleted) => {
+      const [sameOngoingRes, sameCompletedRes, scheduleRes, donghuaOngoingRes, donghuaCompletedRes] = await Promise.all([
+        animeAPI.getOngoingSamehadaku().catch(() => null),
+        animeAPI.getCompletedSamehadaku().catch(() => null),
+        animeAPI.getSchedule().catch(() => null),
+        animeAPI.getDonghuaOngoing(1).catch(() => null),
+        animeAPI.getDonghuaCompleted(1).catch(() => null),
+      ]);
+      if (cancelled) return;
+
+      const sameOngoing = sameOngoingRes?.data?.animeList || [];
+      const sameCompleted = sameCompletedRes?.data?.animeList || [];
+
+      setHomeData({
+        ongoing: mergeAnimeLists(otakOngoing, sameOngoing, 'Ongoing'),
+        completed: mergeAnimeLists(otakCompleted, sameCompleted, 'Completed'),
+      });
+      setDonghuaData({
+        ongoing: donghuaOngoingRes?.ongoing_donghua || [],
+        completed: donghuaCompletedRes?.completed_donghua || [],
+      });
+      if (scheduleRes?.data) setScheduleData(scheduleRes);
+    };
+
+    fetchCritical();
     setWatchHistory(getWatchHistory());
 
-    // Fetch Trakteer top donors via proxy
-    fetch('/api/trakteer?action=supports&limit=10&page=1')
-      .then(r => r.json())
-      .then(d => {
-        if (d?.result?.data) setTopDonors(d.result.data);
-      })
-      .catch(() => {
-        // ignore — Trakteer is non-critical
-      });
+    // Non-critical: Trakteer donors (deferred via idle callback)
+    const idleId = requestIdleCallback(
+      () => {
+        fetch('/api/trakteer?action=supports&limit=10&page=1')
+          .then((r) => r.json())
+          .then((d) => {
+            if (d?.result?.data) setTopDonors(d.result.data);
+          })
+          .catch(() => {});
+      },
+      { timeout: 5000 },
+    );
 
-    // Show donate popup on every visit (delay 2s for smooth UX)
-    const timer = setTimeout(() => setShowDonatePopup(true), 2000);
-    return () => clearTimeout(timer);
+    // Donate popup — delayed further on mobile for less disruption
+    const timer = setTimeout(() => {
+      if (!cancelled) setShowDonatePopup(true);
+    }, 4000);
+
+    return () => {
+      cancelled = true;
+      cancelIdleCallback(idleId);
+      clearTimeout(timer);
+    };
   }, []);
 
   if (loading) {

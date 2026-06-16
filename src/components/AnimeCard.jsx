@@ -51,7 +51,7 @@ const AnimeCard = ({ anime, index = 0, innerRef, statusOverride, providerHint })
             {isCompletedBadge ? 'Completed' : 'Ongoing'}
           </span>
         )}
-        <img src={posterUrl} alt={title} className="poster" loading="lazy" />
+        <img src={posterUrl} alt={title} className="poster" loading="lazy" decoding="async" width={200} height={280} />
         <div className="card-overlay">
           <span className="play-icon" aria-hidden>▶</span>
         </div>

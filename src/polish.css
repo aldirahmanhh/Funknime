@@ -622,6 +622,70 @@ a:hover { color: var(--color-primary-light); }
   .az-letter-btn { width: 32px; height: 32px; font-size: var(--text-xs); }
 }
 
+/* ======== Performance: CLS Prevention ========== */
+
+/* Poster card wrappers — fixed aspect ratio prevents layout shift */
+.card-image-wrapper {
+  aspect-ratio: 5 / 7;
+  overflow: hidden;
+  contain: layout style paint;
+}
+
+.card-image-wrapper .poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Carousel slide — fixed dimensions */
+.carousel-slide {
+  contain: layout style paint;
+}
+
+.carousel-img {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Anime grid — stable layout during skeleton → content swap */
+.anime-grid {
+  contain: layout style;
+}
+
+/* ======== Performance: Skip off-screen rendering ========== */
+.home-rail:nth-child(n+3) {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 400px;
+}
+
+@media (max-width: 768px) {
+  .home-rail:nth-child(n+2) {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 300px;
+  }
+}
+
+/* ======== Font metric fallbacks — reduce CLS from font swap ========== */
+@font-face {
+  font-family: 'Space Grotesk Fallback';
+  src: local('Arial');
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  size-adjust: 105%;
+}
+
+@font-face {
+  font-family: 'Outfit Fallback';
+  src: local('Arial');
+  ascent-override: 100%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+  size-adjust: 103%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
