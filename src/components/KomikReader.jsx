@@ -14,18 +14,18 @@ const KOMIKU_HOSTS = ['img.komiku.org', 'thumbnail.komiku.org', 'komiku.org'];
  * Route komiku.org images through server-side proxy to bypass hotlink protection.
  * Falls back to direct URL if first attempt fails (proxy may block CORS).
  */
-let failedProxyAttempts = new WeakSet(); // Track which proxied URLs failed
-
 const proxyImg = (url) => {
   if (!url) return url;
   if (typeof url !== 'string') return url;
   
   let needsProxy = false;
-  try {
-    const testUrl = !url.startsWith('http') ? `https://${url}` : url;
-    const { hostname } = new URL(testUrl);
-    needsProxy = KOMIKU_HOSTS.some(h => hostname === h || hostname.endsWith(`.${h}`));
-  } catch {}
+   try {
+     const testUrl = !url.startsWith('http') ? `https://${url}` : url;
+     const { hostname } = new URL(testUrl);
+     needsProxy = KOMIKU_HOSTS.some(h => hostname === h || hostname.endsWith(`.${h}`));
+   } catch {
+     // Ignore invalid URLs — will return original url unchanged
+   }
   
   return needsProxy ? `/api/img-proxy?url=${encodeURIComponent(url)}` : url;
 };
