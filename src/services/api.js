@@ -1,7 +1,10 @@
 // Dev-only logger. Stripped/silent in production.
-const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV;
+const isDev = import.meta.env?.DEV ?? false;
 const devLog = (...args) => { if (isDev) console.log(...args); };
 const devError = (...args) => { if (isDev) console.error(...args); };
+// Always-log helpers for debugging production issues
+export const logInfo = (...args) => console.info(...args);
+export const logError = (...args) => console.error(...args);
 
 const API_BASE_URL = 'https://www.sankavollerei.web.id/anime';
 
@@ -213,7 +216,7 @@ export const clearCachePattern = (pattern) => {
 };
 
 // Enhanced API fetching with smart cache, global rate limit, and request queue
-const fetchAnime = async (endpoint, provider = 'default', { priority = false, signal } = {}) => {
+const fetchAnime = async (endpoint, _provider = 'default', { priority = false, signal } = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
 
   // Abort early if caller already cancelled
@@ -811,4 +814,288 @@ export const animeAPI = {
     return fetchAnime(`/donghua/seasons/${year}`, 'donghua');
   },
 
+};
+
+// ═══════════════════════════════════════════════════════
+// COMIC API — same Sanka domain, /comic namespace
+// Reuses cache + rate limiter infra. Base path differs from anime.
+// ═══════════════════════════════════════════════════════
+const COMIC_BASE_URL = 'https://www.sankavollerei.web.id/comic';
+
+const fetchComic = async (endpoint, { priority = false, signal } = {}) => {
+  const url = `${COMIC_BASE_URL}${endpoint}`;
+
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+
+  const cachedData = getFromCache(url);
+  if (cachedData) return cachedData;
+
+  if (isRateLimited()) await waitForRateLimit();
+
+  const doFetch = async () => {
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    const cached2 = getFromCache(url);
+    if (cached2) return cached2;
+    trackRequest();
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal,
+      });
+
+      const contentType = response.headers.get('content-type') || '';
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          await new Promise(r => setTimeout(r, 3000));
+          const retry = await fetch(url, { headers: { 'Accept': 'application/json' }, signal });
+          if (retry.ok) {
+            const retryData = await retry.json();
+            setCache(url, retryData);
+            return retryData;
+          }
+          throw new APIError('Server rate limit. Coba lagi dalam beberapa detik.', 429);
+        }
+
+        let parsed = null;
+        if (contentType.includes('application/json')) {
+          try { parsed = await response.json(); } catch { /* ignore */ }
+        }
+
+        if (response.status === 404) {
+          throw new APIError('Komik atau chapter tidak ditemukan', 404);
+        }
+
+        if (parsed && typeof parsed === 'object') return parsed;
+
+        throw new APIError(`Server error: ${response.status}`, response.status);
+      }
+
+      const data = await response.json();
+      setCache(url, data);
+      return data;
+    } catch (error) {
+      if (error?.name === 'AbortError') throw error;
+      if (error instanceof APIError) throw error;
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new Error('Gagal terhubung ke server. Periksa koneksi internet.');
+      }
+      throw error;
+    }
+  };
+
+  if (priority) return doFetch();
+  return enqueue(doFetch);
+};
+
+// Extract slug from inconsistent link/href fields across comic endpoints.
+// Examples: "/manga/solo-leveling/" → "solo-leveling"
+//           "https://komiku.org/manga/slug/" → "slug"
+//           "/detail-komik/slug/" → "slug"
+const extractComicSlug = (link) => {
+  if (!link || typeof link !== 'string') return null;
+  const cleaned = link.split('?')[0].split('#')[0].replace(/^https?:\/\/[^/]+/, '');
+  const parts = cleaned.split('/').filter(Boolean);
+  // last non-empty segment
+  return parts[parts.length - 1] ?? null;
+};
+
+// Normalize the inconsistent comic list/search response into a flat card shape.
+const normalizeComicItem = (item) => {
+  if (!item || typeof item !== 'object') return null;
+  const link = item.link ?? item.href ?? '';
+  const slug = item.slug ?? extractComicSlug(link) ?? '';
+  return {
+    slug,
+    title: item.title ?? item.name ?? 'Untitled',
+    poster: item.image ?? item.thumbnail ?? item.poster ?? '',
+    image: item.image ?? item.thumbnail ?? item.poster ?? '',
+    link,
+    chapter: item.chapter ?? null,
+    time_ago: item.time_ago ?? item.date ?? null,
+    type: item.type ?? null,
+    genre: item.genre ?? null,
+    description: item.description ?? null,
+    altTitle: item.altTitle ?? null,
+    provider: 'comic',
+  };
+};
+
+export const comicAPI = {
+  // Latest comics (terbaru)
+  getComicTerbaru: async (page = 1, { signal } = {}) => {
+    const data = await fetchComic(`/terbaru?page=${page}`, { signal });
+    const comics = (data?.comics ?? []).map(normalizeComicItem).filter(Boolean);
+    return {
+      comics,
+      pagination: data?.pagination ?? null,
+      hasMore: data?.pagination?.has_more ?? (comics.length > 0),
+      raw: data,
+    };
+  },
+
+  // Popular comics
+  getComicPopuler: async ({ signal } = {}) => {
+    const data = await fetchComic('/populer', { signal });
+    const comics = (data?.comics ?? []).map(normalizeComicItem).filter(Boolean);
+    return { comics, raw: data };
+  },
+
+  // Search comics
+  searchComics: async (query, { signal } = {}) => {
+    const q = encodeURIComponent(query);
+    const data = await fetchComic(`/search?q=${q}`, { signal });
+    const comics = (data?.data ?? []).map(normalizeComicItem).filter(Boolean);
+    return {
+      comics,
+      total: data?.total ?? comics.length,
+      raw: data,
+    };
+  },
+
+  // Comic detail + chapter list
+  getComicDetail: async (slug, { signal } = {}) => {
+    return fetchComic(`/comic/${slug}`, { signal });
+  },
+
+  // Read chapter (images + navigation already embedded)
+  // Chapter API can be slow — retry once with backoff before giving up.
+  getComicChapter: async (slug, { signal } = {}) => {
+    const attemptFetch = () => fetchComic(`/chapter/${slug}`, { signal, priority: true });
+    try {
+      return await attemptFetch();
+    } catch (err) {
+      // Retry once on non-abort, non-404 failures (server timeout / 5xx)
+      if (err?.name === 'AbortError') throw err;
+      const status = err?.status ?? err?.statusCode ?? 0;
+      if (status === 404) throw err;
+      // Back-off 2s then retry
+      await new Promise(r => setTimeout(r, 2000));
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+      return attemptFetch();
+    }
+  },
+
+  // All genres (response is object-indexed, normalize to array)
+  getComicGenres: async () => {
+    const data = await fetchComic('/genres');
+    if (!data || typeof data !== 'object') return [];
+    return Object.values(data)
+      .filter(v => v && typeof v === 'object' && v.value)
+      .map(g => ({ value: g.value, name: g.name ?? g.value }));
+  },
+
+  // Comics by genre
+  getComicByGenre: async (genre, page = 1) => {
+    const data = await fetchComic(`/genre/${genre}?page=${page}`);
+    const comics = (data?.comics ?? data?.data ?? []).map(normalizeComicItem).filter(Boolean);
+    return {
+      comics,
+      hasMore: data?.pagination?.has_more ?? (comics.length > 0),
+      raw: data,
+    };
+  },
+
+  // Comics by type (manga/manhwa/manhua)
+  getComicByType: async (type, page = 1) => {
+    const data = await fetchComic(`/type/${type}?page=${page}`);
+    const comics = (data?.comics ?? data?.data ?? []).map(normalizeComicItem).filter(Boolean);
+    return {
+      comics,
+      hasMore: data?.pagination?.has_more ?? (comics.length > 0),
+      raw: data,
+    };
+  },
+
+  // Homepage aggregation (popular + latest + ranking)
+  getComicHomepage: async () => {
+    return fetchComic('/homepage');
+  },
+
+  // Random comics
+  getComicRandom: async () => {
+    const data = await fetchComic('/random');
+    const comics = (data?.comics ?? data?.data ?? []).map(normalizeComicItem).filter(Boolean);
+    return { comics, raw: data };
+  },
+
+  // Chapter navigation (prev/next/chapter-list for a given chapter slug)
+  getComicChapterNavigation: async (slug, { signal } = {}) => {
+    const data = await fetchComic(`/chapter/${slug}/navigation`, { signal });
+    return {
+      currentChapter: data?.currentChapter ?? null,
+      previousChapter: data?.previousChapter ?? null,
+      nextChapter: data?.nextChapter ?? null,
+      chapterList: data?.chapterList ?? null,
+      raw: data,
+    };
+  },
+
+  // Trending comics (timeframe: today/week/month — optional)
+  getComicTrending: async (timeframe) => {
+    const tf = timeframe ? `?timeframe=${encodeURIComponent(timeframe)}` : '';
+    const data = await fetchComic(`/trending${tf}`);
+    const comics = (data?.trending ?? []).map(normalizeComicItem).filter(Boolean);
+    return {
+      comics,
+      timeframe: data?.timeframe ?? timeframe ?? null,
+      count: data?.count ?? comics.length,
+      raw: data,
+    };
+  },
+
+  // Browse with multi-filter (type/order/genre/page)
+  getComicBrowse: async ({ type, order, genre, page = 1 } = {}) => {
+    const params = new URLSearchParams();
+    if (type) params.set('type', type);
+    if (order) params.set('order', order);
+    if (genre) params.set('genre', genre);
+    params.set('page', page);
+    const data = await fetchComic(`/browse?${params.toString()}`);
+    const comics = (data?.comics ?? []).map(normalizeComicItem).filter(Boolean);
+    return {
+      comics,
+      filters: data?.filters ?? { type, order, genre },
+      hasMore: data?.pagination?.has_more ?? (comics.length > 0),
+      pagination: data?.pagination ?? null,
+      raw: data,
+    };
+  },
+
+  // Recommendations (based_on popular_comics)
+  getComicRecommendations: async () => {
+    const data = await fetchComic('/recommendations');
+    const comics = (data?.recommendations ?? []).map(normalizeComicItem).filter(Boolean);
+    return {
+      comics,
+      basedOn: data?.based_on ?? null,
+      count: data?.count ?? comics.length,
+      raw: data,
+    };
+  },
+
+  // Advanced search with multi-filter
+  getComicAdvancedSearch: async ({ query, type, genre, status, year, sort, page = 1 } = {}) => {
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (type) params.set('type', type);
+    if (genre) params.set('genre', genre);
+    if (status) params.set('status', status);
+    if (year) params.set('year', year);
+    if (sort) params.set('sort', sort);
+    params.set('page', page);
+    const data = await fetchComic(`/advanced-search?${params.toString()}`);
+    const comics = (data?.comics ?? []).map(normalizeComicItem).filter(Boolean);
+    return {
+      comics,
+      query: data?.query ?? query ?? null,
+      filters: data?.filters ?? { type, status, genre, year, sort },
+      total: data?.pagination?.total ?? comics.length,
+      hasMore: data?.pagination?.has_more ?? (comics.length > 0),
+      pagination: data?.pagination ?? null,
+      raw: data,
+    };
+  },
 };

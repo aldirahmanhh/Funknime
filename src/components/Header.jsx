@@ -7,6 +7,8 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
 
+  // Reset UI state on navigation - legitimate use of setState in effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileMenuOpen(false); setOpenDropdown(null); }, [location.pathname]);
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
@@ -29,6 +31,7 @@ const Header = () => {
       { to: '/donghua-genres', label: 'Genres' },
       { to: '/donghua-az', label: 'A-Z List' },
     ]},
+    { to: '/komik', label: 'Komik' },
     { to: '/genres', label: 'Genres' },
     { to: '/schedule', label: 'Schedule' },
     { to: '/history', label: 'History' },

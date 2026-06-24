@@ -22,7 +22,9 @@ export const getWatchHistory = () => {
 const _save = (history) => {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-  } catch {}
+  } catch {
+    // Ignore localStorage errors (quota, privacy mode)
+  }
 };
 
 /**
@@ -57,7 +59,9 @@ export const addToWatchHistory = (item) => {
     }
 
     _save(history.slice(0, MAX_ITEMS));
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 };
 
 /**
@@ -75,7 +79,9 @@ export const updateWatchProgress = (episodeId, currentTime, duration) => {
       history[idx].lastWatched = Date.now();
       _save(history);
     }
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 };
 
 /**

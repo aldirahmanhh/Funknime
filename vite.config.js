@@ -6,6 +6,14 @@ export default defineConfig({
   plugins: [react()],
   server: {
     historyApiFallback: true,
+    proxy: {
+      '/api': {
+        target: 'https://www.mrfunk.my.id',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path,
+      },
+    },
   },
   preview: {
     historyApiFallback: true,

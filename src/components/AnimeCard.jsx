@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const normalizeAnime = (anime, index = 0) => {
   const animeId = anime.animeId ?? anime.slug ?? anime.id;
   const title = anime.title ?? anime.name ?? `Anime ${index + 1}`;
@@ -72,4 +73,5 @@ const AnimeCard = ({ anime, index = 0, innerRef, statusOverride, providerHint })
 };
 
 export default AnimeCard;
+// eslint-disable-next-line react-refresh/only-export-components
 export { normalizeAnime as normalizeAnimeExport };

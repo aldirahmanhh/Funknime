@@ -83,14 +83,18 @@ const Genres = () => {
           const res = await animeAPI.getAnimeByGenre(genre.otakSlug, 'otakudesu');
           const list = res?.data?.animeList ?? res?.animeList ?? [];
           list.forEach((a) => results.push({ ...a, provider: 'otakudesu', providers: ['otakudesu'] }));
-        } catch {}
+        } catch {
+          // Ignore API errors
+        }
       }
       if (genre.sameId) {
         try {
           const res = await animeAPI.getAnimeByGenre(genre.sameId, 'samehadaku');
           const list = res?.data?.animeList ?? res?.animeList ?? [];
           list.forEach((a) => results.push({ ...a, provider: 'samehadaku', providers: ['samehadaku'] }));
-        } catch {}
+        } catch {
+          // Ignore API errors
+        }
       }
 
       const normKey = (item) => (item.title || item.name || '').toString().toLowerCase().replace(/\s+/g, '').trim();

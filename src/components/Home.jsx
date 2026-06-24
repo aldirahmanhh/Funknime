@@ -16,7 +16,7 @@ const Home = () => {
   const [scheduleData, setScheduleData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [watchHistory, setWatchHistory] = useState([]);
+  const [watchHistory] = useState(() => getWatchHistory());
   const [topDonors, setTopDonors] = useState([]);
   const [showDonatePopup, setShowDonatePopup] = useState(false);
 
@@ -75,7 +75,6 @@ const Home = () => {
     };
 
     fetchCritical();
-    setWatchHistory(getWatchHistory());
 
     // Non-critical: Trakteer donors (deferred via idle callback)
     const idleId = requestIdleCallback(

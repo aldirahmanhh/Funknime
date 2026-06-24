@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react';
-
 const SkeletonAnimeCard = () => {
   return (
     <div className="anime-card skeleton">

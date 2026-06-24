@@ -145,7 +145,9 @@ const Watch = () => {
             if (cancelled) return;
             setAnimeData(animeRes?.data || null);
             addToWatchHistory({ animeId: animeRes?.data?.animeId || normalized.animeId, episodeId, animeTitle: animeRes?.data?.title || normalized.title || episodeId, episodeTitle: normalized.title || episodeId, poster: animeRes?.data?.poster || animeRes?.data?.poster_url || '', provider: usedProvider || 'otakudesu' });
-          } catch {}
+          } catch {
+            // Ignore history save errors
+          }
         }
       } catch (err) {
         if (!cancelled) setError(err?.message ?? String(err));
@@ -202,7 +204,9 @@ const Watch = () => {
               vid.currentTime = Math.max(0, lastPos - 2); // seek back 2s for safety
               vid.play().catch(() => {});
             }, { once: true });
-          } catch {}
+          } catch {
+            // Ignore video seek errors
+          }
         }, 1000);
       } else {
         // After 3 retries, fallback to iframe
@@ -260,14 +264,16 @@ const Watch = () => {
         } else {
           screen.orientation?.unlock?.();
         }
-      } catch {}
+      } catch {
+        // Ignore orientation lock errors
+      }
     };
     document.addEventListener('fullscreenchange', onFullscreenChange);
     document.addEventListener('webkitfullscreenchange', onFullscreenChange);
     return () => {
       document.removeEventListener('fullscreenchange', onFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
-      try { screen.orientation?.unlock?.(); } catch {}
+      try { screen.orientation?.unlock?.(); } catch { /* ignore */ }
     };
   }, []);
 

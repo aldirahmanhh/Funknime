@@ -42,3 +42,9 @@ NEOBRUTALISM_REDESIGN.md
 UI_UX_IMPROVEMENTS.md
 VERCEL_404_FIX.md
 anime_rest_api_docs.md
+
+# JCE context index runtime state
+.opencode-jce/context/
+
+.vercel
+.env*

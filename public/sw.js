@@ -36,7 +36,6 @@ self.addEventListener('activate', (event) => {
 });
 
 // Helpers
-const isHashedAsset = (url) => /\/assets\/.+\.[a-f0-9]{8,}\.\w+$/i.test(url.pathname);
 const isStaticExt = (pathname) =>
   /\.(js|mjs|css|png|jpg|jpeg|svg|gif|webp|woff2?)$/i.test(pathname);
 

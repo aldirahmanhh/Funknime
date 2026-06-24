@@ -1,13 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getWatchHistory, clearWatchHistory, formatTime } from '../utils/watchHistory';
 
 const WatchHistory = () => {
-  const [history, setHistory] = useState([]);
-
-  useEffect(() => {
-    setHistory(getWatchHistory());
-  }, []);
+  const [history, setHistory] = useState(() => getWatchHistory());
 
   const handleClear = () => {
     clearWatchHistory();
