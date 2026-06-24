@@ -31,7 +31,6 @@ const Header = () => {
       { to: '/donghua-genres', label: 'Genres' },
       { to: '/donghua-az', label: 'A-Z List' },
     ]},
-    { to: '/komik', label: 'Komik' },
     { to: '/genres', label: 'Genres' },
     { to: '/schedule', label: 'Schedule' },
     { to: '/history', label: 'History' },

@@ -1,0 +1,18 @@
+{
+  "updatedAt": "2026-06-24T12:37:38.032Z",
+  "changedFiles": [
+    "src/services/api.js",
+    "src/components/Komik.jsx",
+    "api/img-proxy.js"
+  ],
+  "verification": [
+    "npm run build — exit 0, 393 modules transformed in 2.01s",
+    "npm run lint — 4 errors (all pre-existing), 4 warnings (all pre-existing)"
+  ],
+  "blockers": [],
+  "nextSteps": [
+    "Monitor for any komikstation detail endpoint becoming available (currently always 404)",
+    "Watch for remaining 404 endpoints: latest, populer, homepage — need fallback logic if backend adds them",
+    "KomikDetail and KomikReader components need no further changes based on current API shapes"
+  ]
+}

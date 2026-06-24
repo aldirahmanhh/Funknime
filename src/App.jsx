@@ -28,10 +28,6 @@ const Genres = lazy(() => import('./components/Genres'))
 const AZList = lazy(() => import('./components/AZList'))
 const Schedule = lazy(() => import('./components/Schedule'))
 const WatchHistory = lazy(() => import('./components/WatchHistory'))
-const Komik = lazy(() => import('./components/Komik'))
-const KomikDetail = lazy(() => import('./components/KomikDetail'))
-const KomikReader = lazy(() => import('./components/KomikReader'))
-const KomikGenreFilter = lazy(() => import('./components/KomikGenreFilter'))
 
 const RouteFallback = () => (
   <div className="loading-container main-container" role="status" aria-live="polite">
@@ -78,10 +74,6 @@ function App() {
                 <Route path="/anime/:animeId" element={<AnimeDetail />} />
                 <Route path="/anime/:provider/:animeId" element={<AnimeDetail />} />
                 <Route path="/watch/:episodeId" element={<Watch />} />
-                <Route path="/komik" element={<Komik />} />
-                <Route path="/komik-genre/:slug" element={<KomikGenreFilter />} />
-                <Route path="/komik/read/:chapterSlug" element={<KomikReader />} />
-                <Route path="/komik/:slug" element={<KomikDetail />} />
               </Routes>
             </Suspense>
           </ErrorBoundary>

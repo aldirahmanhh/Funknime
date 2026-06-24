@@ -1,0 +1,53 @@
+- generic [ref=e2]:
+  - link "Lewati ke konten" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - navigation "Main navigation" [ref=e6]:
+        - link "MrFunk MrFunk" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - img "MrFunk" [ref=e9]
+          - generic [ref=e10]: MrFunk
+        - navigation [ref=e11]:
+          - link "Home" [ref=e12] [cursor=pointer]:
+            - /url: /
+          - button "Anime ▾" [ref=e14] [cursor=pointer]:
+            - text: Anime
+            - generic [ref=e15]: ▾
+          - button "Donghua ▾" [ref=e17] [cursor=pointer]:
+            - text: Donghua
+            - generic [ref=e18]: ▾
+          - link "Komik" [ref=e19] [cursor=pointer]:
+            - /url: /komik
+          - link "Genres" [ref=e20] [cursor=pointer]:
+            - /url: /genres
+          - link "Schedule" [ref=e21] [cursor=pointer]:
+            - /url: /schedule
+          - link "History" [ref=e22] [cursor=pointer]:
+            - /url: /history
+        - link "Cari" [ref=e24] [cursor=pointer]:
+          - /url: /search
+          - text: 🔍
+    - button "Toggle theme selector" [ref=e26] [cursor=pointer]: 🌙
+    - generic [ref=e31]:
+      - img "MrFunk" [ref=e32]
+      - generic [ref=e33]:
+        - generic [ref=e34]: Install MrFunk
+        - generic [ref=e35]: Akses lebih cepat, nonton tanpa buka browser
+      - button "Install" [ref=e36] [cursor=pointer]
+      - button "Tutup" [ref=e37] [cursor=pointer]: ✕
+    - main [ref=e27]:
+      - generic [ref=e38]:
+        - generic [ref=e40]:
+          - heading "Komik" [level=1] [ref=e41]:
+            - generic [ref=e42]: 📚
+            - text: Komik
+          - paragraph [ref=e43]: Manga · Manhwa · Manhua
+        - tablist "Filter komik" [ref=e44]:
+          - tab "🕐 Terbaru" [selected] [ref=e45] [cursor=pointer]
+          - tab "🔥 Populer" [ref=e46] [cursor=pointer]
+        - tabpanel "🕐 Terbaru" [ref=e47]:
+          - generic [ref=e48]:
+            - paragraph [ref=e49]: Tidak ada komik saat ini.
+            - link "Kembali ke Beranda" [ref=e50] [cursor=pointer]:
+              - /url: /
