@@ -910,8 +910,8 @@ const normalizeComicItem = (item) => {
   return {
     slug,
     title: item.title ?? item.name ?? 'Untitled',
-    poster: item.image ?? item.thumbnail ?? item.poster ?? '',
-    image: item.image ?? item.thumbnail ?? item.poster ?? '',
+    poster: item.cover ?? item.image ?? item.thumbnail ?? item.poster ?? '',
+    image: item.cover ?? item.image ?? item.thumbnail ?? item.poster ?? '',
     link,
     chapter: item.chapter ?? null,
     time_ago: item.time_ago ?? item.date ?? null,
