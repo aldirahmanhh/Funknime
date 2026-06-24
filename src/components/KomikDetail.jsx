@@ -7,7 +7,7 @@ import './KomikDetail.css';
  * Route komiku.org image URLs through the server-side proxy to bypass
  * hotlink protection.
  */
-const KOMIKU_HOSTS = ['img.komiku.org', 'thumbnail.komiku.org', 'komiku.org'];
+const KOMIKU_HOSTS = ['img.komiku.org', 'thumbnail.komiku.org', 'komiku.org', 'komikstation.org'];
 const proxyImg = (url) => {
   if (!url) return url;
   if (isDev) return url;
@@ -92,7 +92,7 @@ const KomikDetail = () => {
 
   // ── Data extraction (defensive — Bacakomik structure) ──
   const title = detail.title ?? 'Unknown Title';
-  const poster = detail.cover ?? detail.image ?? '';
+  const poster = detail.cover ?? detail.image ?? detail.imageSrc ?? '';
   const synopsis = detail.synopsis ?? 'Sinopsis tidak tersedia.';
   const status = detail.status ?? null;
   const type = detail.type ?? null;

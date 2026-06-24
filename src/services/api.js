@@ -957,10 +957,12 @@ export const comicAPI = {
 
   // Comic detail + chapter list
   getComicDetail: async (slug, { signal } = {}) => {
-    const data = await fetchComic(`/detail/${slug}`, { signal });
-    // Bacakomik returns nested: { detail: { ..., chapters: [...] }}
+    const data = await fetchComic(`/manga/${slug}`, { signal });
+    // Komikstation returns flat response (no detail wrapper) with fields:
+    // title, alternative, imageSrc, status, rating, synopsis, type, author,
+    // updatedOn, genres: [{name, slug}], chapters: [{title, slug, date}]
     return {
-      ...data.detail,
+      ...data,
       provider: 'comic',
     };
   },
