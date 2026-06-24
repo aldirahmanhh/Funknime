@@ -15,25 +15,24 @@ import { readFileSync } from 'fs';
 // Allowlist: proxy images from known domains
 // Expanded to handle potential API changes (new image CDNs, mirrors, etc.)
 const ALLOWED_HOSTS = new Set([
-  // komiku.org (original)
+  // komiku.org (legacy, kept for compatibility)
   'img.komiku.org',
   'thumbnail.komiku.org',
   'komiku.org',
-  // Potential alternatives (CDNs, mirrors, or new API hosts)
   'cdn.komiku.org',
   'images.komiku.org',
   'static.komiku.org',
   'i.komiku.org',
-  // Live production host (confirmed via user report)
   's2.komiku.org',
-  // Other common manga/comic hosts
+  'cdn-img.komiku.org',
+  'imgcdn.komiku.org',
+  // Other manga/comic hosts
   'mangakakalot.com',
   'images.mangakakalot.com',
   'img.manganelo.com',
   'chap.manganelo.com',
-  // Generic CDN patterns (in case API switched providers)
-  'cdn-img.komiku.org',
-  'imgcdn.komiku.org',
+  // BacaKomik (active provider)
+  'bacakomik.xyz',
 ]);
 
 // Max response size to stream (10 MB safety cap)
