@@ -820,7 +820,7 @@ export const animeAPI = {
 // COMIC API — same Sanka domain, /comic namespace
 // Reuses cache + rate limiter infra. Base path differs from anime.
 // ═══════════════════════════════════════════════════════
-const COMIC_BASE_URL = 'https://www.sankavollerei.web.id/comic/bacakomik';
+const COMIC_BASE_URL = 'https://www.sankavollerei.web.id/comic/komikstation';
 
 const fetchComic = async (endpoint, { priority = false, signal } = {}) => {
   const url = `${COMIC_BASE_URL}${endpoint}`;
@@ -903,6 +903,7 @@ const extractComicSlug = (link) => {
 };
 
 // Normalize the inconsistent comic list/search response into a flat card shape.
+// Supports both bacakomik (cover/image/thumbnail) and komikstation (imageSrc) field names.
 const normalizeComicItem = (item) => {
   if (!item || typeof item !== 'object') return null;
   const link = item.link ?? item.href ?? '';
@@ -910,10 +911,10 @@ const normalizeComicItem = (item) => {
   return {
     slug,
     title: item.title ?? item.name ?? 'Untitled',
-    poster: item.cover ?? item.image ?? item.thumbnail ?? item.poster ?? '',
-    image: item.cover ?? item.image ?? item.thumbnail ?? item.poster ?? '',
+    poster: item.cover ?? item.image ?? item.imageSrc ?? item.thumbnail ?? item.poster ?? '',
+    image: item.cover ?? item.image ?? item.imageSrc ?? item.thumbnail ?? item.poster ?? '',
     link,
-    chapter: item.chapter ?? null,
+    chapter: item.latestChapter ?? item.chapter ?? null,
     time_ago: item.time_ago ?? item.date ?? null,
     type: item.type ?? null,
     genre: item.genre ?? null,
@@ -924,29 +925,29 @@ const normalizeComicItem = (item) => {
 };
 
 export const comicAPI = {
-  // Latest comics (terbaru)
+  // Latest comics (terbaru) — komikstation uses /list endpoint
   getComicTerbaru: async (page = 1, { signal } = {}) => {
-    const data = await fetchComic(`/latest?page=${page}`, { signal });
-    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
+    const data = await fetchComic(`/list${page > 1 ? `?page=${page}` : ''}`, { signal });
+    const comics = (data?.results ?? []).map(normalizeComicItem).filter(Boolean);
     return {
       comics,
-      hasMore: data?.hasNextPage ?? (comics.length > 0),
+      hasMore: data?.pagination?.hasNextPage ?? (comics.length > 0),
       raw: data,
     };
   },
 
-  // Popular comics
+  // Popular comics — komikstation only has /list, no separate populer endpoint
   getComicPopuler: async ({ signal } = {}) => {
-    const data = await fetchComic('/populer', { signal });
-    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
+    const data = await fetchComic('/list', { signal });
+    const comics = (data?.results ?? []).map(normalizeComicItem).filter(Boolean);
     return { comics, raw: data };
   },
 
-  // Search comics
+  // Search comics — komikstation uses path param, not query string
   searchComics: async (query, { signal } = {}) => {
     const q = encodeURIComponent(query);
-    const data = await fetchComic(`/search?q=${q}`, { signal });
-    const comics = (data?.data ?? []).map(normalizeComicItem).filter(Boolean);
+    const data = await fetchComic(`/search/${q}`, { signal });
+    const comics = (data?.seriesList ?? []).map(normalizeComicItem).filter(Boolean);
     return {
       comics,
       total: data?.total ?? comics.length,
@@ -966,8 +967,21 @@ export const comicAPI = {
 
   // Read chapter (images + navigation already embedded)
   // Chapter API can be slow — retry once with backoff before giving up.
+  // Normalizes komikstation format (flat prevSlug/nextSlug) to bacakomik format (navigation wrapper)
+  // so the reader component doesn't need provider-specific logic.
   getComicChapter: async (slug, { signal } = {}) => {
-    return fetchComic(`/chapter/${slug}`, { signal, priority: true });
+    const data = await fetchComic(`/chapter/${slug}`, { signal, priority: true });
+    // Komikstation returns prevSlug/nextSlug at root level instead of navigation wrapper
+    if (data && !data.navigation) {
+      const chList = Array.isArray(data.chapterList) ? data.chapterList : null;
+      data.navigation = {
+        previousChapter: data.prevSlug ?? null,
+        nextChapter: data.nextSlug ?? null,
+        // chapterList is an array of {title,slug} in komikstation — convert to slug string or null
+        chapterList: Array.isArray(chList) ? null : (chList ?? null),
+      };
+    }
+    return data;
   },
 
   // All genres (response is object-indexed, normalize to array)

@@ -33,6 +33,8 @@ const ALLOWED_HOSTS = new Set([
   'chap.manganelo.com',
   // BacaKomik (active provider)
   'bacakomik.xyz',
+  // Komikstation — chapter images hosted on klikcdn
+  'img.klikcdn.com',
 ]);
 
 // Max response size to stream (10 MB safety cap)
