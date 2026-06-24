@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { comicAPI } from '../services/api';
-import { logError } from '../services/api';
+import { logError, logInfo } from '../services/api';
 import { SkeletonAnimeGrid } from './Skeleton';
 import './Komik.css';
 
