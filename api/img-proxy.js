@@ -24,6 +24,8 @@ const ALLOWED_HOSTS = new Set([
   'images.komiku.org',
   'static.komiku.org',
   'i.komiku.org',
+  // Live production host (confirmed via user report)
+  's2.komiku.org',
   // Other common manga/comic hosts
   'mangakakalot.com',
   'images.mangakakalot.com',
