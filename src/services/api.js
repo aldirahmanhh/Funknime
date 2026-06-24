@@ -820,7 +820,7 @@ export const animeAPI = {
 // COMIC API — same Sanka domain, /comic namespace
 // Reuses cache + rate limiter infra. Base path differs from anime.
 // ═══════════════════════════════════════════════════════
-const COMIC_BASE_URL = 'https://www.sankavollerei.web.id/comic';
+const COMIC_BASE_URL = 'https://www.sankavollerei.web.id/comic/';
 
 const fetchComic = async (endpoint, { priority = false, signal } = {}) => {
   const url = `${COMIC_BASE_URL}${endpoint}`;
