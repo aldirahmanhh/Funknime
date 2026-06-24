@@ -108,7 +108,7 @@ const Komik = () => {
         result = await comicAPI.getComicPopuler({ signal });
       }
       if (signal?.aborted) return;
-      const list = result?.comics ?? [];
+      const list = result?.komikList ?? [];
       setComics(list);
       setHasMore(activeTab === 'terbaru'
         ? (result?.hasMore ?? list.length >= PAGE_SIZE_HINT)

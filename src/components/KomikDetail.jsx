@@ -90,23 +90,15 @@ const KomikDetail = () => {
     );
   }
 
-  // ── Data extraction (defensive — response fields may vary) ──
+  // ── Data extraction (defensive — Bacakomik structure) ──
   const title = detail.title ?? 'Unknown Title';
-  const titleId = detail.title_indonesian ?? null;
-  const poster = detail.image ?? '';
-  const synopsis = detail.synopsis ?? detail.synopsis_full ?? detail.summary ?? 'Sinopsis tidak tersedia.';
-  const synopsisFull = detail.synopsis_full ?? null;
-  const background = detail.background_story ?? null;
-
-  const meta = detail.metadata ?? {};
-  const type = meta.type ?? null;
-  const author = meta.author ?? null;
-  const status = meta.status ?? null;
-  const concept = meta.concept ?? null;
-  const ageRating = meta.age_rating ?? null;
-  const readingDir = meta.reading_direction ?? null;
-
+  const poster = detail.cover ?? detail.image ?? '';
+  const synopsis = detail.synopsis ?? 'Sinopsis tidak tersedia.';
+  const status = detail.status ?? null;
+  const type = detail.type ?? null;
+  const author = detail.author ?? null;
   const genres = Array.isArray(detail.genres) ? detail.genres : [];
+  // chapters come at root level for Bacakomik
   const chapters = Array.isArray(detail.chapters) ? detail.chapters : [];
 
   // Chapters newest-first: last element = Chapter 1, first = latest
@@ -189,27 +181,11 @@ const KomikDetail = () => {
                   </dd>
                 </div>
               )}
-              {concept && (
+              {type && (
                 <div className="kd-meta__item">
-                  <dt className="visually-hidden">Konsep</dt>
+                  <dt className="visually-hidden">Type</dt>
                   <dd className="kd-meta__pill">
-                    <span aria-hidden="true">🎯</span> {concept}
-                  </dd>
-                </div>
-              )}
-              {ageRating && (
-                <div className="kd-meta__item">
-                  <dt className="visually-hidden">Age rating</dt>
-                  <dd className="kd-meta__pill">
-                    <span aria-hidden="true">🔞</span> {ageRating}
-                  </dd>
-                </div>
-              )}
-              {readingDir && (
-                <div className="kd-meta__item">
-                  <dt className="visually-hidden">Arah baca</dt>
-                  <dd className="kd-meta__pill">
-                    <span aria-hidden="true">↔</span> {readingDir}
+                    <span aria-hidden="true">📚</span> {type}
                   </dd>
                 </div>
               )}
@@ -264,15 +240,6 @@ const KomikDetail = () => {
         <section className="kd-synopsis section section-neo" aria-labelledby="kd-synopsis-heading">
           <h2 id="kd-synopsis-heading" className="kd-section-title">Sinopsis</h2>
           <p className="kd-synopsis__text">{synopsis}</p>
-          {synopsisFull && synopsisFull !== synopsis && (
-            <details className="kd-synopsis__full">
-              <summary>Sinopsis lengkap</summary>
-              <p>{synopsisFull}</p>
-            </details>
-          )}
-          {background && (
-            <p className="kd-synopsis__background">{background}</p>
-          )}
         </section>
 
         {/* Chapter list */}

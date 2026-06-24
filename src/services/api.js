@@ -926,12 +926,11 @@ const normalizeComicItem = (item) => {
 export const comicAPI = {
   // Latest comics (terbaru)
   getComicTerbaru: async (page = 1, { signal } = {}) => {
-    const data = await fetchComic(`/terbaru?page=${page}`, { signal });
-    const comics = (data?.comics ?? []).map(normalizeComicItem).filter(Boolean);
+    const data = await fetchComic(`/latest?page=${page}`, { signal });
+    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
     return {
       comics,
-      pagination: data?.pagination ?? null,
-      hasMore: data?.pagination?.has_more ?? (comics.length > 0),
+      hasMore: data?.hasNextPage ?? (comics.length > 0),
       raw: data,
     };
   },
@@ -939,7 +938,7 @@ export const comicAPI = {
   // Popular comics
   getComicPopuler: async ({ signal } = {}) => {
     const data = await fetchComic('/populer', { signal });
-    const comics = (data?.comics ?? []).map(normalizeComicItem).filter(Boolean);
+    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
     return { comics, raw: data };
   },
 
@@ -957,25 +956,18 @@ export const comicAPI = {
 
   // Comic detail + chapter list
   getComicDetail: async (slug, { signal } = {}) => {
-    return fetchComic(`/comic/${slug}`, { signal });
+    const data = await fetchComic(`/detail/${slug}`, { signal });
+    // Bacakomik returns nested: { detail: { ..., chapters: [...] }}
+    return {
+      ...data.detail,
+      provider: 'comic',
+    };
   },
 
   // Read chapter (images + navigation already embedded)
   // Chapter API can be slow — retry once with backoff before giving up.
   getComicChapter: async (slug, { signal } = {}) => {
-    const attemptFetch = () => fetchComic(`/chapter/${slug}`, { signal, priority: true });
-    try {
-      return await attemptFetch();
-    } catch (err) {
-      // Retry once on non-abort, non-404 failures (server timeout / 5xx)
-      if (err?.name === 'AbortError') throw err;
-      const status = err?.status ?? err?.statusCode ?? 0;
-      if (status === 404) throw err;
-      // Back-off 2s then retry
-      await new Promise(r => setTimeout(r, 2000));
-      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-      return attemptFetch();
-    }
+    return fetchComic(`/chapter/${slug}`, { signal, priority: true });
   },
 
   // All genres (response is object-indexed, normalize to array)
