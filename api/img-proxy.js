@@ -10,6 +10,8 @@
  * Usage: GET /api/img-proxy?url=<encoded-komiku-image-url>
  */
 
+import { readFileSync } from 'fs';
+
 // Allowlist: proxy images from known domains
 // Expanded to handle potential API changes (new image CDNs, mirrors, etc.)
 const ALLOWED_HOSTS = new Set([
@@ -35,6 +37,8 @@ const ALLOWED_HOSTS = new Set([
 // Max response size to stream (10 MB safety cap)
 const MAX_BYTES = 10 * 1024 * 1024;
 
+const logError = (...args) => console.error('[img-proxy]', ...args);
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -57,8 +61,13 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Only https URLs allowed' });
   }
 
-  // Only allow known komiku hosts
-  if (!ALLOWED_HOSTS.has(parsed.hostname)) {
+  // Only allow known komiku hosts (exact or suffix match for subdomains)
+  const isAllowed = 
+    ALLOWED_HOSTS.has(parsed.hostname) ||
+    Array.from(ALLOWED_HOSTS).some(h => parsed.hostname.endsWith(`.${h}`));
+  
+  if (!isAllowed) {
+    logError('Blocked hostname:', parsed.hostname);
     return res.status(403).json({ error: 'Host not allowed' });
   }
 
