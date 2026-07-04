@@ -1,0 +1,70 @@
+/* KomikGenres — genre grid + browse-by-genre */
+
+.kg-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.kg-hero {
+  margin-bottom: 0;
+}
+
+.kg-hero-copy {
+  /* inherits from page-header */
+}
+
+/* Genre buttons grid */
+.kg-genre-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.kg-genre-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-text, #ddd);
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kg-genre-btn:hover {
+  background: rgba(147, 51, 234, 0.15);
+  border-color: rgba(147, 51, 234, 0.3);
+}
+
+.kg-genre-btn--active {
+  background: var(--color-primary, #9333EA);
+  border-color: var(--color-primary, #9333EA);
+  color: #fff;
+  font-weight: 700;
+}
+
+.kg-genre-btn--active:hover {
+  background: #a855f7;
+}
+
+/* Results section */
+.kg-result-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.kg-hint {
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .kg-genre-grid {
+    gap: 0.35rem;
+  }
+  .kg-genre-btn {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.82rem;
+  }
+}

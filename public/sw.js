@@ -1,7 +1,7 @@
 // Service Worker for Funknime PWA
 // IMPORTANT: bump CACHE_VERSION on every release. Both the precache and the
 // runtime cache key derive from it, so old caches are wiped on activation.
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v5';
 const CACHE_NAME = `funknime-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `funknime-runtime-${CACHE_VERSION}`;
 

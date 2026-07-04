@@ -1,16 +1,55 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { animeAPI } from '../services/api';
+import { animeAPI, comicAPI } from '../services/api';
 import AnimeCard from './AnimeCard';
+
+const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
+const proxyImage = (url) => {
+  if (!url) return '';
+  if (url.startsWith('/api/img-proxy') || url.startsWith('data:')) return url;
+  if (isDev) return url;
+  return `/api/img-proxy?url=${encodeURIComponent(url)}`;
+};
+const placeholderImg = (text) =>
+  `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" viewBox="0 0 200 280">` +
+    `<rect width="200" height="280" fill="#1a1a26"/>` +
+    `<text x="100" y="140" text-anchor="middle" fill="#9333EA" font-family="sans-serif" font-size="14" font-weight="bold">` +
+    (text || 'Komik').substring(0, 16) +
+    `</text></svg>`
+  )}`;
+
+const SearchKomikCard = ({ comic }) => {
+  const { slug, title, poster, chapter, type, rating } = comic;
+  const posterUrl = poster ? proxyImage(poster) : placeholderImg(title);
+  return (
+    <Link to={`/komik/${slug}`} className="anime-card card" title={title}>
+      <div className="card-image-wrapper">
+        {type && <span className="anime-card-badge anime-card-badge--ongoing">{type}</span>}
+        <img src={posterUrl} alt={title} className="poster" loading="lazy" decoding="async" width={200} height={280} referrerPolicy="no-referrer"
+          onError={(e) => { const f = placeholderImg(title); if (e.target.src !== f) e.target.src = f; }} />
+        <div className="card-overlay"><span className="play-icon" aria-hidden="true">📖</span></div>
+      </div>
+      <div className="anime-info">
+        <h3>{title}</h3>
+        <div className="meta">
+          {chapter && <span className="episode-count">{chapter}</span>}
+          {rating && <span className="score">⭐ {rating}</span>}
+        </div>
+      </div>
+    </Link>
+  );
+};
 
 const UnifiedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [animeResults, setAnimeResults] = useState([]);
   const [donghuaResults, setDonghuaResults] = useState([]);
+  const [komikResults, setKomikResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('all'); // all, anime, donghua
+  const [activeTab, setActiveTab] = useState('all'); // all, anime, donghua, komik
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -22,22 +61,25 @@ const UnifiedSearch = () => {
 
   const handleSearch = async (searchQuery) => {
     if (!searchQuery.trim()) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
-      // Search anime and donghua in parallel
-      const [animeRes, donghuaRes] = await Promise.all([
+
+      // Search anime, donghua, and komik in parallel
+      const [animeRes, donghuaRes, komikRes] = await Promise.all([
         animeAPI.search(searchQuery).catch(() => ({ data: { animeList: [] } })),
         animeAPI.searchDonghua(searchQuery).catch(() => ({ data: [] })),
+        comicAPI.searchComics(searchQuery, { page: 1 }).catch(() => ({ comics: [] })),
       ]);
 
       const animeList = animeRes?.data?.animeList || [];
       const donghuaList = Array.isArray(donghuaRes?.data) ? donghuaRes.data : [];
-      
+      const komikList = komikRes?.comics || [];
+
       setAnimeResults(animeList);
       setDonghuaResults(donghuaList);
+      setKomikResults(komikList);
     } catch (err) {
       setError(err?.message ?? 'Gagal mencari');
     } finally {
@@ -54,23 +96,21 @@ const UnifiedSearch = () => {
 
   const getFilteredResults = () => {
     switch (activeTab) {
-      case 'anime':
-        return { anime: animeResults, donghua: [] };
-      case 'donghua':
-        return { anime: [], donghua: donghuaResults };
-      default:
-        return { anime: animeResults, donghua: donghuaResults };
+      case 'anime': return { anime: animeResults, donghua: [], komik: [] };
+      case 'donghua': return { anime: [], donghua: donghuaResults, komik: [] };
+      case 'komik': return { anime: [], donghua: [], komik: komikResults };
+      default: return { anime: animeResults, donghua: donghuaResults, komik: komikResults };
     }
   };
 
-  const { anime, donghua } = getFilteredResults();
-  const totalResults = animeResults.length + donghuaResults.length;
+  const { anime, donghua, komik } = getFilteredResults();
+  const totalResults = animeResults.length + donghuaResults.length + komikResults.length;
 
   return (
     <div className="main-container">
       <header className="page-header">
         <h1 className="main-title">Search</h1>
-        <p className="subtitle">Cari anime atau donghua</p>
+        <p className="subtitle">Cari anime, donghua, atau komik</p>
       </header>
 
       <form onSubmit={handleSubmit} className="search-form">
@@ -78,57 +118,41 @@ const UnifiedSearch = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Cari anime atau donghua..."
+          placeholder="Cari anime, donghua, atau komik..."
           className="search-input"
         />
-        <button type="submit" className="btn btn-primary">
-          Cari
-        </button>
+        <button type="submit" className="btn btn-primary">Cari</button>
       </form>
 
       {query && !loading && (
         <div className="filter-tabs">
-          <button
-            className={`filter-tab ${activeTab === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveTab('all')}
-          >
+          <button className={`filter-tab ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
             Semua ({totalResults})
           </button>
-          <button
-            className={`filter-tab ${activeTab === 'anime' ? 'active' : ''}`}
-            onClick={() => setActiveTab('anime')}
-          >
-            Anime ({animeResults.length})
+          <button className={`filter-tab ${activeTab === 'anime' ? 'active' : ''}`} onClick={() => setActiveTab('anime')}>
+            📺 Anime ({animeResults.length})
           </button>
-          <button
-            className={`filter-tab ${activeTab === 'donghua' ? 'active' : ''}`}
-            onClick={() => setActiveTab('donghua')}
-          >
-            Donghua ({donghuaResults.length})
+          <button className={`filter-tab ${activeTab === 'donghua' ? 'active' : ''}`} onClick={() => setActiveTab('donghua')}>
+            🐉 Donghua ({donghuaResults.length})
+          </button>
+          <button className={`filter-tab ${activeTab === 'komik' ? 'active' : ''}`} onClick={() => setActiveTab('komik')}>
+            📖 Komik ({komikResults.length})
           </button>
         </div>
       )}
 
       {loading && <div className="loading-container"><div className="spinner" /></div>}
-      
+
       {error && <div className="error-message">{error}</div>}
 
       {!loading && query && (
         <>
           {anime.length > 0 && (
             <section className="section">
-              <h2 className="section-title">Anime ({anime.length})</h2>
+              <h2 className="section-title">📺 Anime ({anime.length})</h2>
               <div className="anime-grid">
                 {anime.map((item, idx) => (
-                  <AnimeCard
-                    key={item.animeId || idx}
-                    anime={{
-                      ...item,
-                      provider: 'otakudesu',
-                    }}
-                    index={idx}
-                    providerHint="Anime"
-                  />
+                  <AnimeCard key={item.animeId || idx} anime={{ ...item, provider: 'otakudesu' }} index={idx} providerHint="Anime" />
                 ))}
               </div>
             </section>
@@ -136,38 +160,33 @@ const UnifiedSearch = () => {
 
           {donghua.length > 0 && (
             <section className="section">
-              <h2 className="section-title">Donghua ({donghua.length})</h2>
+              <h2 className="section-title">🐉 Donghua ({donghua.length})</h2>
               <div className="anime-grid">
                 {donghua.map((item, idx) => (
-                  <AnimeCard
-                    key={item.slug || idx}
-                    anime={{
-                      ...item,
-                      animeId: item.slug,
-                      title: item.title,
-                      poster: item.poster,
-                      status: item.status,
-                      type: item.type,
-                      provider: 'donghua',
-                    }}
-                    index={idx}
-                    providerHint="Donghua"
-                  />
+                  <AnimeCard key={item.slug || idx} anime={{ ...item, animeId: item.slug, provider: 'donghua' }} index={idx} providerHint="Donghua" />
                 ))}
               </div>
             </section>
           )}
 
-          {anime.length === 0 && donghua.length === 0 && (
+          {komik.length > 0 && (
+            <section className="section">
+              <h2 className="section-title">📖 Komik ({komik.length})</h2>
+              <div className="anime-grid">
+                {komik.map((comic, idx) => (
+                  <SearchKomikCard key={comic.slug ?? idx} comic={comic} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {anime.length === 0 && donghua.length === 0 && komik.length === 0 && (
             <div className="empty-state">
               <p>Tidak ada hasil untuk "{query}"</p>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
-                <Link to="/ongoing" className="btn btn-primary">
-                  Browse Anime
-                </Link>
-                <Link to="/donghua-ongoing" className="btn btn-secondary">
-                  Browse Donghua
-                </Link>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px', flexWrap: 'wrap' }}>
+                <Link to="/ongoing" className="btn btn-primary">Browse Anime</Link>
+                <Link to="/donghua-ongoing" className="btn btn-secondary">Browse Donghua</Link>
+                <Link to="/komik" className="btn btn-secondary">Browse Komik</Link>
               </div>
             </div>
           )}
@@ -176,7 +195,7 @@ const UnifiedSearch = () => {
 
       {!query && (
         <div className="empty-state">
-          <p>Masukkan kata kunci untuk mencari anime atau donghua</p>
+          <p>Masukkan kata kunci untuk mencari anime, donghua, atau komik</p>
         </div>
       )}
     </div>

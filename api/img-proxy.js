@@ -1,16 +1,14 @@
 /**
- * img-proxy.js — Vercel serverless image proxy for komiku.org assets.
+ * img-proxy.js — Vercel serverless image proxy for comic/manga assets.
  *
- * komiku.org uses hotlink protection that blocks requests with a Referer header.
- * The global Referrer-Policy in vercel.json sends the origin as Referer even
- * when <img referrerPolicy="no-referrer"> is set, because HTTP response headers
- * override the HTML attribute. This proxy fetches the image server-side without
- * any Referer, then streams it back to the browser.
+ * Some comic CDNs use hotlink protection that blocks requests with a Referer
+ * header. The global Referrer-Policy in vercel.json sends the origin as
+ * Referer even when <img referrerPolicy="no-referrer"> is set, because HTTP
+ * response headers override the HTML attribute. This proxy fetches the image
+ * server-side without any Referer, then streams it back to the browser.
  *
- * Usage: GET /api/img-proxy?url=<encoded-komiku-image-url>
+ * Usage: GET /api/img-proxy?url=<encoded-image-url>
  */
-
-import { readFileSync } from 'fs';
 
 // Allowlist: proxy images from known domains
 // Expanded to handle potential API changes (new image CDNs, mirrors, etc.)
@@ -31,8 +29,14 @@ const ALLOWED_HOSTS = new Set([
   'images.mangakakalot.com',
   'img.manganelo.com',
   'chap.manganelo.com',
-  // BacaKomik (active provider)
+  // BacaKomik — covers hosted on WordPress CDN (i2.wp.com/bacakomik.my)
+  'bacakomik.my',
   'bacakomik.xyz',
+  'i2.wp.com',
+  // BacaKomik chapter image CDNs (per provider docs)
+  'imageainewgeneration.lol',
+  'himmga.lat',
+  'gaimgame.pics',
   // Komikstation — chapter images hosted on klikcdn, covers on komikstation.org
   'img.klikcdn.com',
   'komikstation.org',
@@ -65,7 +69,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Only https URLs allowed' });
   }
 
-  // Only allow known komiku hosts (exact or suffix match for subdomains)
+  // Only allow known comic/manga hosts (exact or suffix match for subdomains)
   const isAllowed = 
     ALLOWED_HOSTS.has(parsed.hostname) ||
     Array.from(ALLOWED_HOSTS).some(h => parsed.hostname.endsWith(`.${h}`));

@@ -695,3 +695,121 @@ a:hover { color: var(--color-primary-light); }
   }
   .floating-shape { display: none; }
 }
+
+/* ── Homepage: Category sections (Anime, Donghua, Komik) ── */
+.home-category-section {
+  margin-bottom: 2.5rem;
+  padding: 1.5rem 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+}
+
+.home-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.home-category-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.home-category-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.home-category-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.7rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: var(--color-text-muted, #aaa);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.home-category-link:hover {
+  background: rgba(147, 51, 234, 0.15);
+  border-color: rgba(147, 51, 234, 0.3);
+  color: var(--color-primary-light, #c084fc);
+}
+
+.home-rail {
+  margin-bottom: 1.25rem;
+}
+
+.home-rail:last-child {
+  margin-bottom: 0;
+}
+
+.home-rail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.home-rail-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.home-rail-scroll {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 0.25rem 0;
+}
+
+.home-rail-scroll::-webkit-scrollbar { display: none; }
+
+.home-rail-card {
+  flex: 0 0 180px;
+  scroll-snap-align: start;
+}
+
+.home-rail-empty {
+  color: var(--color-text-muted, #888);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+/* Hero action buttons */
+.home-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+@media (max-width: 640px) {
+  .home-category-section {
+    padding: 1rem 0.75rem;
+    border-radius: 14px;
+  }
+  .home-category-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .home-rail-card {
+    flex: 0 0 150px;
+  }
+}

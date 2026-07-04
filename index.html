@@ -120,7 +120,19 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
+          // Only register in production — in dev, the SW caches Vite's
+          // dynamic /@vite/client and /src/main.jsx responses, causing
+          // stale-asset white screens after restarts.
+          // localhost / 127.0.0.1 = dev, everything else = prod.
+          const isDev = ['localhost', '127.0.0.1'].includes(location.hostname);
+          if (!isDev) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+          } else {
+            // Dev: nuke any stale SW from previous visits
+            navigator.serviceWorker.getRegistrations().then((regs) => {
+              regs.forEach((r) => r.unregister());
+            });
+          }
         });
       }
     </script>

@@ -1,0 +1,37 @@
+/* KomikBerwarna — paginated colored comics */
+
+.kb-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.kb-hero {
+  margin-bottom: 0;
+}
+
+/* Pagination bar */
+.kb-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0 2rem;
+}
+
+.kb-pagination__info {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #aaa);
+  min-width: 100px;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .kb-pagination {
+    gap: 0.75rem;
+  }
+  .kb-pagination__info {
+    min-width: auto;
+    font-size: 0.82rem;
+  }
+}

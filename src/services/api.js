@@ -817,10 +817,11 @@ export const animeAPI = {
 };
 
 // ═══════════════════════════════════════════════════════
-// COMIC API — same Sanka domain, /comic namespace
-// Reuses cache + rate limiter infra. Base path differs from anime.
+// COMIC API — bacakomik provider on the same Sanka domain.
+// Reuses the same cache + rate limiter infra as animeAPI.
+// Base path: /comic/bacakomik
 // ═══════════════════════════════════════════════════════
-const COMIC_BASE_URL = 'https://www.sankavollerei.web.id/comic/komikstation';
+const COMIC_BASE_URL = 'https://www.sankavollerei.web.id/comic/bacakomik';
 
 const fetchComic = async (endpoint, { priority = false, signal } = {}) => {
   const url = `${COMIC_BASE_URL}${endpoint}`;
@@ -890,219 +891,176 @@ const fetchComic = async (endpoint, { priority = false, signal } = {}) => {
   return enqueue(doFetch);
 };
 
-// Extract slug from inconsistent link/href fields across comic endpoints.
-// Examples: "/manga/solo-leveling/" → "solo-leveling"
-//           "https://komiku.org/manga/slug/" → "slug"
-//           "/detail-komik/slug/" → "slug"
-const extractComicSlug = (link) => {
-  if (!link || typeof link !== 'string') return null;
-  const cleaned = link.split('?')[0].split('#')[0].replace(/^https?:\/\/[^/]+/, '');
-  const parts = cleaned.split('/').filter(Boolean);
-  // last non-empty segment
-  return parts[parts.length - 1] ?? null;
-};
-
-// Normalize the inconsistent comic list/search response into a flat card shape.
-// Supports both bacakomik (cover/image/thumbnail) and komikstation (imageSrc) field names.
+// Normalize a bacakomik list/search item into a flat card shape.
+// bacakomik items: { title, slug, cover, chapter?, date?, type?, rating?, genre? }
+// Defensive: read both camelCase and snake_case since the API is inconsistent.
 const normalizeComicItem = (item) => {
   if (!item || typeof item !== 'object') return null;
-  const link = item.link ?? item.href ?? '';
-  const slug = item.slug ?? extractComicSlug(link) ?? '';
+  const cover = item.cover ?? item.poster ?? item.image ?? item.thumbnail ?? '';
   return {
-    slug,
+    slug: item.slug ?? '',
     title: item.title ?? item.name ?? 'Untitled',
-    poster: item.cover ?? item.image ?? item.imageSrc ?? item.thumbnail ?? item.poster ?? '',
-    image: item.cover ?? item.image ?? item.imageSrc ?? item.thumbnail ?? item.poster ?? '',
-    link,
-    chapter: item.latestChapter ?? item.chapter ?? null,
-    time_ago: item.time_ago ?? item.date ?? null,
+    poster: cover,
+    image: cover,
+    chapter: item.chapter ?? item.latestChapter ?? null,
+    date: item.date ?? item.time_ago ?? null,
     type: item.type ?? null,
+    rating: item.rating ?? null,
     genre: item.genre ?? null,
-    description: item.description ?? null,
-    altTitle: item.altTitle ?? null,
     provider: 'comic',
   };
 };
 
 export const comicAPI = {
-  // Latest comics (terbaru) — komikstation uses /list endpoint
+  // Latest comics (terbaru) — paginated via ?page=N
   getComicTerbaru: async (page = 1, { signal } = {}) => {
-    const data = await fetchComic(`/list${page > 1 ? `?page=${page}` : ''}`, { signal });
-    const comics = (data?.results ?? []).map(normalizeComicItem).filter(Boolean);
+    const path = page > 1 ? `/latest?page=${page}` : '/latest';
+    const data = await fetchComic(path, { signal });
+    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
     return {
       comics,
-      hasMore: data?.pagination?.hasNextPage ?? (comics.length > 0),
+      hasMore: data?.hasNextPage ?? false,
+      currentPage: data?.currentPage ?? page,
       raw: data,
     };
   },
 
-  // Popular comics — komikstation only has /list, no separate populer endpoint
+  // Popular comics
   getComicPopuler: async ({ signal } = {}) => {
-    const data = await fetchComic('/list', { signal });
-    const comics = (data?.results ?? []).map(normalizeComicItem).filter(Boolean);
-    return { comics, raw: data };
-  },
-
-  // Search comics — komikstation uses path param, not query string
-  searchComics: async (query, { signal } = {}) => {
-    const q = encodeURIComponent(query);
-    const data = await fetchComic(`/search/${q}`, { signal });
-    const comics = (data?.seriesList ?? []).map(normalizeComicItem).filter(Boolean);
+    const data = await fetchComic('/populer', { signal });
+    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
     return {
       comics,
-      total: data?.total ?? comics.length,
+      hasMore: data?.hasNextPage ?? false,
+      currentPage: data?.currentPage ?? 1,
+      raw: data,
+    };
+  },
+
+  // Search comics — path param, URL-encoded. Supports pagination via ?page=N
+  searchComics: async (query, { page = 1, signal } = {}) => {
+    if (!query?.trim()) return { comics: [], hasMore: false, raw: null };
+    const q = encodeURIComponent(query.trim());
+    const data = await fetchComic(`/search/${q}?page=${page}`, { signal });
+    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
+    return {
+      comics,
+      hasMore: data?.hasNextPage ?? false,
+      currentPage: data?.currentPage ?? 1,
+      raw: data,
+    };
+  },
+
+  // All genres — flat array of { title, slug }
+  getComicGenres: async ({ signal } = {}) => {
+    const data = await fetchComic('/genres', { signal });
+    const genres = data?.genres ?? [];
+    return genres
+      .filter(g => g && (g.slug || g.title))
+      .map(g => ({ slug: g.slug ?? '', title: g.title ?? g.slug ?? '' }));
+  },
+
+  // Comics by genre — /genre/{slug}?page=N (singular 'genre', not 'genres')
+  // Same response shape as latest/populer: komikList[] + hasNextPage + currentPage
+  getComicByGenre: async (genreSlug, page = 1, { signal } = {}) => {
+    if (!genreSlug) return { comics: [], hasMore: false, currentPage: 1, raw: null };
+    const data = await fetchComic(`/genre/${genreSlug}?page=${page}`, { signal });
+    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
+    return {
+      comics,
+      hasMore: data?.hasNextPage ?? false,
+      currentPage: data?.currentPage ?? page,
       raw: data,
     };
   },
 
   // Comic detail + chapter list
+  // Response: { detail: { title, cover, rating, otherTitle, status, type, author,
+  //   artist, release, series, reader, synopsis, genres[], chapters[] } }
+  // chapters are newest-first (Ch.N first, Ch.1 last)
   getComicDetail: async (slug, { signal } = {}) => {
-    const data = await fetchComic(`/manga/${slug}`, { signal });
-    // Komikstation returns flat response (no detail wrapper) with fields:
-    // title, alternative, imageSrc, status, rating, synopsis, type, author,
-    // updatedOn, genres: [{name, slug}], chapters: [{title, slug, date}]
+    const data = await fetchComic(`/detail/${slug}`, { signal });
+    const detail = data?.detail ?? data;
     return {
-      ...data,
+      ...detail,
       provider: 'comic',
-    };
-  },
-
-  // Read chapter (images + navigation already embedded)
-  // Chapter API can be slow — retry once with backoff before giving up.
-  // Normalizes komikstation format (flat prevSlug/nextSlug) to bacakomik format (navigation wrapper)
-  // so the reader component doesn't need provider-specific logic.
-  getComicChapter: async (slug, { signal } = {}) => {
-    const data = await fetchComic(`/chapter/${slug}`, { signal, priority: true });
-    // Komikstation returns prevSlug/nextSlug at root level instead of navigation wrapper
-    if (data && !data.navigation) {
-      const chList = Array.isArray(data.chapterList) ? data.chapterList : null;
-      data.navigation = {
-        previousChapter: data.prevSlug ?? null,
-        nextChapter: data.nextSlug ?? null,
-        // chapterList is an array of {title,slug} in komikstation — convert to slug string or null
-        chapterList: Array.isArray(chList) ? null : (chList ?? null),
-      };
-    }
-    return data;
-  },
-
-  // All genres (response is object-indexed, normalize to array)
-  getComicGenres: async () => {
-    const data = await fetchComic('/genres');
-    if (!data || typeof data !== 'object') return [];
-    return Object.values(data)
-      .filter(v => v && typeof v === 'object' && v.value)
-      .map(g => ({ value: g.value, name: g.name ?? g.value }));
-  },
-
-  // Comics by genre
-  getComicByGenre: async (genre, page = 1) => {
-    const data = await fetchComic(`/genre/${genre}?page=${page}`);
-    const comics = (data?.comics ?? data?.data ?? []).map(normalizeComicItem).filter(Boolean);
-    return {
-      comics,
-      hasMore: data?.pagination?.has_more ?? (comics.length > 0),
       raw: data,
     };
   },
 
-  // Comics by type (manga/manhwa/manhua)
-  getComicByType: async (type, page = 1) => {
-    const data = await fetchComic(`/type/${type}?page=${page}`);
-    const comics = (data?.comics ?? data?.data ?? []).map(normalizeComicItem).filter(Boolean);
+  // Read chapter — priority: true to skip rate-limit queue (LCP-critical)
+  // Response: { title, images[], navigation: { next, prev } }
+  getComicChapter: async (chapterSlug, { signal } = {}) => {
+    const data = await fetchComic(`/chapter/${chapterSlug}`, { signal, priority: true });
+    // Normalize navigation: bacakomik uses { next, prev } (may be null at ends)
+    const nav = data?.navigation ?? {};
     return {
-      comics,
-      hasMore: data?.pagination?.has_more ?? (comics.length > 0),
+      title: data?.title ?? '',
+      images: Array.isArray(data?.images) ? data.images : [],
+      navigation: {
+        next: nav.next ?? null,
+        prev: nav.prev ?? null,
+      },
       raw: data,
     };
   },
 
-  // Homepage aggregation (popular + latest + ranking)
-  getComicHomepage: async () => {
-    return fetchComic('/homepage');
-  },
-
-  // Random comics
-  getComicRandom: async () => {
-    const data = await fetchComic('/random');
-    const comics = (data?.comics ?? data?.data ?? []).map(normalizeComicItem).filter(Boolean);
+  // Recommendations
+  getComicRecommendations: async ({ signal } = {}) => {
+    const data = await fetchComic('/recomen', { signal });
+    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
     return { comics, raw: data };
   },
 
-  // Chapter navigation (prev/next/chapter-list for a given chapter slug)
-  getComicChapterNavigation: async (slug, { signal } = {}) => {
-    const data = await fetchComic(`/chapter/${slug}/navigation`, { signal });
+  // Colored comics (komik berwarna) — paginated by path param
+  getComicBerwarna: async (page = 1, { signal } = {}) => {
+    const data = await fetchComic(`/komikberwarna/${page}`, { signal });
+    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
     return {
-      currentChapter: data?.currentChapter ?? null,
-      previousChapter: data?.previousChapter ?? null,
-      nextChapter: data?.nextChapter ?? null,
-      chapterList: data?.chapterList ?? null,
+      comics,
+      hasMore: data?.hasNextPage ?? false,
+      currentPage: data?.currentPage ?? page,
       raw: data,
     };
   },
 
-  // Trending comics (timeframe: today/week/month — optional)
-  getComicTrending: async (timeframe) => {
-    const tf = timeframe ? `?timeframe=${encodeURIComponent(timeframe)}` : '';
-    const data = await fetchComic(`/trending${tf}`);
-    const comics = (data?.trending ?? []).map(normalizeComicItem).filter(Boolean);
+  // Filter metadata (status, type, genre, author, artist, release, orderby)
+  // Returns { title, value } arrays for each filter — NO comic items.
+  getComicFilters: async ({ signal } = {}) => {
+    const data = await fetchComic('/list', { signal });
+    const pick = (arr) => Array.isArray(arr)
+      ? arr.filter(v => v && (v.value || v.title)).map(v => ({ title: v.title ?? v.value ?? '', value: v.value ?? '' }))
+      : [];
     return {
-      comics,
-      timeframe: data?.timeframe ?? timeframe ?? null,
-      count: data?.count ?? comics.length,
+      status: pick(data?.status),
+      type: pick(data?.type),
+      genres: pick(data?.genres),
+      author: pick(data?.author),
+      artist: pick(data?.artist),
+      release: pick(data?.release),
+      orderby: pick(data?.orderby),
       raw: data,
     };
   },
 
-  // Browse with multi-filter (type/order/genre/page)
-  getComicBrowse: async ({ type, order, genre, page = 1 } = {}) => {
-    const params = new URLSearchParams();
-    if (type) params.set('type', type);
-    if (order) params.set('order', order);
-    if (genre) params.set('genre', genre);
-    params.set('page', page);
-    const data = await fetchComic(`/browse?${params.toString()}`);
-    const comics = (data?.comics ?? []).map(normalizeComicItem).filter(Boolean);
-    return {
-      comics,
-      filters: data?.filters ?? { type, order, genre },
-      hasMore: data?.pagination?.has_more ?? (comics.length > 0),
-      pagination: data?.pagination ?? null,
-      raw: data,
-    };
+  // Top/ranking — /top (no pagination, same shape as populer)
+  // Response: komikList[] with {title, slug, cover, rating}
+  getComicTop: async ({ signal } = {}) => {
+    const data = await fetchComic('/top', { signal });
+    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
+    return { comics, raw: data };
   },
 
-  // Recommendations (based_on popular_comics)
-  getComicRecommendations: async () => {
-    const data = await fetchComic('/recommendations');
-    const comics = (data?.recommendations ?? []).map(normalizeComicItem).filter(Boolean);
+  // Filter by type — /only/{type}?page=N (type: manga/manhwa/manhua)
+  // Same response shape as latest: komikList[] with {title, slug, cover, chapter, date, type}
+  getComicByType: async (type, page = 1, { signal } = {}) => {
+    if (!type) return { comics: [], hasMore: false, currentPage: 1, raw: null };
+    const data = await fetchComic(`/only/${type}?page=${page}`, { signal });
+    const comics = (data?.komikList ?? []).map(normalizeComicItem).filter(Boolean);
     return {
       comics,
-      basedOn: data?.based_on ?? null,
-      count: data?.count ?? comics.length,
-      raw: data,
-    };
-  },
-
-  // Advanced search with multi-filter
-  getComicAdvancedSearch: async ({ query, type, genre, status, year, sort, page = 1 } = {}) => {
-    const params = new URLSearchParams();
-    if (query) params.set('q', query);
-    if (type) params.set('type', type);
-    if (genre) params.set('genre', genre);
-    if (status) params.set('status', status);
-    if (year) params.set('year', year);
-    if (sort) params.set('sort', sort);
-    params.set('page', page);
-    const data = await fetchComic(`/advanced-search?${params.toString()}`);
-    const comics = (data?.comics ?? []).map(normalizeComicItem).filter(Boolean);
-    return {
-      comics,
-      query: data?.query ?? query ?? null,
-      filters: data?.filters ?? { type, status, genre, year, sort },
-      total: data?.pagination?.total ?? comics.length,
-      hasMore: data?.pagination?.has_more ?? (comics.length > 0),
-      pagination: data?.pagination ?? null,
+      hasMore: data?.hasNextPage ?? false,
+      currentPage: data?.currentPage ?? page,
       raw: data,
     };
   },

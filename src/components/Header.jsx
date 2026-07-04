@@ -32,6 +32,14 @@ const Header = () => {
       { to: '/donghua-az', label: 'A-Z List' },
     ]},
     { to: '/genres', label: 'Genres' },
+    { label: 'Komik', submenu: [
+      { to: '/komik', label: 'Terbaru' },
+      { to: '/komik/genres', label: 'Genres' },
+      { to: '/komik/berwarna', label: 'Berwarna' },
+      { to: '/komik/type/manga', label: 'Manga' },
+      { to: '/komik/type/manhwa', label: 'Manhwa' },
+      { to: '/komik/type/manhua', label: 'Manhua' },
+    ]},
     { to: '/schedule', label: 'Schedule' },
     { to: '/history', label: 'History' },
   ];

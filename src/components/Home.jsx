@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { animeAPI } from '../services/api';
+import { animeAPI, comicAPI } from '../services/api';
 import { SkeletonAnimeGrid } from './Skeleton';
 import AnimeCard from './AnimeCard';
 import AnimeCarousel from './AnimeCarousel';
@@ -10,20 +10,70 @@ import { mergeAnimeLists } from '../utils/animeUtils';
 
 const DAY_ORDER = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
+// ── Inline Komik card for homepage ──
+const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
+const proxyImage = (url) => {
+  if (!url) return '';
+  if (url.startsWith('/api/img-proxy') || url.startsWith('data:')) return url;
+  if (isDev) return url;
+  return `/api/img-proxy?url=${encodeURIComponent(url)}`;
+};
+const placeholderImg = (text) =>
+  `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" viewBox="0 0 200 280">` +
+    `<rect width="200" height="280" fill="#1a1a26"/>` +
+    `<text x="100" y="140" text-anchor="middle" fill="#9333EA" font-family="sans-serif" font-size="14" font-weight="bold">` +
+    (text || 'Komik').substring(0, 16) +
+    `</text></svg>`
+  )}`;
+
+const HomeKomikCard = ({ comic }) => {
+  const { slug, title, poster, chapter, type, rating } = comic;
+  const posterUrl = poster ? proxyImage(poster) : placeholderImg(title);
+  return (
+    <Link to={`/komik/${slug}`} className="anime-card card" title={title}>
+      <div className="card-image-wrapper">
+        {type && <span className="anime-card-badge anime-card-badge--ongoing">{type}</span>}
+        <img
+          src={posterUrl}
+          alt={title}
+          className="poster"
+          loading="lazy"
+          decoding="async"
+          width={200}
+          height={280}
+          referrerPolicy="no-referrer"
+          onError={(e) => { const f = placeholderImg(title); if (e.target.src !== f) e.target.src = f; }}
+        />
+        <div className="card-overlay"><span className="play-icon" aria-hidden="true">📖</span></div>
+      </div>
+      <div className="anime-info">
+        <h3>{title}</h3>
+        <div className="meta">
+          {chapter && <span className="episode-count">{chapter}</span>}
+          {rating && <span className="score">⭐ {rating}</span>}
+        </div>
+      </div>
+    </Link>
+  );
+};
+
 const Home = () => {
   const [homeData, setHomeData] = useState(null);
   const [donghuaData, setDonghuaData] = useState(null);
+  const [komikData, setKomikData] = useState(null);
   const [scheduleData, setScheduleData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [watchHistory] = useState(() => getWatchHistory());
   const [topDonors, setTopDonors] = useState([]);
   const [showDonatePopup, setShowDonatePopup] = useState(false);
+  const [komikLoading, setKomikLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    // Phase 1: Fetch only what's above-the-fold (hero section)
+    // Phase 1: Fetch only what's above-the-fold (hero: anime ongoing)
     const fetchCritical = async () => {
       try {
         const homeRes = await animeAPI.getHome();
@@ -32,16 +82,19 @@ const Home = () => {
         const otakOngoing = homeRes?.data?.ongoing?.animeList || [];
         const otakCompleted = homeRes?.data?.completed?.animeList || [];
 
-        // Render immediately with Otakudesu data
         setHomeData({ ongoing: otakOngoing, completed: otakCompleted });
         setLoading(false);
 
-        // Phase 2: After first paint, merge in secondary providers + extras
+        // Phase 2: After first paint, merge secondary + donghua
         requestIdleCallback(
-          () => {
-            if (!cancelled) fetchSecondary(otakOngoing, otakCompleted);
-          },
+          () => { if (!cancelled) fetchSecondary(otakOngoing, otakCompleted); },
           { timeout: 2000 },
+        );
+
+        // Phase 3: Komik (lowest priority, below fold)
+        requestIdleCallback(
+          () => { if (!cancelled) fetchKomik(); },
+          { timeout: 4000 },
         );
       } catch (err) {
         if (!cancelled) setError(err?.message ?? 'Gagal memuat data');
@@ -49,7 +102,6 @@ const Home = () => {
       }
     };
 
-    // Phase 2: Non-critical data — doesn't block first paint
     const fetchSecondary = async (otakOngoing, otakCompleted) => {
       const [sameOngoingRes, sameCompletedRes, scheduleRes, donghuaOngoingRes, donghuaCompletedRes] = await Promise.all([
         animeAPI.getOngoingSamehadaku().catch(() => null),
@@ -74,25 +126,41 @@ const Home = () => {
       if (scheduleRes?.data) setScheduleData(scheduleRes);
     };
 
+    const fetchKomik = async () => {
+      setKomikLoading(true);
+      try {
+        const [latestRes, populerRes] = await Promise.all([
+          comicAPI.getComicTerbaru(1).catch(() => ({ comics: [] })),
+          comicAPI.getComicPopuler().catch(() => ({ comics: [] })),
+        ]);
+        if (!cancelled) {
+          setKomikData({
+            latest: latestRes.comics || [],
+            populer: populerRes.comics || [],
+          });
+        }
+      } catch {
+        // Silently fail — komik is bonus content
+      } finally {
+        if (!cancelled) setKomikLoading(false);
+      }
+    };
+
     fetchCritical();
 
-    // Non-critical: Trakteer donors (deferred via idle callback)
+    // Non-critical: Trakteer donors
     const idleId = requestIdleCallback(
       () => {
         fetch('/api/trakteer?action=supports&limit=10&page=1')
           .then((r) => r.json())
-          .then((d) => {
-            if (d?.result?.data) setTopDonors(d.result.data);
-          })
+          .then((d) => { if (d?.result?.data) setTopDonors(d.result.data); })
           .catch(() => {});
       },
       { timeout: 5000 },
     );
 
-    // Donate popup — delayed further on mobile for less disruption
-    const timer = setTimeout(() => {
-      if (!cancelled) setShowDonatePopup(true);
-    }, 4000);
+    // Donate popup — delayed
+    const timer = setTimeout(() => { if (!cancelled) setShowDonatePopup(true); }, 4000);
 
     return () => {
       cancelled = true;
@@ -126,6 +194,8 @@ const Home = () => {
   const completed = homeData?.completed || [];
   const donghuaOngoing = donghuaData?.ongoing || [];
   const donghuaCompleted = donghuaData?.completed || [];
+  const komikLatest = komikData?.latest || [];
+  const komikPopuler = komikData?.populer || [];
   const days = Array.isArray(scheduleData?.data) ? scheduleData.data : [];
 
   const buildRailItems = (animeList, statusOverride, isDonghua = false) =>
@@ -170,20 +240,24 @@ const Home = () => {
         </div>
       )}
 
-      {/* Hero */}
+      {/* ── Hero ── */}
       <header className="page-header home-hero home-hero--streaming">
         <div className="home-hero-copy">
           <div className="home-hero-eyebrow">✨ Gratis · Tanpa Login · Multi-Provider</div>
           <h1 className="main-title text-gradient" data-text="MRFUNK">MRFUNK</h1>
-          <p className="subtitle">Nonton anime &amp; donghua sub Indo. Semua provider, satu tempat.</p>
+          <p className="subtitle">Nonton anime, donghua, &amp; baca komik sub Indo. Semua gratis.</p>
           <div className="home-hero-actions">
-            <Link to="/search" className="btn btn-primary btn-large">🔍 Cari Anime</Link>
-            <Link to="/ongoing" className="btn btn-secondary">📺 Sedang Tayang</Link>
+            <Link to="/search" className="btn btn-primary btn-large">🔍 Cari</Link>
+            <Link to="/ongoing" className="btn btn-secondary">📺 Anime</Link>
+            <Link to="/donghua-ongoing" className="btn btn-secondary">🐉 Donghua</Link>
+            <Link to="/komik" className="btn btn-secondary">📖 Komik</Link>
           </div>
           <div className="home-hero-stats">
-            <span className="home-stat"><strong>2</strong> Provider</span>
+            <span className="home-stat"><strong>2</strong> Provider Anime</span>
             <span className="home-stat-sep">·</span>
             <span className="home-stat">Donghua ✓</span>
+            <span className="home-stat-sep">·</span>
+            <span className="home-stat">Komik ✓</span>
             <span className="home-stat-sep">·</span>
             <span className="home-stat">Resume otomatis ✓</span>
           </div>
@@ -209,7 +283,7 @@ const Home = () => {
                   <div className="card-image-wrapper">
                     <span className="anime-card-badge anime-card-badge--ongoing">Lanjut</span>
                     {item.poster ? <img src={item.poster} alt={item.animeTitle} className="poster" loading="lazy" decoding="async" /> : <div style={{ width: '100%', height: '100%', background: 'var(--color-surface-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🎬</div>}
-                    <div className="card-overlay"><span className="play-icon" aria-hidden>▶</span></div>
+                    <div className="card-overlay"><span className="play-icon" aria-hidden="true">▶</span></div>
                     {item.currentTime > 0 && item.duration > 0 && (
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: 'rgba(255,255,255,0.15)', zIndex: 3 }}>
                         <div style={{ height: '100%', width: `${Math.min((item.currentTime / item.duration) * 100, 100)}%`, background: 'var(--color-primary)', borderRadius: '0 2px 2px 0' }} />
@@ -228,31 +302,106 @@ const Home = () => {
         </section>
       )}
 
-      {/* Anime sections */}
-      {ongoing.length > 0 && (
-        <section className="section home-rail">
-          <div className="section-header home-rail-header"><h2 className="section-title">🔥 Anime Sedang Tayang</h2><Link to="/ongoing" className="view-all">Lihat semua</Link></div>
-          <div className="home-rail-scroll">{buildRailItems(ongoing, 'Ongoing')}</div>
-        </section>
-      )}
-      {donghuaOngoing.length > 0 && (
-        <section className="section home-rail">
-          <div className="section-header home-rail-header"><h2 className="section-title">🐉 Donghua Sedang Tayang</h2><Link to="/donghua-ongoing" className="view-all">Lihat semua</Link></div>
-          <div className="home-rail-scroll">{buildRailItems(donghuaOngoing, 'Ongoing', true)}</div>
-        </section>
-      )}
-      {completed.length > 0 && (
-        <section className="section home-rail">
-          <div className="section-header home-rail-header"><h2 className="section-title">✅ Anime Baru Selesai</h2><Link to="/completed" className="view-all">Lihat semua</Link></div>
-          <div className="home-rail-scroll">{buildRailItems(completed, 'Completed')}</div>
-        </section>
-      )}
-      {donghuaCompleted.length > 0 && (
-        <section className="section home-rail">
-          <div className="section-header home-rail-header"><h2 className="section-title">🐉 Donghua Baru Selesai</h2><Link to="/donghua-completed" className="view-all">Lihat semua</Link></div>
-          <div className="home-rail-scroll">{buildRailItems(donghuaCompleted, 'Completed', true)}</div>
-        </section>
-      )}
+      {/* ── ANIME Section ── */}
+      <section className="home-category-section">
+        <div className="home-category-header">
+          <h2 className="home-category-title">📺 Anime</h2>
+          <div className="home-category-links">
+            <Link to="/ongoing" className="home-category-link">Ongoing</Link>
+            <Link to="/completed" className="home-category-link">Completed</Link>
+            <Link to="/genres" className="home-category-link">Genres</Link>
+            <Link to="/az-list" className="home-category-link">A-Z</Link>
+          </div>
+        </div>
+        {ongoing.length > 0 && (
+          <div className="home-rail">
+            <div className="section-header home-rail-header"><h3 className="home-rail-title">🔥 Sedang Tayang</h3><Link to="/ongoing" className="view-all">Semua →</Link></div>
+            <div className="home-rail-scroll">{buildRailItems(ongoing, 'Ongoing')}</div>
+          </div>
+        )}
+        {completed.length > 0 && (
+          <div className="home-rail">
+            <div className="section-header home-rail-header"><h3 className="home-rail-title">✅ Baru Selesai</h3><Link to="/completed" className="view-all">Semua →</Link></div>
+            <div className="home-rail-scroll">{buildRailItems(completed, 'Completed')}</div>
+          </div>
+        )}
+      </section>
+
+      {/* ── DONGHUA Section ── */}
+      <section className="home-category-section">
+        <div className="home-category-header">
+          <h2 className="home-category-title">🐉 Donghua</h2>
+          <div className="home-category-links">
+            <Link to="/donghua-ongoing" className="home-category-link">Ongoing</Link>
+            <Link to="/donghua-completed" className="home-category-link">Completed</Link>
+            <Link to="/donghua-genres" className="home-category-link">Genres</Link>
+            <Link to="/donghua-az" className="home-category-link">A-Z</Link>
+          </div>
+        </div>
+        {donghuaOngoing.length > 0 && (
+          <div className="home-rail">
+            <div className="section-header home-rail-header"><h3 className="home-rail-title">🔥 Sedang Tayang</h3><Link to="/donghua-ongoing" className="view-all">Semua →</Link></div>
+            <div className="home-rail-scroll">{buildRailItems(donghuaOngoing, 'Ongoing', true)}</div>
+          </div>
+        )}
+        {donghuaCompleted.length > 0 && (
+          <div className="home-rail">
+            <div className="section-header home-rail-header"><h3 className="home-rail-title">✅ Baru Selesai</h3><Link to="/donghua-completed" className="view-all">Semua →</Link></div>
+            <div className="home-rail-scroll">{buildRailItems(donghuaCompleted, 'Completed', true)}</div>
+          </div>
+        )}
+        {!donghuaOngoing.length && !donghuaCompleted.length && (
+          <p className="home-rail-empty">Memuat donghua...</p>
+        )}
+      </section>
+
+      {/* ── KOMIK Section ── */}
+      <section className="home-category-section">
+        <div className="home-category-header">
+          <h2 className="home-category-title">📖 Komik</h2>
+          <div className="home-category-links">
+            <Link to="/komik" className="home-category-link">Terbaru</Link>
+            <Link to="/komik/genres" className="home-category-link">Genres</Link>
+            <Link to="/komik/berwarna" className="home-category-link">Berwarna</Link>
+            <Link to="/komik/type/manga" className="home-category-link">Manga</Link>
+            <Link to="/komik/type/manhwa" className="home-category-link">Manhwa</Link>
+            <Link to="/komik/type/manhua" className="home-category-link">Manhua</Link>
+          </div>
+        </div>
+        {komikLoading ? (
+          <div className="home-rail"><p className="home-rail-empty">Memuat komik...</p></div>
+        ) : (
+          <>
+            {komikPopuler.length > 0 && (
+              <div className="home-rail">
+                <div className="section-header home-rail-header"><h3 className="home-rail-title">🔥 Populer</h3><Link to="/komik" className="view-all">Semua →</Link></div>
+                <div className="home-rail-scroll">
+                  {komikPopuler.slice(0, 12).map((comic, idx) => (
+                    <div className="home-rail-card" key={comic.slug ?? idx}>
+                      <HomeKomikCard comic={comic} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {komikLatest.length > 0 && (
+              <div className="home-rail">
+                <div className="section-header home-rail-header"><h3 className="home-rail-title">🆕 Terbaru</h3><Link to="/komik" className="view-all">Semua →</Link></div>
+                <div className="home-rail-scroll">
+                  {komikLatest.slice(0, 12).map((comic, idx) => (
+                    <div className="home-rail-card" key={comic.slug ?? idx}>
+                      <HomeKomikCard comic={comic} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {!komikData && !komikLoading && (
+              <p className="home-rail-empty">Komik akan dimuat setelah konten utama selesai.</p>
+            )}
+          </>
+        )}
+      </section>
 
       {/* Schedule Summary */}
       {days.length > 0 && (
@@ -283,7 +432,7 @@ const Home = () => {
         </section>
       )}
 
-      {/* Top Donatur Leaderboard */}
+      {/* Top Donatur */}
       {topDonors.length > 0 && (
         <section className="section">
           <div className="section-header">

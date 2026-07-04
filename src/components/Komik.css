@@ -1,0 +1,104 @@
+/* Komik page — home/list/search */
+.komik-page {
+  padding-bottom: 2rem;
+}
+
+.komik-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.komik-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.komik-quick-links {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.komik-quick-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  background: rgba(147, 51, 234, 0.1);
+  border: 1px solid rgba(147, 51, 234, 0.25);
+  border-radius: 20px;
+  color: var(--color-primary-light, #c084fc);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.komik-quick-link:hover {
+  background: rgba(147, 51, 234, 0.2);
+  border-color: rgba(147, 51, 234, 0.5);
+}
+
+.komik-search-form {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 600px;
+}
+
+.komik-search-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: var(--color-text, #fff);
+  font-size: 1rem;
+  transition: border-color 0.15s ease;
+}
+
+.komik-search-input:focus-visible {
+  outline: 2px solid var(--color-primary, #9333EA);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.komik-search-btn {
+  white-space: nowrap;
+}
+
+.komik-section {
+  margin-bottom: 2.5rem;
+}
+
+.komik-section .section-header {
+  margin-bottom: 1rem;
+}
+
+.komik-card .play-icon {
+  font-size: 1.5rem;
+}
+
+.komik-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .komik-hero {
+    gap: 1rem;
+  }
+
+  .komik-search-form {
+    flex-direction: column;
+  }
+
+  .komik-search-btn {
+    width: 100%;
+  }
+}
