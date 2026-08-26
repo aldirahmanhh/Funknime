@@ -7,6 +7,7 @@ import { VideoSkin, Video, videoFeatures } from '@videojs/react/video';
 import '@videojs/react/video/skin.css';
 import WatchLoading from './WatchLoading';
 import EmbedPlayer from './EmbedPlayer';
+import Icon from './Icon';
 
 const isDev = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV;
 const devWarn = (...args) => { if (isDev) console.warn(...args); };
@@ -31,7 +32,6 @@ const Watch = () => {
   const videoElRef = useRef(null);
   const saveTimerRef = useRef(null);
 
-  // ─── Progress helpers ───
   const saveProgress = useCallback(() => {
     if (!episodeId) return;
     const vid = videoElRef.current;
@@ -40,7 +40,6 @@ const Watch = () => {
     }
   }, [episodeId]);
 
-  // Save on leave
   useEffect(() => {
     const onUnload = () => saveProgress();
     window.addEventListener('beforeunload', onUnload);
@@ -50,11 +49,9 @@ const Watch = () => {
     };
   }, [saveProgress]);
 
-  // ─── Fetch episode ───
   useEffect(() => {
     let cancelled = false;
 
-    // Reset ALL state when episodeId changes
     setEpisodeData(null);
     setAnimeData(null);
     setVideoUrl('');
@@ -95,7 +92,6 @@ const Watch = () => {
         if (cancelled) return;
         if (!data) throw new Error(lastError?.message || 'Episode tidak ditemukan.');
 
-        // Donghua
         if (usedProvider === 'donghua' && data.streaming) {
           if (cancelled) return;
           const dd = {
@@ -116,7 +112,6 @@ const Watch = () => {
 
         if (cancelled) return;
 
-        // Anime
         const raw = data?.data || null;
         let normalized = raw;
         if (raw && !raw.server && Array.isArray(raw.servers)) {
@@ -157,9 +152,11 @@ const Watch = () => {
     };
     fetchEpisodeData();
     return () => { cancelled = true; };
+    // Reload only when the episode changes; nav-state provider is read at
+    // mount time intentionally so back/forward navigation doesn't refetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [episodeId]);
 
-  // ─── Video.js progress tracking + error recovery ───
   const retryCountRef = useRef(0);
 
   useEffect(() => {
@@ -172,7 +169,7 @@ const Watch = () => {
     const onLoaded = () => {
       if (savedTime > 5) vid.currentTime = savedTime;
       setSwitching(false);
-      retryCountRef.current = 0; // reset retry on successful load
+      retryCountRef.current = 0;
     };
     const onPause = () => {
       if (vid.currentTime > 5) updateWatchProgress(episodeId, vid.currentTime, vid.duration);
@@ -188,20 +185,18 @@ const Watch = () => {
       if (vid.currentTime > 5) updateWatchProgress(episodeId, vid.currentTime, vid.duration);
     };
 
-    // Auto-recover from playback errors (FFmpeg demuxer, network stall, etc)
     const onError = () => {
       const lastPos = vid.currentTime || 0;
       devWarn(`[Watch] Video error at ${lastPos}s, retry #${retryCountRef.current + 1}`);
 
       if (retryCountRef.current < 3) {
         retryCountRef.current++;
-        // Save position, reload source, seek back
         if (lastPos > 5) updateWatchProgress(episodeId, lastPos, vid.duration);
         setTimeout(() => {
           try {
             vid.load();
             vid.addEventListener('loadeddata', () => {
-              vid.currentTime = Math.max(0, lastPos - 2); // seek back 2s for safety
+              vid.currentTime = Math.max(0, lastPos - 2);
               vid.play().catch(() => {});
             }, { once: true });
           } catch {
@@ -209,13 +204,11 @@ const Watch = () => {
           }
         }, 1000);
       } else {
-        // After 3 retries, fallback to iframe
         devWarn('[Watch] Max retries reached, falling back to iframe');
         setVideoFailed(true);
       }
     };
 
-    // Handle stalled/stuck video (no data for 8s)
     let stallTimer = null;
     const onStalled = () => {
       stallTimer = setTimeout(() => {
@@ -255,7 +248,6 @@ const Watch = () => {
     };
   }, [videoUrl, episodeId]);
 
-  // ─── Auto-rotate on fullscreen (mobile) ───
   useEffect(() => {
     const onFullscreenChange = () => {
       try {
@@ -277,7 +269,6 @@ const Watch = () => {
     };
   }, []);
 
-  // ─── Anti-ads ───
   useEffect(() => {
     const adP = ['doubleclick.net', 'googlesyndication.com', 'popads.net', 'popcash.net', 'adsterra.com', 'exoclick.com'];
     const isAd = (h) => h && adP.some(d => h.toLowerCase().includes(d));
@@ -288,14 +279,12 @@ const Watch = () => {
     return () => { document.removeEventListener('click', block, true); window.open = orig; };
   }, []);
 
-  // Clear switching overlay when video loads
   useEffect(() => {
     if (!switching) return;
-    const timer = setTimeout(() => setSwitching(false), 3000); // fallback: auto-hide after 3s
+    const timer = setTimeout(() => setSwitching(false), 3000);
     return () => clearTimeout(timer);
   }, [videoUrl, switching]);
 
-  // ─── Handlers ───
   const handleServerSelect = (server) => {
     saveProgress();
     setSwitching(true);
@@ -314,7 +303,7 @@ const Watch = () => {
     } else {
       setSwitching(false);
     }
-    setVideoFailed(false); // reset fallback on server change
+    setVideoFailed(false);
     setSelectedServer(server);
   };
 
@@ -330,7 +319,6 @@ const Watch = () => {
     }
   };
 
-  // Convert special URLs to embed format for iframe fallback
   const toEmbedUrl = (url) => {
     if (!url) return url;
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
@@ -344,22 +332,23 @@ const Watch = () => {
     return url;
   };
 
-  // Determine player mode: 'videojs' or 'iframe'
-  // Try Video.js first, if it fails (videoFailed=true) → fallback to iframe
   const useVideoJs = videoUrl && !videoFailed;
 
-  // ─── Render ───
   if (loading) return <div className="loading-container main-container"><div className="spinner" /><p>Memuat video...</p></div>;
 
   if (error || !episodeData) {
     const nf = error?.includes('tidak ditemukan') || error?.includes('404');
     return (
       <div className="error-container main-container">
-        <div className="error-icon">{nf ? '🔍' : '⚠️'}</div>
-        <h2>{nf ? 'Episode Tidak Ditemukan' : 'Terjadi Kesalahan'}</h2>
-        <p className="error-message">{error || 'Episode tidak ditemukan'}</p>
+        <div className="error-icon" aria-hidden="true">
+          <Icon name={nf ? 'search' : 'alert'} size={28} />
+        </div>
+        <h2>{nf ? 'Episode tidak ditemukan' : 'Terjadi kesalahan'}</h2>
+        <p className="error-hint">{error || 'Episode tidak ditemukan'}</p>
         <div className="error-actions">
-          <button type="button" className="btn btn-primary" onClick={() => navigate(-1)}>← Kembali</button>
+          <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)}>
+            <Icon name="arrow-left" size={16} /> Kembali
+          </button>
           <Link to="/" className="btn btn-secondary">Ke Beranda</Link>
         </div>
       </div>
@@ -372,22 +361,24 @@ const Watch = () => {
 
   return (
     <div className="watch-page main-container">
-      <div style={{ marginBottom: '12px' }}>
+      <div style={{ marginBottom: 'var(--space-3)' }}>
         {hasBack ? (
-          <Link to={`/anime/${backId}`} className="back-link">← Kembali ke {(animeData?.title || 'Anime').substring(0, 40)}</Link>
+          <Link to={`/anime/${backId}`} className="back-link">
+            <Icon name="arrow-left" size={16} /> {(animeData?.title || 'Anime').substring(0, 40)}
+          </Link>
         ) : (
-          <button type="button" className="back-link" onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', fontWeight: 600, fontSize: 'var(--text-sm)', padding: 0, fontFamily: 'var(--font-sans)' }}>← Kembali</button>
+          <button type="button" className="back-link" onClick={() => navigate(-1)}>
+            <Icon name="arrow-left" size={16} /> Kembali
+          </button>
         )}
       </div>
 
-      <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 800, marginBottom: '16px' }}>{episodeData.title}</h1>
+      <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: 'var(--space-4)' }}>{episodeData.title}</h1>
 
-      {/* Video Player */}
-      <div className="video-player-wrapper" style={{ position: 'relative' }}>
+      <div className="video-player-wrapper">
         {switching && <WatchLoading message="Mengganti server..." serverName={switchLabel} />}
         {videoUrl ? (
           useVideoJs ? (
-            /* Try Video.js first */
             <Player.Provider key={videoUrl}>
               <VideoSkin>
                 <Video
@@ -408,11 +399,10 @@ const Watch = () => {
               </VideoSkin>
             </Player.Provider>
           ) : iframeSrc ? (
-            /* Fallback: enhanced embed player */
             <EmbedPlayer src={iframeSrc} title={episodeData.title} onLoad={() => setSwitching(false)} />
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-              <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Buka Video →</a>
+              <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Buka Video <Icon name="external-link" size={14} /></a>
             </div>
           )
         ) : (
@@ -420,7 +410,6 @@ const Watch = () => {
         )}
       </div>
 
-      {/* Quality & Server */}
       <div className="server-selector">
         {episodeData?.server?.qualities?.length > 0 && (
           <div className="quality-tabs">
@@ -436,32 +425,34 @@ const Watch = () => {
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="episode-navigation">
         {(episodeData?.navigation?.previous_episode || (episodeData?.hasPrevEpisode && !episodeData?.navigation)) && (
-          <Link to={`/watch/${episodeData?.navigation?.previous_episode?.slug || episodeData?.prevEpisode?.episodeId || episodeId}`} className="btn btn-secondary" style={{ flex: 1, textAlign: 'center' }}>← Eps Sebelumnya</Link>
+          <Link to={`/watch/${episodeData?.navigation?.previous_episode?.slug || episodeData?.prevEpisode?.episodeId || episodeId}`} className="btn btn-secondary" style={{ flex: 1, textAlign: 'center' }}>
+            <Icon name="arrow-left" size={16} /> Eps Sebelumnya
+          </Link>
         )}
         {(episodeData?.navigation?.next_episode || (episodeData?.hasNextEpisode && !episodeData?.navigation)) && (
-          <Link to={`/watch/${episodeData?.navigation?.next_episode?.slug || episodeData?.nextEpisode?.episodeId || episodeId}`} className="btn btn-primary" style={{ flex: 1, textAlign: 'center' }}>Eps Berikutnya →</Link>
+          <Link to={`/watch/${episodeData?.navigation?.next_episode?.slug || episodeData?.nextEpisode?.episodeId || episodeId}`} className="btn btn-primary" style={{ flex: 1, textAlign: 'center' }}>
+            Eps Berikutnya <Icon name="arrow-right" size={16} />
+          </Link>
         )}
       </div>
 
-      {/* Anime Info */}
       {animeData && (
-        <div className="detail-header" style={{ marginTop: '20px' }}>
+        <div className="detail-header" style={{ marginTop: 'var(--space-5)' }}>
           <div className="detail-poster" style={{ width: '140px' }}>
             <img src={animeData.poster || animeData.poster_url} alt={animeData.title} loading="lazy" decoding="async" />
           </div>
           <div className="detail-info">
-            <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '8px' }}>{animeData.title}</h2>
+            <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-2)' }}>{animeData.title}</h2>
             <div className="detail-meta">
-              {animeData.type && <span className="detail-meta-item">📺 {animeData.type}</span>}
-              {animeData.episodes != null && <span className="detail-meta-item">🎬 {animeData.episodes} Episode</span>}
-              {animeData.status && <span className="detail-meta-item">📊 {animeData.status}</span>}
-              {animeData.duration && <span className="detail-meta-item">⏱️ {animeData.duration}</span>}
+              {animeData.type && <span className="detail-meta-item"><Icon name="monitor" size={14} /> {animeData.type}</span>}
+              {animeData.episodes != null && <span className="detail-meta-item"><Icon name="play" size={14} /> {animeData.episodes} Episode</span>}
+              {animeData.status && <span className="detail-meta-item"><Icon name="check" size={14} /> {animeData.status}</span>}
+              {animeData.duration && <span className="detail-meta-item"><Icon name="clock" size={14} /> {animeData.duration}</span>}
             </div>
             {animeData.genreList?.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '8px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-1)', marginTop: 'var(--space-2)' }}>
                 {animeData.genreList.map(g => <span key={g.title} className="detail-meta-item" style={{ fontSize: '0.65rem' }}>{g.title}</span>)}
               </div>
             )}

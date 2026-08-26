@@ -1,0 +1,92 @@
+/* Skeleton — layout-geometry variants (DESIGN.md §5) */
+
+.skeleton-card-poster {
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+.skeleton-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+}
+.skeleton-card-title {
+  height: 14px;
+  width: 65%;
+  border-radius: var(--radius-sm);
+}
+.skeleton-card-sub {
+  height: 12px;
+  width: 40%;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-detail-poster {
+  width: 200px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+.skeleton-detail-title {
+  height: 28px;
+  width: 55%;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-3);
+}
+.skeleton-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.skeleton-detail-meta-pill {
+  height: 24px;
+  width: 80px;
+  border-radius: var(--radius-full);
+}
+.skeleton-detail-genre {
+  height: 20px;
+  width: 60px;
+  border-radius: var(--radius-full);
+}
+
+.skeleton-watch-player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+}
+.skeleton-watch-title {
+  height: 20px;
+  width: 200px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-4);
+}
+.skeleton-watch-server {
+  height: 30px;
+  width: 80px;
+  border-radius: var(--radius-full);
+}
+.skeleton-watch-nav {
+  height: 40px;
+  width: 140px;
+  border-radius: var(--radius-full);
+}
+
+.skeleton-info-poster {
+  width: 140px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+.skeleton-info-title {
+  height: 22px;
+  width: 70%;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-2);
+}
+.skeleton-info-pill {
+  height: 20px;
+  width: 70px;
+  border-radius: var(--radius-full);
+}

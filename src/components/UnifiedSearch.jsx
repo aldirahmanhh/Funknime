@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { animeAPI, comicAPI } from '../services/api';
 import AnimeCard from './AnimeCard';
+import Icon from './Icon';
 
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
 const proxyImage = (url) => {
@@ -28,13 +29,13 @@ const SearchKomikCard = ({ comic }) => {
         {type && <span className="anime-card-badge anime-card-badge--ongoing">{type}</span>}
         <img src={posterUrl} alt={title} className="poster" loading="lazy" decoding="async" width={200} height={280} referrerPolicy="no-referrer"
           onError={(e) => { const f = placeholderImg(title); if (e.target.src !== f) e.target.src = f; }} />
-        <div className="card-overlay"><span className="play-icon" aria-hidden="true">📖</span></div>
+        <div className="card-overlay"><span className="play-icon" aria-hidden="true"><Icon name="book" size={20} /></span></div>
       </div>
       <div className="anime-info">
         <h3>{title}</h3>
         <div className="meta">
           {chapter && <span className="episode-count">{chapter}</span>}
-          {rating && <span className="score">⭐ {rating}</span>}
+          {rating && <span className="score"><Icon name="star" size={12} /> {rating}</span>}
         </div>
       </div>
     </Link>
@@ -49,7 +50,7 @@ const UnifiedSearch = () => {
   const [komikResults, setKomikResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('all'); // all, anime, donghua, komik
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -66,7 +67,6 @@ const UnifiedSearch = () => {
       setLoading(true);
       setError(null);
 
-      // Search anime, donghua, and komik in parallel
       const [animeRes, donghuaRes, komikRes] = await Promise.all([
         animeAPI.search(searchQuery).catch(() => ({ data: { animeList: [] } })),
         animeAPI.searchDonghua(searchQuery).catch(() => ({ data: [] })),
@@ -130,26 +130,26 @@ const UnifiedSearch = () => {
             Semua ({totalResults})
           </button>
           <button className={`filter-tab ${activeTab === 'anime' ? 'active' : ''}`} onClick={() => setActiveTab('anime')}>
-            📺 Anime ({animeResults.length})
+            <Icon name="monitor" size={14} /> Anime ({animeResults.length})
           </button>
           <button className={`filter-tab ${activeTab === 'donghua' ? 'active' : ''}`} onClick={() => setActiveTab('donghua')}>
-            🐉 Donghua ({donghuaResults.length})
+            <Icon name="flame" size={14} /> Donghua ({donghuaResults.length})
           </button>
           <button className={`filter-tab ${activeTab === 'komik' ? 'active' : ''}`} onClick={() => setActiveTab('komik')}>
-            📖 Komik ({komikResults.length})
+            <Icon name="book" size={14} /> Komik ({komikResults.length})
           </button>
         </div>
       )}
 
       {loading && <div className="loading-container"><div className="spinner" /></div>}
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="error-hint">{error}</div>}
 
       {!loading && query && (
         <>
           {anime.length > 0 && (
             <section className="section">
-              <h2 className="section-title">📺 Anime ({anime.length})</h2>
+              <h2 className="section-title">Anime ({anime.length})</h2>
               <div className="anime-grid">
                 {anime.map((item, idx) => (
                   <AnimeCard key={item.animeId || idx} anime={{ ...item, provider: 'otakudesu' }} index={idx} providerHint="Anime" />
@@ -160,7 +160,7 @@ const UnifiedSearch = () => {
 
           {donghua.length > 0 && (
             <section className="section">
-              <h2 className="section-title">🐉 Donghua ({donghua.length})</h2>
+              <h2 className="section-title">Donghua ({donghua.length})</h2>
               <div className="anime-grid">
                 {donghua.map((item, idx) => (
                   <AnimeCard key={item.slug || idx} anime={{ ...item, animeId: item.slug, provider: 'donghua' }} index={idx} providerHint="Donghua" />
@@ -171,7 +171,7 @@ const UnifiedSearch = () => {
 
           {komik.length > 0 && (
             <section className="section">
-              <h2 className="section-title">📖 Komik ({komik.length})</h2>
+              <h2 className="section-title">Komik ({komik.length})</h2>
               <div className="anime-grid">
                 {komik.map((comic, idx) => (
                   <SearchKomikCard key={comic.slug ?? idx} comic={comic} />
@@ -182,8 +182,8 @@ const UnifiedSearch = () => {
 
           {anime.length === 0 && donghua.length === 0 && komik.length === 0 && (
             <div className="empty-state">
-              <p>Tidak ada hasil untuk "{query}"</p>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px', flexWrap: 'wrap' }}>
+              <p>Tidak ada hasil untuk &ldquo;{query}&rdquo;</p>
+              <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'center', marginTop: 'var(--space-4)', flexWrap: 'wrap' }}>
                 <Link to="/ongoing" className="btn btn-primary">Browse Anime</Link>
                 <Link to="/donghua-ongoing" className="btn btn-secondary">Browse Donghua</Link>
                 <Link to="/komik" className="btn btn-secondary">Browse Komik</Link>

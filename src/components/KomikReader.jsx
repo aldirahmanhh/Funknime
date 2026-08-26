@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { comicAPI } from '../services/api';
+import Icon from './Icon';
 import './KomikReader.css';
 
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
@@ -62,7 +63,6 @@ const KomikReader = () => {
 
   const onImageLoad = (idx) => setLoadedImages((s) => new Set(s).add(idx));
 
-  // Keyboard navigation
   useEffect(() => {
     if (mode !== 'horizontal') return;
     const onKey = (e) => {
@@ -82,7 +82,7 @@ const KomikReader = () => {
     return (
       <div className="kr-loading main-container" role="status" aria-live="polite">
         <div className="kr-loading__spinner" aria-hidden="true" />
-        <p className="kr-loading__text">Memuat chapter…</p>
+        <p className="kr-loading__text">Memuat chapter...</p>
       </div>
     );
   }
@@ -90,28 +90,30 @@ const KomikReader = () => {
   if (error || !chapter || images.length === 0) {
     return (
       <div className="error-container main-container">
-        <div className="error-icon" aria-hidden="true">📖</div>
-        <h2>Chapter Tidak Ditemukan</h2>
-        <p className="error-message">{error ?? 'Chapter tidak ditemukan atau tidak memiliki gambar.'}</p>
+        <div className="error-icon" aria-hidden="true">
+          <Icon name="book" size={28} />
+        </div>
+        <h2>Chapter tidak ditemukan</h2>
+        <p className="error-hint">{error ?? 'Chapter tidak ditemukan atau tidak memiliki gambar.'}</p>
         <div className="error-actions">
-          <button type="button" className="btn btn-primary" onClick={() => navigate(-1)}>← Kembali</button>
+          <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)}>
+            <Icon name="arrow-left" size={16} /> Kembali
+          </button>
           <Link to="/komik" className="btn btn-secondary">Baca Komik</Link>
         </div>
       </div>
     );
   }
 
-  // Extract chapter number from slug
   const chapMatch = (chapterSlug || '').match(/-chapter-(\d+(?:[.-]\d+)?)$/i);
   const chapNum = chapMatch ? chapMatch[1] : '?';
 
   return (
     <div className="kr">
-      {/* Topbar */}
       <header className="kr-topbar">
         <nav className="kr-topbar__breadcrumb" aria-label="Breadcrumb">
           <Link to="/komik">Komik</Link>
-          <span aria-hidden="true"> › </span>
+          <span aria-hidden="true"> &rsaquo; </span>
           <span className="kr-topbar__current">{chapter.title || chapterSlug}</span>
         </nav>
         <div className="kr-topbar__info">
@@ -120,16 +122,15 @@ const KomikReader = () => {
             <div className="kr-mode-toggle" role="radiogroup" aria-label="Mode baca">
               <button type="button" className={`kr-mode-btn${mode === 'vertical' ? ' kr-mode-btn--active' : ''}`}
                 onClick={() => setMode('vertical')} role="radio" aria-checked={mode === 'vertical'}>
-                ↕ Gulir
+                <Icon name="layers" size={14} /> Gulir
               </button>
               <button type="button" className={`kr-mode-btn${mode === 'horizontal' ? ' kr-mode-btn--active' : ''}`}
                 onClick={() => setMode('horizontal')} role="radio" aria-checked={mode === 'horizontal'}>
-                ↔ Halaman
+                <Icon name="grid" size={14} /> Halaman
               </button>
             </div>
           </div>
         </div>
-        {/* Page counter in horizontal mode */}
         {mode === 'horizontal' && (
           <div className="kr-topbar__progress">
             <div className="kr-progress-bar">
@@ -140,7 +141,6 @@ const KomikReader = () => {
         )}
       </header>
 
-      {/* Reading area */}
       <main className={`kr-reader${mode === 'horizontal' ? ' kr-reader--horizontal' : ''}`}>
         {mode === 'vertical' ? (
           <div className="kr-vertical">
@@ -171,7 +171,7 @@ const KomikReader = () => {
               <button type="button" className="kr-horizontal__nav kr-horizontal__nav--prev"
                 onClick={() => (currentImage > 0 ? setCurrentImage((i) => i - 1) : goPrev())}
                 disabled={currentImage === 0 && !prevSlug} aria-label={currentImage > 0 ? 'Halaman sebelumnya' : 'Chapter sebelumnya'}>
-                ‹
+                <Icon name="chevron-left" size={20} />
               </button>
               <img
                 src={proxyImage(images[currentImage])}
@@ -184,39 +184,38 @@ const KomikReader = () => {
               <button type="button" className="kr-horizontal__nav kr-horizontal__nav--next"
                 onClick={() => (currentImage < images.length - 1 ? setCurrentImage((i) => i + 1) : goNext())}
                 disabled={currentImage === images.length - 1 && !nextSlug} aria-label={currentImage < images.length - 1 ? 'Halaman berikutnya' : 'Chapter berikutnya'}>
-                ›
+                <Icon name="arrow-right" size={20} />
               </button>
             </div>
             <div className="kr-horizontal__info">
-              <span className="kr-horizontal__hint">← → atau A D untuk navigasi</span>
+              <span className="kr-horizontal__hint">Arrow keys atau A/D untuk navigasi</span>
             </div>
           </div>
         )}
       </main>
 
-      {/* Bottom navigation */}
       <nav className="kr-nav" aria-label="Navigasi chapter">
         <button type="button" className="kr-nav__btn kr-nav__btn--prev" onClick={goPrev} disabled={!prevSlug}>
-          <span className="kr-nav__arrow">←</span>
+          <Icon name="arrow-left" size={18} />
           <div className="kr-nav__label">
             <span className="kr-nav__dir">Sebelumnya</span>
           </div>
         </button>
         <Link to="/komik" className="kr-nav__btn kr-nav__btn--home">
-          📚 Daftar Komik
+          <Icon name="book" size={18} /> Daftar Komik
         </Link>
         <button type="button" className="kr-nav__btn kr-nav__btn--next" onClick={goNext} disabled={!nextSlug}>
           <div className="kr-nav__label">
             <span className="kr-nav__dir">Berikutnya</span>
           </div>
-          <span className="kr-nav__arrow">→</span>
+          <Icon name="arrow-right" size={18} />
         </button>
       </nav>
       {(!prevSlug || !nextSlug) && (
         <p className="kr-nav__info">
-          {!prevSlug && '📌 Chapter pertama'}
-          {!prevSlug && !nextSlug && ' · '}
-          {!nextSlug && '🏁 Chapter terbaru'}
+          {!prevSlug && 'Chapter pertama'}
+          {!prevSlug && !nextSlug && ' \u00b7 '}
+          {!nextSlug && 'Chapter terbaru'}
         </p>
       )}
     </div>
