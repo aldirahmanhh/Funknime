@@ -2,6 +2,7 @@
   "name": "anime-web-funknime",
   "private": true,
   "version": "0.0.0",
+  "license": "CC-BY-NC-ND-4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

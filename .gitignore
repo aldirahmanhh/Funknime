@@ -50,6 +50,9 @@ anime_rest_api_docs.md
 # Playwright
 .playwright-mcp/
 
+# OpenCode agent state
+.omo/
+
 # Vite deps cache
 .vite/
 

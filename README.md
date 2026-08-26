@@ -6,7 +6,7 @@
   ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
   ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
   ![Vercel](https://img.shields.io/badge/Deployed-Vercel-000?logo=vercel)
-  ![License](https://img.shields.io/badge/License-MIT-green)
+  ![License](https://img.shields.io/badge/License-CC_BY--NC--ND_4.0-lightgrey)
   [![Trakteer](https://img.shields.io/badge/Trakteer-Donasi-red?logo=buymeacoffee&logoColor=white)](https://teer.id/anrizz)
 
   <br/>
@@ -79,21 +79,25 @@ src/
 - Trakteer donasi + leaderboard top donatur
 - Anti-ads bawaan buat iframe streaming
 - Responsive (mobile, tablet, desktop)
-- Dark theme + purple neobrutalism UI
+- Dark cinema-lounge UI (satu tema gelap signature, aksen ungu fungsional)
 
 ## Credits
 
 - **API** — [Sankavollerei](https://www.sankavollerei.web.id) (gratis, rate limit 50 req/min)
 - **Donasi** — [Trakteer](https://teer.id/anrizz)
-- **Icons** — Emoji native
+- **Icons** — Inline SVG set buatan sendiri (tanpa dependency)
 
 ## Dukung project ini
 
-MrFunk itu gratis & open source. Kalau kamu suka dan mau bantu biaya server + domain:
+Kalau kamu suka MrFunk, dukung lewat Trakteer:
 
 [![Trakteer](https://img.shields.io/badge/Trakteer-Donasi_Sekarang-red?style=for-the-badge&logo=buymeacoffee&logoColor=white)](https://teer.id/anrizz)
 
 Atau cukup kasih star di repo ini — itu juga udah bantu banget.
+
+## Lisensi
+
+Lisensi: **[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)** — detail lengkap ada di file `LICENSE`.
 
 ## Disclaimer
 
