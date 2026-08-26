@@ -1,0 +1,65 @@
+/* AnimeDetail.jsx scoped styles — DESIGN.md compliant */
+
+.anime-synopsis {
+  background: var(--surface-1);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.anime-synopsis h2 {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-3);
+}
+
+.anime-synopsis p {
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  max-width: 65ch;
+  margin-bottom: var(--space-2);
+}
+
+.anime-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--space-4);
+}
+
+.genre-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  background: var(--surface-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.genre-link:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+
+.anime-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.anime-episode-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.anime-empty-search {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  padding: var(--space-4);
+  text-align: center;
+}

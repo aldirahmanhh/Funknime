@@ -1,4 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
+import Icon from './Icon';
+import './EmbedPlayer.css';
 
 const EmbedPlayer = ({ src, title, onLoad }) => {
   const [loaded, setLoaded] = useState(false);
@@ -26,42 +28,14 @@ const EmbedPlayer = ({ src, title, onLoad }) => {
   };
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        position: 'relative',
-        background: '#000',
-        borderRadius: 'inherit',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="embed-player">
       {!loaded && (
-        <div
-          style={{
-            position: 'absolute', inset: 0, zIndex: 5,
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            background: '#0a0a0f', gap: '12px',
-          }}
-        >
-          <div
-            style={{
-              width: '44px', height: '44px',
-              border: '3px solid rgba(255,255,255,0.1)',
-              borderTopColor: 'var(--color-primary)',
-              borderRadius: '50%',
-              animation: 'spin 0.7s linear infinite',
-            }}
-          />
-          <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
-            Memuat player...
-          </p>
+        <div className="embed-player__loader">
+          <div className="spinner" />
+          <p className="embed-player__loader-text">Memuat player...</p>
         </div>
       )}
 
-      {/* Iframe — no sandbox (some servers like vidhide reject sandboxed iframes).
-          referrerpolicy keeps our URL out of upstream logs. */}
       <iframe
         ref={iframeRef}
         src={src}
@@ -70,59 +44,22 @@ const EmbedPlayer = ({ src, title, onLoad }) => {
         referrerPolicy="no-referrer"
         title={title}
         onLoad={handleLoad}
-        style={{
-          width: '100%', height: '100%',
-          border: 'none',
-          opacity: loaded ? 1 : 0,
-          transition: 'opacity 0.3s ease',
-        }}
+        className="embed-player__iframe"
+        style={{ opacity: loaded ? 1 : 0 }}
       />
 
-      {/* Top-right control buttons — always visible (touch + keyboard friendly).
-          They sit ABOVE the iframe but only on a small corner area. */}
       {loaded && (
-        <div
-          style={{
-            position: 'absolute', top: '6px', right: '6px',
-            display: 'flex', gap: '4px',
-            zIndex: 3,
-          }}
-        >
-          <ControlBtn icon="🔄" label="Reload" onClick={reloadIframe} />
-          <ControlBtn icon="⛶" label="Fullscreen" onClick={toggleFullscreen} />
+        <div className="embed-player__controls">
+          <button type="button" className="embed-player__btn" onClick={reloadIframe} title="Reload" aria-label="Reload">
+            <Icon name="refresh" size={14} />
+          </button>
+          <button type="button" className="embed-player__btn" onClick={toggleFullscreen} title="Fullscreen" aria-label="Fullscreen">
+            <Icon name="external-link" size={14} />
+          </button>
         </div>
       )}
     </div>
   );
 };
-
-const ControlBtn = ({ icon, label, onClick }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    title={label}
-    aria-label={label}
-    style={{
-      background: 'rgba(0,0,0,0.55)',
-      border: '1px solid rgba(255,255,255,0.2)',
-      borderRadius: '6px',
-      color: '#fff',
-      padding: '6px 10px',
-      minHeight: '32px',
-      fontSize: '0.8rem',
-      cursor: 'pointer',
-      display: 'flex', alignItems: 'center', gap: '4px',
-      backdropFilter: 'blur(4px)',
-      transition: 'background 0.15s ease, transform 0.15s ease',
-    }}
-    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.75)'; }}
-    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.55)'; }}
-    onFocus={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.75)'; }}
-    onBlur={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.55)'; }}
-  >
-    <span aria-hidden="true">{icon}</span>
-    <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>{label}</span>
-  </button>
-);
 
 export default EmbedPlayer;

@@ -1,0 +1,63 @@
+/* EmbedPlayer — iframe wrapper + overlay controls */
+
+.embed-player {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #000;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.embed-player__loader {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  gap: var(--space-3);
+}
+.embed-player__loader-text {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.embed-player__iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  transition: opacity 0.3s ease;
+}
+
+.embed-player__controls {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: flex;
+  gap: 4px;
+  z-index: 3;
+}
+
+.embed-player__btn {
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  padding: var(--space-2) 10px;
+  min-height: 32px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  backdrop-filter: blur(4px);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.embed-player__btn:hover {
+  background: rgba(0, 0, 0, 0.75);
+}

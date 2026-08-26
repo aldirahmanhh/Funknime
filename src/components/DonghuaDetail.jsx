@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { animeAPI } from '../services/api';
+import Icon from './Icon';
+import './DonghuaDetail.css';
 
-// Dev-only logger
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
 const devLog = (...args) => { if (isDev) console.log(...args); };
 
@@ -57,13 +58,13 @@ const DonghuaDetail = () => {
   if (error || !donghua) {
     return (
       <div className="error-container main-container">
-        <div className="error-icon" aria-hidden="true">🔍</div>
+        <div className="error-icon" aria-hidden="true"><Icon name="search" size={28} /></div>
         <h2>Donghua Tidak Ditemukan</h2>
         <p className="error-message">{error ?? 'Donghua tidak ditemukan'}</p>
         <p className="error-hint">URL mungkin salah atau konten belum tersedia.</p>
         <div className="error-actions">
           <button type="button" className="btn btn-primary" onClick={() => navigate(-1)}>
-            ← Kembali
+            Kembali
           </button>
           <Link to="/donghua-ongoing" className="btn btn-secondary">Donghua Ongoing</Link>
         </div>
@@ -71,7 +72,6 @@ const DonghuaDetail = () => {
     );
   }
 
-  // ── Data extraction ──
   const title       = donghua.title ?? 'Unknown Title';
   const poster      = donghua.poster ?? donghua.poster_url ?? '';
   const synopsis    = donghua.synopsis ?? donghua.description ?? 'Sinopsis tidak tersedia.';
@@ -97,16 +97,13 @@ const DonghuaDetail = () => {
       })
     : episodes;
 
-  const statusColor = status?.toLowerCase().includes('ongoing') ? 'var(--color-success)'
-    : status?.toLowerCase().includes('completed') ? 'var(--color-secondary)'
-    : 'var(--color-text-muted)';
+  const isOngoing = status?.toLowerCase().includes('ongoing');
 
   devLog('[DonghuaDetail] data:', donghua);
 
   return (
     <article className="dd main-container" aria-labelledby="dd-title">
 
-      {/* ── Breadcrumb ── */}
       <nav className="breadcrumb" aria-label="Breadcrumb">
         <Link to="/">Beranda</Link>
         <span className="breadcrumb-sep" aria-hidden="true">/</span>
@@ -115,24 +112,20 @@ const DonghuaDetail = () => {
         <span className="breadcrumb-current" aria-current="page">{title}</span>
       </nav>
 
-      {/* ── Hero ── */}
-      <section className="dd-hero" aria-label="Info donghua">
-        {/* Blurred bg */}
+      <div className="dd-hero-wrap">
         {poster && (
           <div
-            className="dd-hero__bg"
+            className="dd-hero-bg"
             style={{ backgroundImage: `url(${poster})` }}
             aria-hidden="true"
           />
         )}
 
-        <div className="dd-hero__body">
-          {/* Poster */}
-          <div className="dd-hero__poster-wrap">
+        <div className="detail-header">
+          <div className="detail-poster">
             <img
               src={poster}
               alt={`Poster ${title}`}
-              className="dd-hero__poster"
               loading="eager"
               onError={(e) => {
                 e.target.src = 'https://placehold.co/220x330/16161F/9333EA?text=No+Poster';
@@ -140,8 +133,7 @@ const DonghuaDetail = () => {
             />
             {status && (
               <span
-                className="dd-hero__badge"
-                style={{ '--badge-color': statusColor }}
+                className={`dd-status-badge${isOngoing ? ' dd-status-badge--ongoing' : ''}`}
                 aria-label={`Status: ${status}`}
               >
                 {status}
@@ -149,75 +141,56 @@ const DonghuaDetail = () => {
             )}
           </div>
 
-          {/* Info */}
-          <div className="dd-hero__info">
-            <p className="dd-hero__label">🐉 {type}</p>
-            <h1 id="dd-title" className="dd-hero__title">{title}</h1>
+          <div className="detail-info">
+            <p className="text-eyebrow">{type}</p>
+            <h1 id="dd-title">{title}</h1>
 
-            {/* Meta pills */}
-            <dl className="dd-meta" aria-label="Detail informasi">
+            <div className="detail-meta">
               {rating && (
-                <div className="dd-meta__item">
-                  <dt className="visually-hidden">Rating</dt>
-                  <dd className="dd-meta__pill dd-meta__pill--accent">
-                    <span aria-hidden="true">⭐</span> {rating}
-                  </dd>
-                </div>
+                <span className="detail-meta-item">
+                  <Icon name="star" size={14} /> <span className="num" style={{ color: 'var(--color-accent)' }}>{rating}</span>
+                </span>
               )}
               {epCount && (
-                <div className="dd-meta__item">
-                  <dt className="visually-hidden">Jumlah episode</dt>
-                  <dd className="dd-meta__pill">
-                    <span aria-hidden="true">📺</span> {epCount} eps
-                  </dd>
-                </div>
+                <span className="detail-meta-item">
+                  <Icon name="monitor" size={14} /> {epCount} eps
+                </span>
               )}
               {released && (
-                <div className="dd-meta__item">
-                  <dt className="visually-hidden">Rilis</dt>
-                  <dd className="dd-meta__pill">
-                    <span aria-hidden="true">📅</span> {released}
-                  </dd>
-                </div>
+                <span className="detail-meta-item">
+                  <Icon name="calendar" size={14} /> {released}
+                </span>
               )}
               {duration && (
-                <div className="dd-meta__item">
-                  <dt className="visually-hidden">Durasi</dt>
-                  <dd className="dd-meta__pill">
-                    <span aria-hidden="true">⏱</span> {duration}
-                  </dd>
-                </div>
+                <span className="detail-meta-item">
+                  <Icon name="clock" size={14} /> {duration}
+                </span>
               )}
               {studio && (
-                <div className="dd-meta__item">
-                  <dt className="visually-hidden">Studio</dt>
-                  <dd className="dd-meta__pill">
-                    <span aria-hidden="true">🏢</span> {studio}
-                  </dd>
-                </div>
+                <span className="detail-meta-item">
+                  {studio}
+                </span>
               )}
-            </dl>
+            </div>
 
-            {/* Genre tags */}
             {Array.isArray(genres) && genres.length > 0 && (
               <div className="dd-genres" role="list" aria-label="Genre">
                 {genres.map((g, i) => {
                   const name = typeof g === 'string' ? g : g.name ?? g.title ?? '';
                   return (
-                    <span key={i} className="genre-tag" role="listitem">{name}</span>
+                    <span key={i} className="dd-genre-chip" role="listitem">{name}</span>
                   );
                 })}
               </div>
             )}
 
-            {/* CTA buttons */}
             {episodes.length > 0 && (
               <div className="dd-cta" role="group" aria-label="Mulai menonton">
-                <Link to={`/watch/${firstSlug}`} className="btn btn-primary btn-large">
-                  <span aria-hidden="true">▶</span> Episode 1
+                <Link to={`/watch/${firstSlug}`} className="btn btn-primary">
+                  <Icon name="play" size={16} /> Episode 1
                 </Link>
                 {episodes.length > 1 && (
-                  <Link to={`/watch/${latestSlug}`} className="btn btn-secondary btn-large">
+                  <Link to={`/watch/${latestSlug}`} className="btn btn-secondary">
                     Episode Terbaru
                   </Link>
                 )}
@@ -225,72 +198,67 @@ const DonghuaDetail = () => {
             )}
           </div>
         </div>
+      </div>
+
+      <section className="dd-synopsis" aria-labelledby="dd-synopsis-heading">
+        <h2 id="dd-synopsis-heading">Sinopsis</h2>
+        <p>{synopsis}</p>
       </section>
 
-      {/* ── Content grid ── */}
-      <div className="dd-content">
-
-        {/* Synopsis */}
-        <section className="dd-synopsis section section-neo" aria-labelledby="dd-synopsis-heading">
-          <h2 id="dd-synopsis-heading" className="dd-section-title">Sinopsis</h2>
-          <p className="dd-synopsis__text">{synopsis}</p>
-        </section>
-
-        {/* Episode list */}
-        {episodes.length > 0 && (
-          <section className="dd-episodes section section-neo" aria-labelledby="dd-ep-heading">
-            <div className="dd-episodes__header">
-              <h2 id="dd-ep-heading" className="dd-section-title">
-                Episode
-                <span className="dd-episodes__count" aria-label={`${episodes.length} episode`}>
-                  {episodes.length}
-                </span>
-              </h2>
-              {episodes.length > 12 && (
-                <div className="dd-episodes__search">
-                  <label htmlFor="ep-search" className="visually-hidden">Cari episode</label>
-                  <input
-                    id="ep-search"
-                    type="search"
-                    className="dd-episodes__search-input"
-                    placeholder="Cari episode…"
-                    value={epSearch}
-                    onChange={e => setEpSearch(e.target.value)}
-                    aria-label="Cari episode"
-                  />
-                </div>
-              )}
-            </div>
-
-            {filteredEps.length === 0 ? (
-              <p className="dd-episodes__empty">Tidak ada episode yang cocok.</p>
-            ) : (
-              <ol className="dd-ep-grid" aria-label="Daftar episode" reversed>
-                {filteredEps.map((ep, idx) => {
-                  const epTitle = ep.episode ?? ep.title ?? `Episode ${idx + 1}`;
-                  const epSlug  = ep.slug ?? ep.episodeId ?? '';
-                  return (
-                    <li key={epSlug || idx} className="dd-ep-item">
-                      <Link to={`/watch/${epSlug}`} className="dd-ep-btn" aria-label={`Tonton ${epTitle}`}>
-                        <span className="dd-ep-btn__title">{epTitle}</span>
-                        {ep.date && <span className="dd-ep-btn__date">{ep.date}</span>}
-                        <span className="dd-ep-btn__icon" aria-hidden="true">▶</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ol>
+      {episodes.length > 0 && (
+        <section className="episode-list" aria-labelledby="dd-ep-heading">
+          <div className="episode-list-header">
+            <h2 id="dd-ep-heading" style={{ display: 'inline', fontSize: 'inherit', fontWeight: 'inherit' }}>
+              Episode
+              <span className="num" style={{ marginLeft: '6px', color: 'var(--text-muted)' }}>
+                {episodes.length}
+              </span>
+            </h2>
+            {episodes.length > 12 && (
+              <div className="dd-episodes-search">
+                <label htmlFor="ep-search" className="visually-hidden">Cari episode</label>
+                <input
+                  id="ep-search"
+                  type="search"
+                  placeholder="Cari episode…"
+                  value={epSearch}
+                  onChange={e => setEpSearch(e.target.value)}
+                  aria-label="Cari episode"
+                />
+              </div>
             )}
-          </section>
-        )}
-
-        {episodes.length === 0 && (
-          <div className="section section-neo empty-state">
-            <p>Episode list tidak tersedia</p>
-            <p className="error-hint">Detail lengkap mungkin belum tersedia dari API</p>
           </div>
-        )}
-      </div>
+
+          {filteredEps.length === 0 ? (
+            <p className="dd-episodes-empty">Tidak ada episode yang cocok.</p>
+          ) : (
+            <div className="dd-episode-scroll">
+              {filteredEps.map((ep, idx) => {
+                const epTitle = ep.episode ?? ep.title ?? `Episode ${idx + 1}`;
+                const epSlug  = ep.slug ?? ep.episodeId ?? '';
+                return (
+                  <Link
+                    key={epSlug || idx}
+                    to={`/watch/${epSlug}`}
+                    className="episode-item"
+                    aria-label={`Tonton ${epTitle}`}
+                  >
+                    <span className="episode-title">{epTitle}</span>
+                    {ep.date && <span className="episode-date">{ep.date}</span>}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
+
+      {episodes.length === 0 && (
+        <div className="empty-state">
+          <p>Episode list tidak tersedia</p>
+          <p className="error-hint">Detail lengkap mungkin belum tersedia dari API</p>
+        </div>
+      )}
     </article>
   );
 };

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { animeAPI, APIError } from '../services/api';
+import Icon from './Icon';
+import './AnimeDetail.css';
 
 const PROVIDER_ORDER = ['otakudesu', 'samehadaku', 'stream'];
 
@@ -53,25 +55,24 @@ const AnimeDetail = () => {
       } finally { setLoading(false); }
     };
     fetchAnimeData();
+    // Intentionally fetch on slug change only; `error` is read via closure to
+    // avoid refetch loops when a provider attempt fails (see loop above).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animeId, providerParam]);
 
   useEffect(() => {
     if ((providerUsed || (providerParam || 'otakudesu').toLowerCase()) !== 'otakudesu') return;
-    // Extract batch URL from various possible formats
     const extractBatchUrl = (val) => {
       if (!val) return null;
       if (typeof val === 'string' && val.startsWith('http')) return val;
       if (typeof val === 'object') {
-        // Could be { url: '...' } or { batchUrl: '...' } or { downloadUrl: '...' }
         const u = val.url || val.batchUrl || val.downloadUrl || val.href;
         if (typeof u === 'string' && u.startsWith('http')) return u;
-        // Could be array of links
         if (Array.isArray(val)) {
           const first = val[0];
           if (typeof first === 'string') return first;
           if (first?.url) return first.url;
         }
-        // Nested: { list: [{ url }] }
         if (Array.isArray(val.list) && val.list[0]?.url) return val.list[0].url;
       }
       return null;
@@ -113,14 +114,13 @@ const AnimeDetail = () => {
   if (!anime) {
     return (
       <div className="error-container main-container">
-        <div className="error-icon">🔍</div>
+        <div className="error-icon"><Icon name="search" size={28} /></div>
         <h2>Anime tidak ditemukan</h2>
-        <Link to="/" className="btn btn-primary">← Kembali ke Beranda</Link>
+        <Link to="/" className="btn btn-primary">Kembali ke Beranda</Link>
       </div>
     );
   }
 
-  // Only use batch if it's a valid URL string (not object)
   const batchLink = (typeof batchUrl === 'string' && batchUrl.startsWith('http')) ? batchUrl
     : (typeof anime?.batch === 'string' && anime.batch.startsWith('http')) ? anime.batch
     : null;
@@ -131,7 +131,6 @@ const AnimeDetail = () => {
     return 'Otakudesu';
   })();
 
-  // Episode list - use actual episode count from API, not array length
   const episodeList = anime.episodeList ?? [];
   const totalEpisodes = anime.episodes ?? anime.episodeCount ?? episodeList.length;
   const getEpisodeNum = (ep) => {
@@ -150,7 +149,6 @@ const AnimeDetail = () => {
         <span>{anime.title}</span>
       </nav>
 
-      {/* Detail Header - Horizontal layout */}
       <div className="detail-header">
         <div className="detail-poster">
           <img
@@ -162,63 +160,61 @@ const AnimeDetail = () => {
         <div className="detail-info">
           <h1>{anime.title}</h1>
           <div className="detail-meta">
-            <span className="detail-meta-item">📡 {providerLabel}</span>
-            {anime.type && <span className="detail-meta-item">📺 {anime.type}</span>}
-            {totalEpisodes > 0 && <span className="detail-meta-item">🎬 {totalEpisodes} Episode</span>}
-            {anime.status && <span className="detail-meta-item">📊 {anime.status}</span>}
-            {anime.duration && <span className="detail-meta-item">⏱️ {anime.duration}</span>}
-            {anime.studios && <span className="detail-meta-item">🏢 {anime.studios}</span>}
-            {anime.aired && <span className="detail-meta-item">📅 {anime.aired}</span>}
+            <span className="detail-meta-item">{providerLabel}</span>
+            {anime.type && <span className="detail-meta-item">{anime.type}</span>}
+            {totalEpisodes > 0 && <span className="detail-meta-item">{totalEpisodes} Episode</span>}
+            {anime.status && <span className="detail-meta-item">{anime.status}</span>}
+            {anime.duration && <span className="detail-meta-item">{anime.duration}</span>}
+            {anime.studios && <span className="detail-meta-item">{anime.studios}</span>}
+            {anime.aired && <span className="detail-meta-item">{anime.aired}</span>}
           </div>
 
           {anime.genreList?.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
+            <div className="anime-genres">
               {anime.genreList.map((genre, idx) => (
-                <Link key={idx} to={`/genres?genre=${genre.genreId}`} className="detail-meta-item" style={{ textDecoration: 'none', color: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>
+                <Link key={idx} to={`/genres?genre=${genre.genreId}`} className="genre-link">
                   {genre.title}
                 </Link>
               ))}
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div className="anime-actions">
             {firstEpisode?.episodeId && (
               <Link to={`/watch/${firstEpisode.episodeId}`} className="btn btn-primary">
-                ▶ Putar Episode 1
+                <Icon name="play" size={16} /> Putar Episode 1
               </Link>
             )}
             {(batchLink || batchLoading) && (
               batchLink ? (
                 <a href={batchLink} className="btn btn-secondary" target="_blank" rel="noopener noreferrer">
-                  ⬇ Download Batch
+                  <Icon name="download" size={16} /> Download Batch
                 </a>
               ) : (
-                <span className="btn btn-secondary" style={{ opacity: 0.6 }}>⬇ Memuat batch...</span>
+                <span className="btn btn-secondary" style={{ opacity: 0.6 }}><Icon name="download" size={16} /> Memuat batch...</span>
               )
             )}
           </div>
         </div>
       </div>
 
-      {/* Synopsis */}
-      <div style={{ background: 'var(--color-surface)', border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)', marginBottom: 'var(--space-6)' }}>
-        <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-3)' }}>Sinopsis</h2>
+      <div className="anime-synopsis">
+        <h2>Sinopsis</h2>
         {anime.synopsis?.paragraphs?.length > 0 ? (
           anime.synopsis.paragraphs.map((para, idx) => (
-            <p key={idx} style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)', lineHeight: '1.7', marginBottom: '8px' }}>{para}</p>
+            <p key={idx}>{para}</p>
           ))
         ) : (
-          <p style={{ color: 'var(--color-text-dim)' }}>Sinopsis tidak tersedia.</p>
+          <p style={{ color: 'var(--text-muted)' }}>Sinopsis tidak tersedia.</p>
         )}
       </div>
 
-      {/* Episode List */}
       {sortedEpisodeList.length > 0 && (
         <div className="episode-list">
           <div className="episode-list-header">
             Daftar Episode ({sortedEpisodeList.length})
           </div>
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <div className="anime-episode-scroll">
             {sortedEpisodeList.map((episode, idx) => (
               <Link
                 key={episode.episodeId ?? idx}
