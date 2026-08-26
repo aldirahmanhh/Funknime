@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import Icon from './Icon';
 import './Header.css';
+
+const TRAKTEER_URL = 'https://teer.id/anrizz';
 
 const Header = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
 
   // Reset UI state on navigation - legitimate use of setState in effect
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -13,6 +17,18 @@ const Header = () => {
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+    const onKeyDown = (e) => { if (e.key === 'Escape') setMobileMenuOpen(false); };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, [mobileMenuOpen]);
 
   const closeMobileMenu = () => { setMobileMenuOpen(false); setOpenDropdown(null); };
@@ -40,29 +56,30 @@ const Header = () => {
       { to: '/komik/type/manhwa', label: 'Manhwa' },
       { to: '/komik/type/manhua', label: 'Manhua' },
     ]},
-    { to: '/schedule', label: 'Schedule' },
-    { to: '/history', label: 'History' },
+    { to: '/schedule', label: 'Jadwal' },
+    { to: '/history', label: 'Riwayat' },
   ];
 
   return (
     <>
-      <header className="header">
-        <nav className="nav-container" aria-label="Main navigation">
+      <header className={`header ${scrolled ? 'header--scrolled' : ''}`}>
+        <nav className="nav-container" aria-label="Navigasi utama">
           <div className="nav-brand">
             <Link to="/" className="nav-logo" onClick={closeMobileMenu}>
-              <img src="/logo.png" alt="MrFunk" className="logo-image" />
+              <img src="/logo.png" alt="MrFunk" className="logo-image" width="36" height="36" />
               <span className="logo-text">MrFunk</span>
             </Link>
           </div>
-          <div className={`nav-menu ${mobileMenuOpen ? 'open' : ''}`} role="navigation">
-            {navLinks.map((link, idx) => {
+          <div id="primary-navigation" className={`nav-menu ${mobileMenuOpen ? 'open' : ''}`}>
+            {navLinks.map((link) => {
               if (link.submenu) {
                 const isOpen = openDropdown === link.label;
+                const childActive = link.submenu.some((s) => location.pathname === s.to);
                 return (
-                  <div key={idx} className={`nav-dropdown ${isOpen ? 'open' : ''}`}>
-                    <button type="button" className="nav-link dropdown-trigger" onClick={() => toggleDropdown(link.label)} aria-expanded={isOpen}>
+                  <div key={link.label} className={`nav-dropdown ${isOpen ? 'open' : ''}`}>
+                    <button type="button" className={`nav-link dropdown-trigger ${childActive ? 'child-active' : ''}`} onClick={() => toggleDropdown(link.label)} aria-expanded={isOpen} aria-haspopup="true">
                       {link.label}
-                      <span className={`dropdown-arrow ${isOpen ? 'rotated' : ''}`}>▾</span>
+                      <Icon name="chevron-down" size={14} className={`dropdown-arrow-icon ${isOpen ? 'rotated' : ''}`} />
                     </button>
                     <div className={`dropdown-menu ${isOpen ? 'show' : ''}`}>
                       {link.submenu.map((sub) => (
@@ -72,12 +89,23 @@ const Header = () => {
                   </div>
                 );
               }
-              return <Link key={link.to} to={link.to} className={`nav-link ${location.pathname === link.to ? 'active' : ''}`} onClick={closeMobileMenu}>{link.label}</Link>;
+              return <Link key={link.to} to={link.to} className={`nav-link ${location.pathname === link.to ? 'active' : ''}`} aria-current={location.pathname === link.to ? 'page' : undefined} onClick={closeMobileMenu}>{link.label}</Link>;
             })}
+            {/* Donate inside the mobile sheet so it is reachable everywhere */}
+            <a href={TRAKTEER_URL} target="_blank" rel="noopener noreferrer" className="btn btn--lg btn-donate nav-donate-mobile" onClick={closeMobileMenu}>
+              <Icon name="heart" size={18} />
+              Dukung MrFunk
+            </a>
           </div>
           <div className="nav-actions">
-            <Link to="/search" className="nav-search-link" onClick={closeMobileMenu} aria-label="Cari">🔍</Link>
-            <button type="button" className={`mobile-menu-btn ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(p => !p)} aria-label="Menu">
+            <Link to="/search" className="icon-btn nav-search-link" onClick={closeMobileMenu} aria-label="Cari anime dan komik">
+              <Icon name="search" size={19} />
+            </Link>
+            <a href={TRAKTEER_URL} target="_blank" rel="noopener noreferrer" className="btn btn--sm btn-donate nav-donate-desktop">
+              <Icon name="heart" size={15} />
+              Dukung
+            </a>
+            <button type="button" className={`mobile-menu-btn ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(p => !p)} aria-expanded={mobileMenuOpen} aria-controls="primary-navigation" aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'}>
               <span className="hamburger-line" /><span className="hamburger-line" /><span className="hamburger-line" />
             </button>
           </div>

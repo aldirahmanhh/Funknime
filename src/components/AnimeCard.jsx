@@ -1,11 +1,18 @@
 import { Link } from 'react-router-dom';
+import Icon from './Icon';
+
+const POSTER_FALLBACK =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280"><rect width="200" height="280" fill="#181822"/><text x="100" y="146" font-family="sans-serif" font-size="56" fill="#2C2C3A" text-anchor="middle">?</text></svg>'
+  );
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const normalizeAnime = (anime, index = 0) => {
   const animeId = anime.animeId ?? anime.slug ?? anime.id;
   const title = anime.title ?? anime.name ?? `Anime ${index + 1}`;
   const posterUrl = anime.poster ?? anime.poster_url ?? anime.cover_image ?? anime.thumbnail
-    ?? `https://via.placeholder.com/200x280/1a1a26/ff3e9a?text=${encodeURIComponent(title.substring(0, 10))}`;
+    ?? POSTER_FALLBACK;
   const episodes = anime.episodes ?? anime.episodeCount ?? anime.episode_count ?? 0;
   const score = anime.score ?? anime.rating ?? null;
   const releaseDay = anime.releaseDay ?? anime.schedule ?? anime.latestReleaseDate ?? '';
@@ -52,16 +59,16 @@ const AnimeCard = ({ anime, index = 0, innerRef, statusOverride, providerHint })
             {isCompletedBadge ? 'Completed' : 'Ongoing'}
           </span>
         )}
-        <img src={posterUrl} alt={title} className="poster" loading="lazy" decoding="async" width={200} height={280} />
+        <img src={posterUrl} alt={`${title} poster`} className="poster" loading="lazy" decoding="async" width={200} height={280} />
         <div className="card-overlay">
-          <span className="play-icon" aria-hidden>▶</span>
+          <span className="play-icon"><Icon name="play" size={20} /></span>
         </div>
       </div>
       <div className="anime-info">
         <h3>{title}</h3>
         <div className="meta">
-          {episodes > 0 && <span className="episode-count">{episodes} eps</span>}
-          {score && <span className="score">⭐ {score}</span>}
+          {episodes > 0 && <span className="episode-count num">{episodes} eps</span>}
+          {score && <span className="score num"><Icon name="star" size={12} /> {score}</span>}
           {releaseDay && <span className="release-day">{releaseDay}</span>}
         </div>
         {finalProvider && (
