@@ -5,7 +5,6 @@ import Header from './components/Header'
 import './App.css'
 import { ThemeProvider } from './contexts/ThemeContext'
 import ErrorBoundary from './components/ErrorBoundary'
-import ThemeSelector from './components/ThemeSelector'
 import InstallBanner from './components/InstallBanner'
 import MaintenancePage from './components/MaintenancePage'
 
@@ -51,13 +50,7 @@ function App() {
     <ThemeProvider>
       <a href="#main-content" className="skip-link">Lewati ke konten</a>
       <div className="app">
-        <div className="floating-shapes" aria-hidden="true">
-          <div className="floating-shape floating-shape--1"></div>
-          <div className="floating-shape floating-shape--2"></div>
-          <div className="floating-shape floating-shape--3"></div>
-        </div>
         <Header />
-        <ThemeSelector />
         <InstallBanner />
         <main id="main-content">
           <ErrorBoundary>
