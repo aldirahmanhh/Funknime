@@ -1,16 +1,17 @@
 /* ========== DONGHUA PAGES ========== */
 .donghua-page {
-  animation: fadeInUp 0.5s ease-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .donghua-detail {
-  animation: fadeInUp 0.5s ease-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .donghua-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(158px, 44vw), 1fr));
   gap: var(--space-4);
+  row-gap: var(--space-6);
 }
 
 /* ── Breadcrumb ── */
@@ -19,16 +20,16 @@
   align-items: center;
   gap: var(--space-2);
   font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   margin-bottom: var(--space-5);
   flex-wrap: wrap;
 }
 .breadcrumb a {
-  color: var(--color-primary);
+  color: var(--text-secondary);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
-.breadcrumb a:hover { color: var(--color-primary-light); }
+.breadcrumb a:hover { color: var(--text-primary); }
 .breadcrumb-sep { opacity: .4; }
 
 /* ── Genre tags ── */
@@ -41,51 +42,53 @@
 }
 .genre-tag {
   padding: var(--space-1) var(--space-3);
-  background: var(--color-surface-hover);
-  border: var(--border-thin) solid var(--color-border);
+  background: var(--surface-2);
+  border: none;
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--color-text-muted);
+  font-weight: 500;
+  color: var(--text-secondary);
   text-decoration: none;
-  transition: all var(--transition-fast);
-  cursor: default;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 .genre-tag:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  background: var(--surface-3);
+  color: var(--text-primary);
 }
 
-/* ── Episode grid (shared) ── */
+/* ── Episode grid (shared compact) ── */
 .episode-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: var(--space-2);
 }
 .episode-btn {
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-surface);
-  border: var(--border-thin) solid var(--color-border);
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
+  background: var(--surface-2);
+  border: none;
   border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
   font-size: var(--text-sm);
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
   text-align: center;
-  transition: all var(--transition-fast);
-  display: block;
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 .episode-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-text);
-  background: rgba(147, 51, 234, 0.08);
+  color: var(--text-primary);
+  background: var(--surface-3);
 }
 
 /* ════════════════════════════════════════════
-   DONGHUA DETAIL — Redesign
+   DONGHUA DETAIL
    ════════════════════════════════════════════ */
 .dd {
-  animation: fadeInUp 0.4s ease-out;
+  animation: fadeIn 0.3s ease-out;
   padding-bottom: var(--space-16);
 }
 
@@ -99,9 +102,8 @@
 }
 .dd-loading__poster,
 .dd-loading__line {
-  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-hover) 50%, var(--color-surface) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
+  background: var(--surface-2);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
   border-radius: var(--radius-md);
 }
 .dd-loading__poster {
@@ -122,27 +124,14 @@
 .dd-loading__line--sub    { width: 40%; }
 .dd-loading__line--meta   { width: 75%; }
 
-@keyframes shimmer {
-  from { background-position: 200% 0; }
-  to   { background-position: -200% 0; }
-}
-
 /* ── Hero section ── */
 .dd-hero {
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
   margin-bottom: var(--space-8);
-  border: var(--border-width) solid var(--color-border);
 }
-.dd-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 3px;
-  background: var(--anime-gradient);
-  z-index: 2;
-}
+.dd-hero::before { content: none; }
 .dd-hero__bg {
   position: absolute;
   inset: 0;
@@ -160,10 +149,9 @@
   padding: var(--space-8);
   background: linear-gradient(
     135deg,
-    rgba(10, 10, 15, 0.72) 0%,
-    rgba(22, 22, 31, 0.58) 100%
+    rgba(10, 10, 16, 0.72) 0%,
+    rgba(18, 18, 26, 0.58) 100%
   );
-  backdrop-filter: blur(2px);
 }
 
 /* ── Poster ── */
@@ -177,8 +165,7 @@
   aspect-ratio: 2/3;
   object-fit: cover;
   border-radius: var(--radius-lg);
-  border: var(--border-width) solid var(--color-border);
-  box-shadow: var(--shadow-xl), var(--shadow-glow);
+  box-shadow: var(--shadow-xl);
   display: block;
 }
 .dd-hero__badge {
@@ -187,14 +174,12 @@
   left: var(--space-2);
   padding: 3px var(--space-2);
   border-radius: var(--radius-full);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  font-family: var(--font-heading);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #fff;
-  background: var(--badge-color, var(--color-text-muted));
-  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #FFFFFF;
+  background: var(--badge-color, rgba(24, 24, 34, 0.85));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Info column ── */
@@ -207,19 +192,20 @@
   justify-content: center;
 }
 .dd-hero__label {
-  font-size: var(--text-sm);
+  font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--color-primary-light);
-  letter-spacing: 0.06em;
+  color: var(--accent-text);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   margin: 0;
 }
 .dd-hero__title {
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
   font-size: clamp(var(--text-xl), 3vw, var(--text-3xl));
-  font-weight: 800;
+  font-weight: 700;
   line-height: var(--leading-tight);
-  color: var(--color-text);
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
   margin: 0;
   word-break: break-word;
 }
@@ -237,18 +223,18 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-3);
-  background: rgba(255,255,255,.06);
-  border: var(--border-thin) solid var(--color-border);
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
   border-radius: var(--radius-full);
   font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--color-text-muted);
+  font-weight: 500;
+  color: var(--text-secondary);
   margin: 0;
+  font-variant-numeric: tabular-nums;
 }
 .dd-meta__pill--accent {
-  border-color: var(--color-accent);
   color: var(--color-accent);
-  background: rgba(245, 158, 11, 0.08);
+  background: rgba(232, 163, 61, 0.12);
 }
 
 /* ── CTA ── */
@@ -268,21 +254,23 @@
 
 /* ── Section title ── */
 .dd-section-title {
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
   font-size: var(--text-lg);
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--text-primary);
   margin: 0 0 var(--space-4);
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  letter-spacing: -0.01em;
 }
 
 /* ── Synopsis ── */
 .dd-synopsis__text {
   font-size: var(--text-base);
   line-height: var(--leading-relaxed);
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
+  max-width: 65ch;
   margin: 0;
   white-space: pre-line;
 }
@@ -304,30 +292,32 @@
   min-width: 28px;
   height: 22px;
   padding: 0 var(--space-2);
-  background: var(--color-primary);
+  background: var(--accent-soft);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
-  font-weight: 700;
-  color: #fff;
+  font-weight: 600;
+  color: var(--accent-text);
+  font-variant-numeric: tabular-nums;
 }
 .dd-episodes__search-input {
   height: 36px;
   padding: 0 var(--space-4);
-  background: var(--color-surface-hover);
-  border: var(--border-thin) solid var(--color-border);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-full);
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: var(--text-sm);
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   outline: none;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   width: 200px;
 }
 .dd-episodes__search-input:focus {
-  border-color: var(--color-primary);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .dd-episodes__empty {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   padding: var(--space-4) 0;
 }
@@ -346,56 +336,42 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: var(--space-3) var(--space-3);
-  background: var(--color-surface);
-  border: var(--border-thin) solid var(--color-border);
+  padding: var(--space-3);
+  background: var(--surface-1);
+  border: none;
   border-radius: var(--radius-md);
   text-decoration: none;
-  color: var(--color-text-muted);
-  transition: all var(--transition-fast);
+  color: var(--text-secondary);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
   position: relative;
   overflow: hidden;
 }
-.dd-ep-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--color-primary);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
 .dd-ep-btn:hover,
 .dd-ep-btn:focus-visible {
-  border-color: var(--color-primary);
-  color: var(--color-text);
-  background: var(--color-surface-hover);
+  color: var(--text-primary);
+  background: var(--surface-2);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
 }
-.dd-ep-btn:hover::before,
-.dd-ep-btn:focus-visible::before { opacity: 1; }
 .dd-ep-btn__title {
   font-size: var(--text-sm);
-  font-weight: 600;
-  font-family: var(--font-heading);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .dd-ep-btn__date {
   font-size: var(--text-xs);
-  color: var(--color-text-dim);
+  color: var(--text-muted);
 }
 .dd-ep-btn__icon {
   position: absolute;
   right: var(--space-3);
   top: 50%;
   transform: translateY(-50%);
-  font-size: 10px;
   opacity: 0;
   transition: opacity var(--transition-fast);
-  color: var(--color-primary);
+  color: var(--accent);
 }
 .dd-ep-btn:hover .dd-ep-btn__icon,
 .dd-ep-btn:focus-visible .dd-ep-btn__icon { opacity: 1; }
@@ -406,7 +382,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: var(--space-6);
+    padding: var(--space-6) var(--space-4);
     gap: var(--space-5);
   }
   .dd-hero__poster-wrap { width: 160px; }
@@ -422,9 +398,8 @@
 }
 
 @media (max-width: 480px) {
-  .dd-hero__body { padding: var(--space-4); }
+  .dd-hero__body { padding: var(--space-5) var(--space-4); }
   .dd-hero__title { font-size: var(--text-xl); }
   .dd-ep-grid { grid-template-columns: repeat(2, 1fr); }
   .donghua-grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
 }
-

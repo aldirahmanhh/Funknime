@@ -42,25 +42,13 @@
   .video-player-wrapper {
     max-height: 85vh;
   }
-  .home-hero {
-    padding: var(--space-4) var(--space-3);
-  }
-}
-
-/* High DPI screens */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  body::before {
-    background-size: 24px 24px;
-  }
 }
 
 /* Print styles */
 @media print {
   .header,
   .footer,
-  .floating-shapes,
-  .theme-selector,
-  body::before {
+  .install-banner {
     display: none !important;
   }
   body {
