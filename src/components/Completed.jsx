@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { animeAPI } from '../services/api';
 import { SkeletonAnimeGrid } from './Skeleton';
 import AnimeCard from './AnimeCard';
+import Icon from './Icon';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { mergeAnimeLists } from '../utils/animeUtils';
 
@@ -36,16 +37,18 @@ const Completed = () => {
     return () => {
       reset();
     };
+    // Cleanup-only effect: reset list state when leaving the page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading && animes.length === 0) {
     return (
       <div className="anime-list-page main-container">
-        <header className="page-header section section-neo">
-          <h1 className="main-title text-gradient">Anime Selesai</h1>
-          <p className="subtitle">Kumpulan anime yang sudah tamat dari Otakudesu & Samehadaku.</p>
+        <header className="page-header">
+          <h1>Anime Selesai</h1>
+          <p className="subtitle">Kumpulan anime yang sudah tamat dari Otakudesu &amp; Samehadaku.</p>
         </header>
-        <section className="section section-neo">
+        <section className="section">
           <SkeletonAnimeGrid count={12} />
         </section>
       </div>
@@ -55,9 +58,9 @@ const Completed = () => {
   if (error && animes.length === 0) {
     return (
       <div className="anime-list-page main-container">
-        <section className="section section-neo">
+        <section className="section">
           <div className="error-container">
-            <div className="error-icon" aria-hidden>⚠️</div>
+            <div className="error-icon" aria-hidden><Icon name="alert" size={28} /></div>
             <p className="error-message">Gagal memuat anime selesai: {error}</p>
             <p className="error-hint">Server mungkin sedang bermasalah (mis. error 500). Coba lagi nanti.</p>
             <button type="button" className="btn btn-primary" onClick={reset}>Coba Lagi</button>
@@ -69,20 +72,20 @@ const Completed = () => {
 
   return (
     <div className="anime-list-page main-container">
-      <header className="page-header section section-neo">
-        <h1 className="main-title text-gradient">Anime Selesai</h1>
-        <p className="subtitle">Anime yang sudah tamat dari Otakudesu & Samehadaku.</p>
+      <header className="page-header">
+        <h1>Anime Selesai</h1>
+        <p className="subtitle">Anime yang sudah tamat dari Otakudesu &amp; Samehadaku.</p>
         {error && <p className="error-message">{error}</p>}
       </header>
 
-      <section className="section section-neo">
+      <section className="section">
         <div className="anime-grid">
           {animes.map((anime, idx) => {
             const providers = anime.providers || [anime.provider];
             const hasOtak = providers.includes('otakudesu');
             const hasSame = providers.includes('samehadaku');
             const providerHint = hasOtak && hasSame ? 'Otakudesu & Samehadaku' : (hasSame ? 'Samehadaku' : 'Otakudesu');
-            
+
             return (
               <AnimeCard
                 key={anime.animeId ?? anime.slug ?? idx}

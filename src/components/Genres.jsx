@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { animeAPI } from '../services/api';
 import AnimeCard from './AnimeCard';
 import ErrorPage from './ErrorPage';
@@ -127,15 +126,13 @@ const Genres = () => {
 
   return (
     <div className="genres-page main-container">
-      <header className="page-header genres-hero">
-        <div className="genres-hero-copy">
-          <h1 className="main-title text-gradient">Jelajahi Genre</h1>
-          <p className="subtitle">
-            {genres.length > 0
-              ? `${genres.length} genre tersedia dari Otakudesu &amp; Samehadaku`
-              : 'Temukan anime berdasarkan genre favorit'}
-          </p>
-        </div>
+      <header className="page-header">
+        <h1>Jelajahi Genre</h1>
+        <p className="subtitle">
+          {genres.length > 0
+            ? `${genres.length} genre tersedia dari Otakudesu &amp; Samehadaku`
+            : 'Temukan anime berdasarkan genre favorit'}
+        </p>
       </header>
 
       {loading ? (
@@ -150,7 +147,7 @@ const Genres = () => {
                 <button
                   key={idx}
                   type="button"
-                  className={`genre-card${isSelected ? ' active' : ''}`}
+                  className={`genre-card${isSelected ? ' genre-card--active' : ''}`}
                   onClick={() => handleGenreClick(genre)}
                   aria-pressed={isSelected}
                 >
@@ -166,24 +163,24 @@ const Genres = () => {
               <div className="section-header genres-result-header">
                 <div className="genres-result-title-group">
                   <h2 className="section-title">{selectedGenre.title}</h2>
-                  <span className="genres-result-count">
+                  <span className="num" style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
                     {genreLoading ? '…' : `${animeByGenre.length} anime`}
                   </span>
                 </div>
                 <button
                   type="button"
-                  className="btn btn-secondary genres-clear-btn"
+                  className="btn btn-secondary btn--sm"
                   onClick={() => { setSelectedGenre(null); setAnimeByGenre([]); }}
                   aria-label="Hapus filter genre"
                 >
-                  ✕ Hapus
+                  Hapus
                 </button>
               </div>
 
               {genreLoading ? (
                 <div className="loading-container"><div className="spinner" /><p>Memuat anime...</p></div>
               ) : animeByGenre.length === 0 ? (
-                <div className="empty-state" style={{ textAlign: 'center' }}>
+                <div className="empty-state">
                   <p>Tidak ada anime di genre <strong>{selectedGenre.title}</strong>.</p>
                 </div>
               ) : (

@@ -1,0 +1,45 @@
+/* ========== WATCH HISTORY ========== */
+
+.empty-state-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto var(--space-4);
+  background: var(--surface-2);
+  border-radius: 50%;
+  color: var(--text-muted);
+}
+
+/* Progress bar on resume cards */
+.history-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  z-index: 3;
+  overflow: hidden;
+}
+
+.history-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  transition: width 200ms var(--ease-out);
+}
+
+/* Time label */
+.history-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  color: var(--accent);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}

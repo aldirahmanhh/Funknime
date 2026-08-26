@@ -108,16 +108,16 @@ const Schedule = () => {
   if (loading) {
     return (
       <div className="schedule-page main-container">
-        <header className="page-header schedule-hero">
+        <header className="page-header">
           <div className="skeleton skeleton-text" style={{ height: 40, width: 200 }} />
           <div className="skeleton skeleton-text" style={{ height: 20, width: 320, marginTop: 8 }} />
         </header>
-        <div className="schedule-tabs-skeleton">
+        <div className="schedule-summary-grid">
           {DAY_ORDER.map(d => (
-            <div key={d} className="skeleton" style={{ height: 36, width: 72, borderRadius: 8, flexShrink: 0 }} />
+            <div key={d} className="skeleton" style={{ height: 44, width: 90, borderRadius: 10, flexShrink: 0 }} />
           ))}
         </div>
-        <section className="section section-neo">
+        <section className="section">
           <SkeletonAnimeGrid count={6} />
         </section>
       </div>
@@ -141,15 +141,15 @@ const Schedule = () => {
 
   return (
     <div className="schedule-page main-container">
-      <header className="page-header schedule-hero">
-        <h1 className="main-title text-gradient">Jadwal Tayang</h1>
+      <header className="page-header">
+        <h1>Jadwal Tayang</h1>
         <p className="subtitle">Anime yang tayang per hari — hari ini: <strong>{todayName}</strong></p>
       </header>
 
-      {/* Sticky day tabs */}
+      {/* Sticky day pills */}
       {days.length > 0 && (
         <div className="schedule-tabs-wrapper" role="navigation" aria-label="Navigasi hari">
-          <div className="schedule-tabs" ref={tabsRef}>
+          <div className="schedule-day-grid" ref={tabsRef}>
             {days.map((dayItem) => {
               const isToday = dayItem.day === todayName;
               const isActive = dayItem.day === activeDay;
@@ -159,14 +159,14 @@ const Schedule = () => {
                   key={dayItem.day}
                   type="button"
                   data-day={dayItem.day}
-                  className={`schedule-tab${isActive ? ' active' : ''}${isToday ? ' today' : ''}`}
+                  className={`schedule-day-pill${isActive ? ' schedule-day-pill--active' : ''}${isToday ? ' schedule-day-pill--today' : ''}`}
                   onClick={() => scrollToDay(dayItem.day)}
                   aria-pressed={isActive}
                   aria-current={isToday ? 'date' : undefined}
                 >
-                  {isToday && <span className="schedule-tab-dot" aria-hidden="true" />}
-                  {dayItem.day}
-                  <span className="schedule-tab-count">{count}</span>
+                  {isToday && <span className="schedule-day-pill-dot" aria-hidden="true" />}
+                  <span className="schedule-day-pill-name">{dayItem.day}</span>
+                  <span className="schedule-day-pill-count">{count}</span>
                 </button>
               );
             })}
@@ -182,15 +182,15 @@ const Schedule = () => {
           return (
             <section
               key={`${dayName}-${idx}`}
-              className={`schedule-day-section section section-neo${isToday ? ' schedule-day-section--today' : ''}`}
+              className="schedule-day-section section"
               ref={el => { dayRefs.current[dayName] = el; }}
             >
-              <div className="section-header section-header-neo schedule-section-header">
-                <h2 className="section-title section-title-neo">
-                  {isToday && <span className="schedule-today-badge" aria-label="Hari ini">HARI INI</span>}
+              <div className="section-header schedule-section-header">
+                <h2 className="section-title">
+                  {isToday && <span className="text-eyebrow" style={{ color: 'var(--accent-text)', marginRight: 'var(--space-2)' }}>Hari ini</span>}
                   {dayName}
                 </h2>
-                <span className="schedule-day-count">{list.length} anime</span>
+                <span className="num" style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>{list.length} anime</span>
               </div>
               <div className="anime-grid">
                 {list.map((anime, i) => {
@@ -213,7 +213,7 @@ const Schedule = () => {
           );
         })
       ) : (
-        <div className="schedule-no-data empty-state" style={{ textAlign: 'center' }}>
+        <div className="empty-state">
           <p>Belum ada data jadwal.</p>
         </div>
       )}
