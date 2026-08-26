@@ -2,69 +2,66 @@
 
 .kg-page {
   display: grid;
-  gap: 1.25rem;
+  gap: var(--space-6);
 }
 
 .kg-hero {
   margin-bottom: 0;
 }
 
-.kg-hero-copy {
-  /* inherits from page-header */
-}
-
-/* Genre buttons grid */
 .kg-genre-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.25rem 0;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
 }
 
 .kg-genre-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--color-text, #ddd);
-  padding: 0.45rem 1rem;
-  border-radius: 20px;
-  font-size: 0.88rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .kg-genre-btn:hover {
-  background: rgba(147, 51, 234, 0.15);
-  border-color: rgba(147, 51, 234, 0.3);
+  background: var(--surface-3);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
 }
 
 .kg-genre-btn--active {
-  background: var(--color-primary, #9333EA);
-  border-color: var(--color-primary, #9333EA);
-  color: #fff;
-  font-weight: 700;
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
 }
 
 .kg-genre-btn--active:hover {
-  background: #a855f7;
+  background: var(--accent-soft);
+  border-color: var(--accent-strong);
 }
 
-/* Results section */
 .kg-result-section {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .kg-hint {
-  font-size: 0.95rem;
+  font-size: var(--text-base);
 }
 
 @media (max-width: 640px) {
   .kg-genre-grid {
-    gap: 0.35rem;
+    gap: var(--space-1);
   }
   .kg-genre-btn {
-    padding: 0.35rem 0.75rem;
-    font-size: 0.82rem;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.8125rem;
   }
 }

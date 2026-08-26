@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { comicAPI } from '../services/api';
 import ErrorPage from './ErrorPage';
+import Icon from './Icon';
 import './KomikBerwarna.css';
 
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
@@ -17,8 +18,8 @@ const proxyImage = (url) => {
 const placeholderImg = (text) =>
   `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" viewBox="0 0 200 280">` +
-    `<rect width="200" height="280" fill="#1a1a26"/>` +
-    `<text x="100" y="140" text-anchor="middle" fill="#9333EA" font-family="sans-serif" font-size="14" font-weight="bold">` +
+    `<rect width="200" height="280" fill="#181822"/>` +
+    `<text x="100" y="140" text-anchor="middle" fill="#7E7E9C" font-family="sans-serif" font-size="14" font-weight="bold">` +
     (text || 'Komik').substring(0, 16) +
     `</text></svg>`
   )}`;
@@ -32,7 +33,7 @@ const BerwarnaCard = ({ comic }) => {
         {type && <span className="anime-card-badge anime-card-badge--ongoing">{type}</span>}
         <img
           src={posterUrl}
-          alt={title}
+          alt={`${title} poster`}
           className="poster"
           loading="lazy"
           decoding="async"
@@ -41,17 +42,27 @@ const BerwarnaCard = ({ comic }) => {
           referrerPolicy="no-referrer"
           onError={(e) => { const f = placeholderImg(title); if (e.target.src !== f) e.target.src = f; }}
         />
-        <div className="card-overlay"><span className="play-icon" aria-hidden>📖</span></div>
+        <div className="card-overlay">
+          <span className="play-icon"><Icon name="book" size={20} /></span>
+        </div>
       </div>
       <div className="anime-info">
         <h3>{title}</h3>
         <div className="meta">
-          {rating && <span className="score">⭐ {rating}</span>}
+          {rating && <span className="score num"><Icon name="star" size={12} /> {rating}</span>}
         </div>
       </div>
     </Link>
   );
 };
+
+const SkeletonGrid = () => (
+  <div className="anime-grid" aria-hidden="true">
+    {Array.from({ length: 12 }).map((_, i) => (
+      <div key={i} className="skeleton skeleton-card" />
+    ))}
+  </div>
+);
 
 const KomikBerwarna = () => {
   const [comics, setComics] = useState([]);
@@ -101,13 +112,16 @@ const KomikBerwarna = () => {
     <div className="kb-page main-container">
       <header className="page-header kb-hero">
         <div className="kb-hero-copy">
-          <h1 className="main-title text-gradient">Komik Berwarna</h1>
+          <h1 className="main-title">Komik Berwarna</h1>
           <p className="subtitle">Koleksi komik full-color — manga, manhwa, dan manhua berwarna</p>
         </div>
       </header>
 
       {loading ? (
-        <div className="loading-container" role="status"><div className="spinner" /><p>Memuat komik berwarna...</p></div>
+        <div role="status">
+          <SkeletonGrid />
+          <span className="visually-hidden">Memuat komik berwarna...</span>
+        </div>
       ) : (
         <>
           <div className="anime-grid">
@@ -116,13 +130,18 @@ const KomikBerwarna = () => {
             ))}
           </div>
 
-          <div className="kb-pagination">
+          <div className="pagination kb-pagination">
             <button type="button" className="btn btn-secondary" onClick={prevPage} disabled={page <= 1}>
-              ← Sebelumnya
+              <Icon name="chevron-left" size={16} /> Sebelumnya
             </button>
-            <span className="kb-pagination__info">Halaman {page}</span>
+            <span className="page-info kb-pagination__info">Halaman {page}</span>
             <button type="button" className="btn btn-secondary" onClick={nextPage} disabled={!hasMore || loadingMore}>
-              {loadingMore ? 'Memuat...' : 'Selanjutnya →'}
+              {loadingMore ? (
+                <>
+                  <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} aria-hidden="true" />
+                  Memuat...
+                </>
+              ) : <>Selanjutnya <Icon name="chevron-right" size={16} /></>}
             </button>
           </div>
         </>

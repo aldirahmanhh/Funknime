@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { comicAPI } from '../services/api';
 import ErrorPage from './ErrorPage';
+import Icon from './Icon';
 import './KomikGenres.css';
 
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
@@ -17,8 +18,8 @@ const proxyImage = (url) => {
 const placeholderImg = (text) =>
   `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" viewBox="0 0 200 280">` +
-    `<rect width="200" height="280" fill="#1a1a26"/>` +
-    `<text x="100" y="140" text-anchor="middle" fill="#9333EA" font-family="sans-serif" font-size="14" font-weight="bold">` +
+    `<rect width="200" height="280" fill="#181822"/>` +
+    `<text x="100" y="140" text-anchor="middle" fill="#7E7E9C" font-family="sans-serif" font-size="14" font-weight="bold">` +
     (text || 'Komik').substring(0, 16) +
     `</text></svg>`
   )}`;
@@ -32,7 +33,7 @@ const GenreComicCard = ({ comic }) => {
         {type && <span className="anime-card-badge anime-card-badge--ongoing">{type}</span>}
         <img
           src={posterUrl}
-          alt={title}
+          alt={`${title} poster`}
           className="poster"
           loading="lazy"
           decoding="async"
@@ -41,17 +42,27 @@ const GenreComicCard = ({ comic }) => {
           referrerPolicy="no-referrer"
           onError={(e) => { const f = placeholderImg(title); if (e.target.src !== f) e.target.src = f; }}
         />
-        <div className="card-overlay"><span className="play-icon" aria-hidden>📖</span></div>
+        <div className="card-overlay">
+          <span className="play-icon"><Icon name="book" size={20} /></span>
+        </div>
       </div>
       <div className="anime-info">
         <h3>{title}</h3>
         <div className="meta">
-          {rating && <span className="score">⭐ {rating}</span>}
+          {rating && <span className="score num"><Icon name="star" size={12} /> {rating}</span>}
         </div>
       </div>
     </Link>
   );
 };
+
+const SkeletonGrid = () => (
+  <div className="anime-grid" aria-hidden="true">
+    {Array.from({ length: 12 }).map((_, i) => (
+      <div key={i} className="skeleton skeleton-card" />
+    ))}
+  </div>
+);
 
 const KomikGenres = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -67,7 +78,6 @@ const KomikGenres = () => {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Load genres on mount
   useEffect(() => {
     let cancelled = false;
     const ctrl = new AbortController();
@@ -90,7 +100,6 @@ const KomikGenres = () => {
     return () => { cancelled = true; ctrl.abort(); };
   }, []);
 
-  // Load comics by genre when selected
   useEffect(() => {
     if (!selectedGenre) { setComics([]); return; }
     let cancelled = false;
@@ -117,6 +126,8 @@ const KomikGenres = () => {
       }
     })();
     return () => { cancelled = true; ctrl.abort(); };
+    // Refetch only when the selected genre changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGenre]);
 
   const loadMore = useCallback(async () => {
@@ -149,7 +160,7 @@ const KomikGenres = () => {
     <div className="kg-page main-container">
       <header className="page-header kg-hero">
         <div className="kg-hero-copy">
-          <h1 className="main-title text-gradient">Genre Komik</h1>
+          <h1 className="main-title">Genre Komik</h1>
           <p className="subtitle">
             {genres.length > 0
               ? `${genres.length} genre tersedia`
@@ -159,7 +170,10 @@ const KomikGenres = () => {
       </header>
 
       {loading ? (
-        <div className="loading-container" role="status"><div className="spinner" /><p>Memuat genre...</p></div>
+        <div role="status">
+          <SkeletonGrid />
+          <span className="visually-hidden">Memuat genre...</span>
+        </div>
       ) : (
         <>
           <div className="kg-genre-grid">
@@ -169,7 +183,7 @@ const KomikGenres = () => {
                 <button
                   key={genre.slug}
                   type="button"
-                  className={`kg-genre-btn${isActive ? ' kg-genre-btn--active' : ''}`}
+                  className={`filter-tab kg-genre-btn${isActive ? ' active' : ''}`}
                   onClick={() => setSelectedGenre(isActive ? '' : genre.slug)}
                   aria-pressed={isActive}
                 >
@@ -190,17 +204,17 @@ const KomikGenres = () => {
                 </div>
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn btn-ghost btn--sm"
                   onClick={() => { setSelectedGenre(''); setComics([]); setSearchParams({}, { replace: true }); }}
                 >
-                  ✕ Hapus
+                  <Icon name="close" size={14} /> Hapus
                 </button>
               </div>
 
               {genreLoading ? (
-                <div className="loading-container"><div className="spinner" /><p>Memuat komik...</p></div>
+                <SkeletonGrid />
               ) : comics.length === 0 ? (
-                <div className="empty-state" style={{ textAlign: 'center', padding: '2rem' }}>
+                <div className="empty-state">
                   <p>Tidak ada komik di genre <strong>{selectedGenreTitle}</strong>.</p>
                 </div>
               ) : (
@@ -213,8 +227,13 @@ const KomikGenres = () => {
 
                   {hasMore && (
                     <div className="komik-load-more">
-                      <button type="button" className="btn btn-secondary" onClick={loadMore} disabled={loadingMore}>
-                        {loadingMore ? 'Memuat...' : 'Muat Lebih Banyak'}
+                      <button type="button" className="btn btn-secondary btn--lg" onClick={loadMore} disabled={loadingMore}>
+                        {loadingMore ? (
+                          <>
+                            <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} aria-hidden="true" />
+                            Memuat...
+                          </>
+                        ) : 'Muat Lebih Banyak'}
                       </button>
                     </div>
                   )}
@@ -222,7 +241,7 @@ const KomikGenres = () => {
               )}
             </section>
           ) : (
-            <p className="kg-hint" style={{ textAlign: 'center', color: 'var(--color-text-muted, #888)', padding: '2rem 0' }}>
+            <p className="kg-hint empty-state">
               Pilih genre di atas untuk melihat komik.
             </p>
           )}

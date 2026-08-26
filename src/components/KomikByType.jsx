@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { comicAPI } from '../services/api';
 import ErrorPage from './ErrorPage';
+import Icon from './Icon';
+import './KomikByType.css';
 
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
 const devWarn = (...args) => { if (isDev) console.warn('[KomikByType]', ...args); };
@@ -16,13 +18,12 @@ const proxyImage = (url) => {
 const placeholderImg = (text) =>
   `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" viewBox="0 0 200 280">` +
-    `<rect width="200" height="280" fill="#1a1a26"/>` +
-    `<text x="100" y="140" text-anchor="middle" fill="#9333EA" font-family="sans-serif" font-size="14" font-weight="bold">` +
+    `<rect width="200" height="280" fill="#181822"/>` +
+    `<text x="100" y="140" text-anchor="middle" fill="#7E7E9C" font-family="sans-serif" font-size="14" font-weight="bold">` +
     (text || 'Komik').substring(0, 16) +
     `</text></svg>`
   )}`;
 
-const TypeEmoji = { manga: '🇯🇵', manhwa: '🇰🇷', manhua: '🇨🇳' };
 const TypeLabel = { manga: 'Manga (Jepang)', manhwa: 'Manhwa (Korea)', manhua: 'Manhua (China)' };
 
 const TypeCard = ({ comic }) => {
@@ -34,7 +35,7 @@ const TypeCard = ({ comic }) => {
         {type && <span className="anime-card-badge anime-card-badge--ongoing">{type}</span>}
         <img
           src={posterUrl}
-          alt={title}
+          alt={`${title} poster`}
           className="poster"
           loading="lazy"
           decoding="async"
@@ -43,24 +44,33 @@ const TypeCard = ({ comic }) => {
           referrerPolicy="no-referrer"
           onError={(e) => { const f = placeholderImg(title); if (e.target.src !== f) e.target.src = f; }}
         />
-        <div className="card-overlay"><span className="play-icon" aria-hidden>📖</span></div>
+        <div className="card-overlay">
+          <span className="play-icon"><Icon name="book" size={20} /></span>
+        </div>
       </div>
       <div className="anime-info">
         <h3>{title}</h3>
         <div className="meta">
-          {chapter && <span className="episode-count">{chapter}</span>}
-          {rating && <span className="score">⭐ {rating}</span>}
+          {chapter && <span className="episode-count num">{chapter}</span>}
+          {rating && <span className="score num"><Icon name="star" size={12} /> {rating}</span>}
         </div>
       </div>
     </Link>
   );
 };
 
+const SkeletonGrid = () => (
+  <div className="anime-grid" aria-hidden="true">
+    {Array.from({ length: 12 }).map((_, i) => (
+      <div key={i} className="skeleton skeleton-card" />
+    ))}
+  </div>
+);
+
 const KomikByType = () => {
   const { type } = useParams();
   const validType = TypeLabel[type] ? type : null;
   const label = validType ? TypeLabel[type] : 'Tipe Tidak Dikenal';
-  const emoji = validType ? (TypeEmoji[type] || '') : '';
 
   const [comics, setComics] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,6 +104,8 @@ const KomikByType = () => {
     setError(null);
     fetchPage(1);
     window.scrollTo(0, 0);
+    // Refetch only when the type changes; fetchPage reads current page state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [validType]);
 
   const loadMore = () => { if (!loadingMore && hasMore) fetchPage(page + 1, true); };
@@ -110,17 +122,17 @@ const KomikByType = () => {
     <div className="kbt-page main-container">
       <header className="page-header kbt-hero">
         <div className="kbt-hero-copy">
-          <h1 className="main-title text-gradient">{emoji} {label}</h1>
+          <h1 className="main-title">{label}</h1>
           <p className="subtitle">Daftar komik terbaru tipe {validType}</p>
-          <nav className="kbt-tabs" aria-label="Filter tipe">
+          <nav className="filter-tabs kbt-tabs" aria-label="Filter tipe">
             {Object.entries(TypeLabel).map(([t, lbl]) => (
               <Link
                 key={t}
                 to={`/komik/type/${t}`}
-                className={`kbt-tab${t === type ? ' kbt-tab--active' : ''}`}
+                className={`filter-tab kbt-tab${t === type ? ' active' : ''}`}
                 aria-current={t === type ? 'page' : undefined}
               >
-                {TypeEmoji[t]} {lbl}
+                {lbl}
               </Link>
             ))}
           </nav>
@@ -128,13 +140,16 @@ const KomikByType = () => {
       </header>
 
       {loading ? (
-        <div className="loading-container" role="status"><div className="spinner" /><p>Memuat komik {validType}...</p></div>
+        <div role="status">
+          <SkeletonGrid />
+          <span className="visually-hidden">Memuat komik {validType}...</span>
+        </div>
       ) : error ? (
         <ErrorPage title={label} message={error} hint="Coba lagi nanti." onRetry={() => fetchPage(1)} />
       ) : (
         <>
           {comics.length === 0 ? (
-            <div className="empty-state" style={{ textAlign: 'center', padding: '2rem' }}>
+            <div className="empty-state">
               <p>Tidak ada komik untuk tipe <strong>{validType}</strong>.</p>
             </div>
           ) : (
@@ -147,8 +162,13 @@ const KomikByType = () => {
 
               {hasMore && (
                 <div className="komik-load-more">
-                  <button type="button" className="btn btn-secondary" onClick={loadMore} disabled={loadingMore}>
-                    {loadingMore ? 'Memuat...' : 'Muat Lebih Banyak'}
+                  <button type="button" className="btn btn-secondary btn--lg" onClick={loadMore} disabled={loadingMore}>
+                    {loadingMore ? (
+                      <>
+                        <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} aria-hidden="true" />
+                        Memuat...
+                      </>
+                    ) : 'Muat Lebih Banyak'}
                   </button>
                 </div>
               )}

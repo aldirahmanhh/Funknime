@@ -2,16 +2,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { comicAPI } from '../services/api';
 import ErrorPage from './ErrorPage';
+import Icon from './Icon';
 import './Komik.css';
 
-// Dev-only logger
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
 const devWarn = (...args) => { if (isDev) console.warn('[Komik]', ...args); };
 
-// Route comic images through the serverless img-proxy to bypass hotlink
-// protection. In prod, Vercel's Referrer-Policy header overrides the HTML
-// attribute, so we need the server-side proxy. In dev, no such header exists,
-// so referrerPolicy="no-referrer" on <img> works directly.
 const proxyImage = (url) => {
   if (!url) return '';
   if (url.startsWith('/api/img-proxy') || url.startsWith('data:')) return url;
@@ -19,12 +15,11 @@ const proxyImage = (url) => {
   return `/api/img-proxy?url=${encodeURIComponent(url)}`;
 };
 
-// Inline SVG placeholder — no external dependency
 const placeholderImg = (text) =>
   `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" viewBox="0 0 200 280">` +
-    `<rect width="200" height="280" fill="#1a1a26"/>` +
-    `<text x="100" y="140" text-anchor="middle" fill="#9333EA" font-family="sans-serif" font-size="14" font-weight="bold">` +
+    `<rect width="200" height="280" fill="#181822"/>` +
+    `<text x="100" y="140" text-anchor="middle" fill="#7E7E9C" font-family="sans-serif" font-size="14" font-weight="bold">` +
     (text || 'Komik').substring(0, 16) +
     `</text></svg>`
   )}`;
@@ -41,7 +36,7 @@ const KomikCard = ({ comic }) => {
         {type && <span className="anime-card-badge anime-card-badge--ongoing">{type}</span>}
         <img
           src={posterUrl}
-          alt={title}
+          alt={`${title} poster`}
           className="poster"
           loading="lazy"
           decoding="async"
@@ -53,18 +48,28 @@ const KomikCard = ({ comic }) => {
             if (e.target.src !== fallback) e.target.src = fallback;
           }}
         />
-        <div className="card-overlay"><span className="play-icon" aria-hidden>📖</span></div>
+        <div className="card-overlay">
+          <span className="play-icon"><Icon name="book" size={20} /></span>
+        </div>
       </div>
       <div className="anime-info">
         <h3>{title}</h3>
         <div className="meta">
-          {chapter && <span className="episode-count">{chapter}</span>}
-          {rating && <span className="score">⭐ {rating}</span>}
+          {chapter && <span className="episode-count num">{chapter}</span>}
+          {rating && <span className="score num"><Icon name="star" size={12} /> {rating}</span>}
         </div>
       </div>
     </Link>
   );
 };
+
+const SkeletonGrid = () => (
+  <div className="anime-grid" aria-hidden="true">
+    {Array.from({ length: 12 }).map((_, i) => (
+      <div key={i} className="skeleton skeleton-card" />
+    ))}
+  </div>
+);
 
 const Komik = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -83,7 +88,6 @@ const Komik = () => {
   const [rekomendasi, setRekomendasi] = useState([]);
   const [topComics, setTopComics] = useState([]);
 
-  // Initial load: latest + populer in parallel
   useEffect(() => {
     let cancelled = false;
     const ctrl = new AbortController();
@@ -127,7 +131,6 @@ const Komik = () => {
     return () => { cancelled = true; ctrl.abort(); };
   }, []);
 
-  // Search effect — debounced via setTimeout
   useEffect(() => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -196,7 +199,7 @@ const Komik = () => {
     <div className="komik-page main-container">
       <header className="page-header komik-hero">
           <div className="komik-hero-copy">
-            <h1 className="main-title text-gradient">Baca Komik</h1>
+            <h1 className="main-title">Baca Komik</h1>
             <p className="subtitle">
               {showSearch
                 ? `Hasil pencarian untuk "${query}"`
@@ -204,11 +207,11 @@ const Komik = () => {
             </p>
             {!showSearch && (
               <nav className="komik-quick-links" aria-label="Navigasi komik">
-                <Link to="/komik/genres" className="komik-quick-link">🎯 Genre</Link>
-                <Link to="/komik/berwarna" className="komik-quick-link">🎨 Berwarna</Link>
-                <Link to="/komik/type/manga" className="komik-quick-link">🇯🇵 Manga</Link>
-                <Link to="/komik/type/manhwa" className="komik-quick-link">🇰🇷 Manhwa</Link>
-                <Link to="/komik/type/manhua" className="komik-quick-link">🇨🇳 Manhua</Link>
+                <Link to="/komik/genres" className="komik-quick-link"><Icon name="layers" size={16} /> Genre</Link>
+                <Link to="/komik/berwarna" className="komik-quick-link"><Icon name="sparkle" size={16} /> Berwarna</Link>
+                <Link to="/komik/type/manga" className="komik-quick-link"><Icon name="book" size={16} /> Manga</Link>
+                <Link to="/komik/type/manhwa" className="komik-quick-link"><Icon name="book" size={16} /> Manhwa</Link>
+                <Link to="/komik/type/manhua" className="komik-quick-link"><Icon name="book" size={16} /> Manhua</Link>
               </nav>
             )}
           </div>
@@ -223,15 +226,15 @@ const Komik = () => {
             aria-label="Cari komik"
           />
           <button type="submit" className="btn btn-primary komik-search-btn" aria-label="Cari">
-            🔍 Cari
+            <Icon name="search" size={16} /> Cari
           </button>
         </form>
       </header>
 
       {loading ? (
-        <div className="loading-container" role="status" aria-live="polite">
-          <div className="spinner" aria-hidden="true" />
-          <p>Memuat komik...</p>
+        <div role="status" aria-live="polite">
+          <SkeletonGrid />
+          <span className="visually-hidden">Memuat komik...</span>
         </div>
       ) : showSearch ? (
         <section className="komik-section">
@@ -242,10 +245,10 @@ const Komik = () => {
             </span>
           </div>
           {searchLoading ? (
-            <div className="loading-container"><div className="spinner" /><p>Mencari...</p></div>
+            <SkeletonGrid />
           ) : searchResults.length === 0 ? (
-            <div className="empty-state" style={{ textAlign: 'center', padding: '2rem' }}>
-              <p>Tidak ada komik yang cocok dengan <strong>"{query}"</strong>.</p>
+            <div className="empty-state">
+              <p>Tidak ada komik yang cocok dengan <strong>&ldquo;{query}&rdquo;</strong>.</p>
             </div>
           ) : (
             <div className="anime-grid">
@@ -261,7 +264,7 @@ const Komik = () => {
             <>
               <section className="komik-section">
                 <div className="section-header">
-                  <h2 className="section-title">🔥 Populer</h2>
+                  <h2 className="section-title"><Icon name="flame" size={20} /> Populer</h2>
                 </div>
                 <div className="anime-grid">
                   {populer.map((comic, idx) => (
@@ -273,7 +276,7 @@ const Komik = () => {
               {topComics.length > 0 && (
                 <section className="komik-section">
                   <div className="section-header">
-                    <h2 className="section-title">🏆 Top Peringkat</h2>
+                    <h2 className="section-title"><Icon name="star" size={20} /> Top Peringkat</h2>
                   </div>
                   <div className="anime-grid">
                     {topComics.slice(0, 12).map((comic, idx) => (
@@ -286,7 +289,7 @@ const Komik = () => {
               {rekomendasi.length > 0 && (
                 <section className="komik-section">
                   <div className="section-header">
-                    <h2 className="section-title">🎯 Rekomendasi</h2>
+                    <h2 className="section-title"><Icon name="sparkle" size={20} /> Rekomendasi</h2>
                   </div>
                   <div className="anime-grid">
                     {rekomendasi.slice(0, 12).map((comic, idx) => (
@@ -300,7 +303,7 @@ const Komik = () => {
 
           <section className="komik-section">
             <div className="section-header">
-              <h2 className="section-title">🆕 Terbaru</h2>
+              <h2 className="section-title">Terbaru</h2>
             </div>
             <div className="anime-grid">
               {latest.map((comic, idx) => (
@@ -313,11 +316,16 @@ const Komik = () => {
             <div className="komik-load-more">
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="btn btn-secondary btn--lg"
                 onClick={loadMore}
                 disabled={loadingMore}
               >
-                {loadingMore ? 'Memuat...' : 'Muat Lebih Banyak'}
+                {loadingMore ? (
+                  <>
+                    <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} aria-hidden="true" />
+                    Memuat...
+                  </>
+                ) : 'Muat Lebih Banyak'}
               </button>
             </div>
           )}
