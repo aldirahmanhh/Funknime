@@ -43,9 +43,9 @@ function initParticles(count, w, h, focal) {
       z: focal + Math.random() * focal * 2,
       vx: (Math.random() - 0.5) * 0.12,
       vy: (Math.random() - 0.5) * 0.08,
-      vz: 0.18 + Math.random() * 0.28,
+      vz: 0.3 + Math.random() * 0.45,
       size: 0.5 + Math.random() * 1,
-      alpha: 0.3 + Math.random() * 0.5,
+      alpha: 0.45 + Math.random() * 0.45,
       rgb,
     });
   }

@@ -269,7 +269,8 @@ motion in the product, kept deliberately low-visibility.
   backdrop) and `/komik/*` (comic reader needs distraction-free surfaces).
 - **Z-index slot:** local `0` (below `.app` which carries `z-index: 1`).
   Exempt from the global `--z-*` scale per §7's local-stacking provision.
-- **Opacity:** canvas element capped at 0.35 — never competes with content.
+- **Opacity:** canvas element capped at 0.5 — perceptible against `--bg`
+  yet never competes with content surfaces above it.
 - **Particle palette:** muted tints of `--accent` (#8B5CF6) and
   `--text-primary` (#F2F2F7) only; no new colors.
 - **Reduced motion:** `prefers-reduced-motion: reduce` renders a single

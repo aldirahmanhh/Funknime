@@ -6,7 +6,7 @@
   z-index: 0;           /* local stacking — below .app (z-index: 1) */
   pointer-events: none;
   overflow: hidden;
-  opacity: 0.35;        /* subtle: never competes with content */
+  opacity: 0.5;         /* subtle but perceptible against --bg */
 }
 
 .animated-background__canvas {
