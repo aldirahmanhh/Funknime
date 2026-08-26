@@ -7,6 +7,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import InstallBanner from './components/InstallBanner'
 import MaintenancePage from './components/MaintenancePage'
+import AnimatedBackground from './components/AnimatedBackground'
 
 const IS_MAINTENANCE = import.meta.env.VITE_MAINTENANCE_MODE === 'true'
 
@@ -48,8 +49,9 @@ function App() {
 
   return (
     <ThemeProvider>
+      <AnimatedBackground />
       <a href="#main-content" className="skip-link">Lewati ke konten</a>
-      <div className="app">
+      <div className="app" style={{ position: 'relative', zIndex: 1 }}>
         <Header />
         <InstallBanner />
         <main id="main-content">

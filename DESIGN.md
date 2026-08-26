@@ -258,6 +258,29 @@ before page composition. States listed are REQUIRED unless noted.
 - No parallax, no bounce easing, no autoplaying carousels faster than 6s;
   hero carousel pauses on hover/focus and exposes pause control.
 
+### Ambient background layer
+
+A `<canvas>`-based 3D particle field (`AnimatedBackground`) renders a subtle
+depth effect behind page content. This is a **sanctioned decorative exception**
+to §2's "zero decorative gradients" rule — the particles are the only ambient
+motion in the product, kept deliberately low-visibility.
+
+- **Appears:** all routes except `/watch/*` (video player needs a clean
+  backdrop) and `/komik/*` (comic reader needs distraction-free surfaces).
+- **Z-index slot:** local `0` (below `.app` which carries `z-index: 1`).
+  Exempt from the global `--z-*` scale per §7's local-stacking provision.
+- **Opacity:** canvas element capped at 0.35 — never competes with content.
+- **Particle palette:** muted tints of `--accent` (#8B5CF6) and
+  `--text-primary` (#F2F2F7) only; no new colors.
+- **Reduced motion:** `prefers-reduced-motion: reduce` renders a single
+  static frame (drawn once, no rAF loop). The canvas remains visible but
+  frozen.
+- **Performance budget:** `devicePixelRatio` capped at 2; particle count
+  scales with viewport area (≈35 on small mobile, ≈55 tablet, ≈85 desktop,
+  hard cap 90); `requestAnimationFrame` loop pauses when `document.hidden`.
+- **Pointer events:** `pointer-events: none` — purely decorative, never
+  interactive.
+
 ## 7. Depth & Surface
 
 **Strategy: tonal-shift primary + heavy tinted shadows for elevation.
