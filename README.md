@@ -102,9 +102,3 @@ Lisensi: **[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 ## Disclaimer
 
 Project ini dibuat buat belajar. Semua konten disediakan oleh pihak ketiga, MrFunk ga nyimpen file apapun.
-
----
-
-<div align="center">
-  <sub>Made with 💜 by <a href="https://github.com/aldirahmanhh">aldirahmanhh</a></sub>
-</div>
