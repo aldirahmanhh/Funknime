@@ -7,10 +7,11 @@ import AnimeCarousel from './AnimeCarousel';
 import Footer from './Footer';
 import { getWatchHistory, formatTime } from '../utils/watchHistory';
 import { mergeAnimeLists } from '../utils/animeUtils';
+import Icon from './Icon';
+import './Home.css';
 
 const DAY_ORDER = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
-// ── Inline Komik card for homepage ──
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
 const proxyImage = (url) => {
   if (!url) return '';
@@ -45,13 +46,13 @@ const HomeKomikCard = ({ comic }) => {
           referrerPolicy="no-referrer"
           onError={(e) => { const f = placeholderImg(title); if (e.target.src !== f) e.target.src = f; }}
         />
-        <div className="card-overlay"><span className="play-icon" aria-hidden="true">📖</span></div>
+        <div className="card-overlay"><span className="play-icon" aria-hidden="true"><Icon name="book" size={20} /></span></div>
       </div>
       <div className="anime-info">
         <h3>{title}</h3>
         <div className="meta">
           {chapter && <span className="episode-count">{chapter}</span>}
-          {rating && <span className="score">⭐ {rating}</span>}
+          {rating && <span className="score"><Icon name="star" size={14} /> {rating}</span>}
         </div>
       </div>
     </Link>
@@ -67,13 +68,11 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [watchHistory] = useState(() => getWatchHistory());
   const [topDonors, setTopDonors] = useState([]);
-  const [showDonatePopup, setShowDonatePopup] = useState(false);
   const [komikLoading, setKomikLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    // Phase 1: Fetch only what's above-the-fold (hero: anime ongoing)
     const fetchCritical = async () => {
       try {
         const homeRes = await animeAPI.getHome();
@@ -85,13 +84,11 @@ const Home = () => {
         setHomeData({ ongoing: otakOngoing, completed: otakCompleted });
         setLoading(false);
 
-        // Phase 2: After first paint, merge secondary + donghua
         requestIdleCallback(
           () => { if (!cancelled) fetchSecondary(otakOngoing, otakCompleted); },
           { timeout: 2000 },
         );
 
-        // Phase 3: Komik (lowest priority, below fold)
         requestIdleCallback(
           () => { if (!cancelled) fetchKomik(); },
           { timeout: 4000 },
@@ -140,7 +137,7 @@ const Home = () => {
           });
         }
       } catch {
-        // Silently fail — komik is bonus content
+        // Silently fail
       } finally {
         if (!cancelled) setKomikLoading(false);
       }
@@ -148,7 +145,6 @@ const Home = () => {
 
     fetchCritical();
 
-    // Non-critical: Trakteer donors
     const idleId = requestIdleCallback(
       () => {
         fetch('/api/trakteer?action=supports&limit=10&page=1')
@@ -159,13 +155,9 @@ const Home = () => {
       { timeout: 5000 },
     );
 
-    // Donate popup — delayed
-    const timer = setTimeout(() => { if (!cancelled) setShowDonatePopup(true); }, 4000);
-
     return () => {
       cancelled = true;
       cancelIdleCallback(idleId);
-      clearTimeout(timer);
     };
   }, []);
 
@@ -222,44 +214,26 @@ const Home = () => {
 
   return (
     <div className="home-container main-container">
-      {/* Donate Popup */}
-      {showDonatePopup && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(4px)' }} onClick={() => setShowDonatePopup(false)}>
-          <div style={{ background: 'var(--color-surface)', border: '2px solid var(--color-primary)', borderRadius: '20px', padding: '32px 28px', maxWidth: '440px', width: '100%', textAlign: 'center', position: 'relative', boxShadow: '0 0 40px rgba(147,51,234,0.3)' }} onClick={e => e.stopPropagation()}>
-            <button onClick={() => setShowDonatePopup(false)} style={{ position: 'absolute', top: '12px', right: '16px', background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '1.3rem', cursor: 'pointer' }}>✕</button>
-            <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>☕</div>
-            <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 900, marginBottom: '8px' }}>Suka MrFunk?</h2>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)', marginBottom: '20px', lineHeight: 1.7 }}>
-              Kalau kamu suka nonton di sini, boleh dong trakteer kita biar makin semangat update! 💜
-            </p>
-            <a href="https://teer.id/anrizz" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginBottom: '10px', padding: '14px', fontSize: 'var(--text-base)', borderRadius: '12px' }}>
-              ☕ Trakteer Sekarang
-            </a>
-            <button onClick={() => setShowDonatePopup(false)} style={{ background: 'none', border: 'none', color: 'var(--color-text-dim)', fontSize: 'var(--text-xs)', cursor: 'pointer', marginTop: '4px', padding: '8px' }}>Nanti aja deh →</button>
-          </div>
-        </div>
-      )}
-
       {/* ── Hero ── */}
       <header className="page-header home-hero home-hero--streaming">
         <div className="home-hero-copy">
-          <div className="home-hero-eyebrow">✨ Gratis · Tanpa Login · Multi-Provider</div>
-          <h1 className="main-title text-gradient" data-text="MRFUNK">MRFUNK</h1>
+          <div className="home-hero-eyebrow">Gratis · Tanpa Login · Multi-Provider</div>
+          <h1 className="main-title">MrFunk</h1>
           <p className="subtitle">Nonton anime, donghua, &amp; baca komik sub Indo. Semua gratis.</p>
           <div className="home-hero-actions">
-            <Link to="/search" className="btn btn-primary btn-large">🔍 Cari</Link>
-            <Link to="/ongoing" className="btn btn-secondary">📺 Anime</Link>
-            <Link to="/donghua-ongoing" className="btn btn-secondary">🐉 Donghua</Link>
-            <Link to="/komik" className="btn btn-secondary">📖 Komik</Link>
+            <Link to="/search" className="btn btn-primary btn-large"><Icon name="search" /> Cari</Link>
+            <Link to="/ongoing" className="btn btn-secondary"><Icon name="play" /> Anime</Link>
+            <Link to="/donghua-ongoing" className="btn btn-secondary"><Icon name="monitor" /> Donghua</Link>
+            <Link to="/komik" className="btn btn-secondary"><Icon name="book" /> Komik</Link>
           </div>
           <div className="home-hero-stats">
             <span className="home-stat"><strong>2</strong> Provider Anime</span>
             <span className="home-stat-sep">·</span>
-            <span className="home-stat">Donghua ✓</span>
+            <span className="home-stat">Donghua</span>
             <span className="home-stat-sep">·</span>
-            <span className="home-stat">Komik ✓</span>
+            <span className="home-stat">Komik</span>
             <span className="home-stat-sep">·</span>
-            <span className="home-stat">Resume otomatis ✓</span>
+            <span className="home-stat">Resume otomatis</span>
           </div>
         </div>
         {ongoing.length > 0 && (
@@ -273,8 +247,8 @@ const Home = () => {
       {watchHistory.length > 0 && (
         <section className="section home-rail">
           <div className="section-header home-rail-header">
-            <h2 className="section-title">🕐 Lanjut Tonton</h2>
-            <Link to="/history" className="view-all">Lihat semua</Link>
+            <h2 className="section-title">Lanjut Tonton</h2>
+            <Link to="/history" className="view-all">Lihat semua <Icon name="arrow-right" size={14} /></Link>
           </div>
           <div className="home-rail-scroll">
             {watchHistory.slice(0, 12).map((item, idx) => (
@@ -282,18 +256,18 @@ const Home = () => {
                 <Link to={`/watch/${item.episodeId}`} state={{ provider: item.provider, backAnimeId: item.animeId }} className="anime-card card">
                   <div className="card-image-wrapper">
                     <span className="anime-card-badge anime-card-badge--ongoing">Lanjut</span>
-                    {item.poster ? <img src={item.poster} alt={item.animeTitle} className="poster" loading="lazy" decoding="async" /> : <div style={{ width: '100%', height: '100%', background: 'var(--color-surface-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🎬</div>}
-                    <div className="card-overlay"><span className="play-icon" aria-hidden="true">▶</span></div>
+                    {item.poster ? <img src={item.poster} alt={item.animeTitle} className="poster" loading="lazy" decoding="async" /> : <div className="home-watch-placeholder"><Icon name="play" size={24} /></div>}
+                    <div className="card-overlay"><span className="play-icon" aria-hidden="true"><Icon name="play" size={20} /></span></div>
                     {item.currentTime > 0 && item.duration > 0 && (
-                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: 'rgba(255,255,255,0.15)', zIndex: 3 }}>
-                        <div style={{ height: '100%', width: `${Math.min((item.currentTime / item.duration) * 100, 100)}%`, background: 'var(--color-primary)', borderRadius: '0 2px 2px 0' }} />
+                      <div className="home-progress-track">
+                        <div className="home-progress-fill" style={{ width: `${Math.min((item.currentTime / item.duration) * 100, 100)}%` }} />
                       </div>
                     )}
                   </div>
                   <div className="anime-info">
                     <h3>{item.animeTitle}</h3>
-                    <div className="meta"><span className="episode-count">{item.episodeTitle || `Episode`}</span></div>
-                    {item.currentTime > 0 && <div style={{ fontSize: '0.6rem', color: 'var(--color-primary)', fontWeight: 600, marginTop: '2px' }}>⏱️ {formatTime(item.currentTime)}</div>}
+                    <div className="meta"><span className="episode-count">{item.episodeTitle || 'Episode'}</span></div>
+                    {item.currentTime > 0 && <div className="home-watch-time"><Icon name="clock" size={11} /> <span className="num">{formatTime(item.currentTime)}</span></div>}
                   </div>
                 </Link>
               </div>
@@ -305,7 +279,7 @@ const Home = () => {
       {/* ── ANIME Section ── */}
       <section className="home-category-section">
         <div className="home-category-header">
-          <h2 className="home-category-title">📺 Anime</h2>
+          <h2 className="home-category-title">Anime</h2>
           <div className="home-category-links">
             <Link to="/ongoing" className="home-category-link">Ongoing</Link>
             <Link to="/completed" className="home-category-link">Completed</Link>
@@ -315,13 +289,13 @@ const Home = () => {
         </div>
         {ongoing.length > 0 && (
           <div className="home-rail">
-            <div className="section-header home-rail-header"><h3 className="home-rail-title">🔥 Sedang Tayang</h3><Link to="/ongoing" className="view-all">Semua →</Link></div>
+            <div className="section-header home-rail-header"><h3 className="home-rail-title">Sedang tayang</h3><Link to="/ongoing" className="view-all">Lihat semua <Icon name="arrow-right" size={14} /></Link></div>
             <div className="home-rail-scroll">{buildRailItems(ongoing, 'Ongoing')}</div>
           </div>
         )}
         {completed.length > 0 && (
           <div className="home-rail">
-            <div className="section-header home-rail-header"><h3 className="home-rail-title">✅ Baru Selesai</h3><Link to="/completed" className="view-all">Semua →</Link></div>
+            <div className="section-header home-rail-header"><h3 className="home-rail-title">Baru selesai</h3><Link to="/completed" className="view-all">Lihat semua <Icon name="arrow-right" size={14} /></Link></div>
             <div className="home-rail-scroll">{buildRailItems(completed, 'Completed')}</div>
           </div>
         )}
@@ -330,7 +304,7 @@ const Home = () => {
       {/* ── DONGHUA Section ── */}
       <section className="home-category-section">
         <div className="home-category-header">
-          <h2 className="home-category-title">🐉 Donghua</h2>
+          <h2 className="home-category-title">Donghua</h2>
           <div className="home-category-links">
             <Link to="/donghua-ongoing" className="home-category-link">Ongoing</Link>
             <Link to="/donghua-completed" className="home-category-link">Completed</Link>
@@ -340,25 +314,25 @@ const Home = () => {
         </div>
         {donghuaOngoing.length > 0 && (
           <div className="home-rail">
-            <div className="section-header home-rail-header"><h3 className="home-rail-title">🔥 Sedang Tayang</h3><Link to="/donghua-ongoing" className="view-all">Semua →</Link></div>
+            <div className="section-header home-rail-header"><h3 className="home-rail-title">Sedang tayang</h3><Link to="/donghua-ongoing" className="view-all">Lihat semua <Icon name="arrow-right" size={14} /></Link></div>
             <div className="home-rail-scroll">{buildRailItems(donghuaOngoing, 'Ongoing', true)}</div>
           </div>
         )}
         {donghuaCompleted.length > 0 && (
           <div className="home-rail">
-            <div className="section-header home-rail-header"><h3 className="home-rail-title">✅ Baru Selesai</h3><Link to="/donghua-completed" className="view-all">Semua →</Link></div>
+            <div className="section-header home-rail-header"><h3 className="home-rail-title">Baru selesai</h3><Link to="/donghua-completed" className="view-all">Lihat semua <Icon name="arrow-right" size={14} /></Link></div>
             <div className="home-rail-scroll">{buildRailItems(donghuaCompleted, 'Completed', true)}</div>
           </div>
         )}
         {!donghuaOngoing.length && !donghuaCompleted.length && (
-          <p className="home-rail-empty">Memuat donghua...</p>
+          <p className="home-rail-empty">Memuat donghua…</p>
         )}
       </section>
 
       {/* ── KOMIK Section ── */}
       <section className="home-category-section">
         <div className="home-category-header">
-          <h2 className="home-category-title">📖 Komik</h2>
+          <h2 className="home-category-title">Komik</h2>
           <div className="home-category-links">
             <Link to="/komik" className="home-category-link">Terbaru</Link>
             <Link to="/komik/genres" className="home-category-link">Genres</Link>
@@ -369,12 +343,12 @@ const Home = () => {
           </div>
         </div>
         {komikLoading ? (
-          <div className="home-rail"><p className="home-rail-empty">Memuat komik...</p></div>
+          <div className="home-rail"><p className="home-rail-empty">Memuat komik…</p></div>
         ) : (
           <>
             {komikPopuler.length > 0 && (
               <div className="home-rail">
-                <div className="section-header home-rail-header"><h3 className="home-rail-title">🔥 Populer</h3><Link to="/komik" className="view-all">Semua →</Link></div>
+                <div className="section-header home-rail-header"><h3 className="home-rail-title">Populer</h3><Link to="/komik" className="view-all">Lihat semua <Icon name="arrow-right" size={14} /></Link></div>
                 <div className="home-rail-scroll">
                   {komikPopuler.slice(0, 12).map((comic, idx) => (
                     <div className="home-rail-card" key={comic.slug ?? idx}>
@@ -386,7 +360,7 @@ const Home = () => {
             )}
             {komikLatest.length > 0 && (
               <div className="home-rail">
-                <div className="section-header home-rail-header"><h3 className="home-rail-title">🆕 Terbaru</h3><Link to="/komik" className="view-all">Semua →</Link></div>
+                <div className="section-header home-rail-header"><h3 className="home-rail-title">Terbaru</h3><Link to="/komik" className="view-all">Lihat semua <Icon name="arrow-right" size={14} /></Link></div>
                 <div className="home-rail-scroll">
                   {komikLatest.slice(0, 12).map((comic, idx) => (
                     <div className="home-rail-card" key={comic.slug ?? idx}>
@@ -406,7 +380,7 @@ const Home = () => {
       {/* Schedule Summary */}
       {days.length > 0 && (
         <section className="section">
-          <div className="section-header"><h2 className="section-title">📅 Jadwal Tayang</h2><Link to="/schedule" className="view-all">Buka jadwal</Link></div>
+          <div className="section-header"><h2 className="section-title">Jadwal tayang</h2><Link to="/schedule" className="view-all">Buka jadwal <Icon name="arrow-right" size={14} /></Link></div>
           <div className="schedule-summary-grid">
             {days.sort((a, b) => {
               const ai = DAY_ORDER.indexOf(a.day || '');
@@ -436,19 +410,18 @@ const Home = () => {
       {topDonors.length > 0 && (
         <section className="section">
           <div className="section-header">
-            <h2 className="section-title">💜 Top Donatur</h2>
-            <a href="https://teer.id/anrizz" target="_blank" rel="noopener noreferrer" className="view-all">Donasi juga →</a>
+            <h2 className="section-title">Top Donatur</h2>
+            <a href="https://teer.id/anrizz" target="_blank" rel="noopener noreferrer" className="view-all">Donasi juga <Icon name="arrow-right" size={14} /></a>
           </div>
           <div className="donor-list">
             {topDonors.slice(0, 5).map((donor, idx) => {
-              const rankIcon = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
               const rankClass = idx === 0 ? 'donor-rank--gold' : idx === 1 ? 'donor-rank--silver' : idx === 2 ? 'donor-rank--bronze' : '';
               return (
                 <div key={donor.order_id || idx} className="donor-row">
-                  <span className={`donor-rank ${rankClass}`} aria-label={`Peringkat ${idx + 1}`}>{rankIcon}</span>
+                  <span className={`donor-rank num ${rankClass}`} aria-label={`Peringkat ${idx + 1}`}>{idx + 1}</span>
                   <div className="donor-info">
                     <div className="donor-name">{donor.creator_name || 'Anonim'}</div>
-                    {donor.support_message && <div className="donor-message">"{donor.support_message}"</div>}
+                    {donor.support_message && <div className="donor-message">&ldquo;{donor.support_message}&rdquo;</div>}
                   </div>
                   <div className="donor-amount">
                     <div className="donor-quantity">{donor.quantity}× {donor.unit_name}</div>
@@ -458,12 +431,24 @@ const Home = () => {
               );
             })}
             <a href="https://teer.id/anrizz" target="_blank" rel="noopener noreferrer" className="donor-cta-row">
-              <span>☕ Trakteer MrFunk</span>
+              <span><Icon name="heart" size={16} /> Trakteer MrFunk</span>
               <span className="donor-cta-arrow">→</span>
             </a>
           </div>
         </section>
       )}
+
+      {/* Donate band — inline, replaces timed popup */}
+      <section className="home-donate-band" aria-label="Dukung MrFunk">
+        <div className="home-donate-band-inner">
+          <Icon name="heart" size={28} className="home-donate-band-icon" />
+          <h2 className="home-donate-band-title">Dukung MrFunk</h2>
+          <p className="home-donate-band-text">Gratis selamanya — dukungan kamu membantu biaya server.</p>
+          <a href="https://teer.id/anrizz" target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-large">
+            Trakteer Sekarang
+          </a>
+        </div>
+      </section>
 
       <Footer />
     </div>

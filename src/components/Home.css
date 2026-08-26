@@ -1,0 +1,115 @@
+/* ================================================================
+   Home page — component-scoped styles
+   Design contract: DESIGN.md §1, §4, §5, §7
+   ================================================================ */
+
+/* ======== Hero split layout ======== */
+.home-hero--streaming {
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+.home-hero-copy {
+  flex: 0 0 38%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-hero-featured {
+  flex: 1 1 62%;
+  min-width: 0;
+}
+
+.home-hero--streaming .carousel {
+  border: none;
+}
+
+/* ======== Watch history ======== */
+.home-progress-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  z-index: 3;
+  border-radius: 0;
+}
+
+.home-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+
+.home-watch-time {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.6rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.home-watch-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--surface-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+/* ======== Donate band (inline, replaces popup) ======== */
+.home-donate-band {
+  margin-bottom: var(--space-12);
+}
+
+.home-donate-band-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-6);
+  background: var(--surface-2);
+  border-radius: var(--radius-xl);
+}
+
+.home-donate-band-icon {
+  color: var(--accent);
+}
+
+.home-donate-band-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  margin: 0;
+}
+
+.home-donate-band-text {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 36ch;
+}
+
+/* ======== Responsive ======== */
+@media (max-width: 768px) {
+  .home-hero--streaming {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-hero-copy {
+    flex: none;
+  }
+
+  .home-hero-featured {
+    flex: none;
+  }
+}
