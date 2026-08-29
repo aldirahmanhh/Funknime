@@ -72,7 +72,13 @@
   width: 200px;
   box-shadow: var(--shadow-lg);
 }
-.detail-poster img { width: 100%; height: auto; display: block; }
+.detail-poster img {
+  width: 100%; height: auto; display: block;
+  image-rendering: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  filter: none;
+}
 .detail-info { flex: 1; min-width: 0; }
 .detail-info h1 { font-size: var(--text-2xl); margin-bottom: var(--space-3); letter-spacing: -0.015em; }
 .detail-meta { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }

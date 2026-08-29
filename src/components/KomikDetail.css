@@ -50,8 +50,13 @@
 .kd-hero__poster-wrap { position: relative; flex-shrink: 0; }
 .kd-hero__poster {
   width: 220px; height: 330px;
-  object-fit: cover; border-radius: var(--radius-lg);
+  object-fit: cover; object-position: center top;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
+  image-rendering: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  filter: none;
 }
 .kd-hero__poster--empty {
   background: var(--surface-2);

@@ -510,16 +510,25 @@ a:hover { color: var(--accent-text); }
 
 /* ======== Performance: CLS prevention ======== */
 
-/* Poster card wrappers — fixed aspect ratio prevents layout shift */
+/* Poster card wrappers — fixed 2/3 aspect ratio prevents layout shift
+   (matches DESIGN.md poster spec; placeholder bg avoids stretched preview) */
 .card-image-wrapper {
-  aspect-ratio: 5 / 7;
+  aspect-ratio: 2 / 3;
   overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
   contain: layout style paint;
 }
 .card-image-wrapper .poster {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
+  image-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  filter: none;
 }
 
 /* Carousel slide — fixed dimensions */

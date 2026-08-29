@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Icon from './Icon';
+import { getHighResPoster } from '../utils/imageOptim';
 
 const POSTER_FALLBACK =
   'data:image/svg+xml;utf8,' +
@@ -33,9 +34,13 @@ export const normalizeAnime = (anime, index = 0) => {
   return { animeId, title, posterUrl, episodes, score, releaseDay, isCompleted, rawStatus, providerLabel };
 };
 
-const AnimeCard = ({ anime, index = 0, innerRef, statusOverride, providerHint }) => {
+const AnimeCard = ({ anime, index = 0, innerRef, statusOverride, providerHint, priority = false }) => {
   const normalized = normalizeAnime(anime, index);
   const { animeId, title, posterUrl, episodes, score, releaseDay, isCompleted, rawStatus, providerLabel } = normalized;
+
+  // Full-resolution original (strips WordPress -WxH thumbnail suffix).
+  // data: fallbacks pass through unchanged.
+  const highResPoster = getHighResPoster(posterUrl);
 
   const useOverride = statusOverride && (statusOverride.toLowerCase() === 'ongoing' || statusOverride.toLowerCase() === 'completed');
   const isCompletedBadge = useOverride ? statusOverride.toLowerCase() === 'completed' : isCompleted;
@@ -59,7 +64,19 @@ const AnimeCard = ({ anime, index = 0, innerRef, statusOverride, providerHint })
             {isCompletedBadge ? 'Completed' : 'Ongoing'}
           </span>
         )}
-        <img src={posterUrl} alt={`${title} poster`} className="poster" loading="lazy" decoding="async" width={200} height={280} />
+        <img
+          src={highResPoster}
+          alt={`${title} poster`}
+          className="poster"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : undefined}
+          decoding="async"
+          width={320}
+          height={480}
+          sizes="(max-width: 480px) 44vw, (max-width: 768px) 28vw, (max-width: 1024px) 18vw, 158px"
+          referrerPolicy="no-referrer"
+          onError={(e) => { if (e.target.src !== POSTER_FALLBACK) e.target.src = POSTER_FALLBACK; }}
+        />
         <div className="card-overlay">
           <span className="play-icon"><Icon name="play" size={20} /></span>
         </div>

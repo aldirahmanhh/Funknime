@@ -439,14 +439,20 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-md);
   background: var(--surface-2);
   flex-shrink: 0;
+  isolation: isolate;
   transform: translateZ(0);
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
+/* crisp poster rendering — high-res source via getHighResPoster() */
 .poster {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
+  image-rendering: auto;
+  will-change: transform;
   transition: transform var(--transition-slow);
 }
 
@@ -457,7 +463,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .card:hover .poster,
 .card:focus-within .poster {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 /* Functional bottom scrim + play overlay (the only allowed gradients) */

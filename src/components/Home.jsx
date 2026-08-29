@@ -7,6 +7,7 @@ import AnimeCarousel from './AnimeCarousel';
 import Footer from './Footer';
 import { getWatchHistory, formatTime } from '../utils/watchHistory';
 import { mergeAnimeLists } from '../utils/animeUtils';
+import { getHighResPoster } from '../utils/imageOptim';
 import Icon from './Icon';
 import './Home.css';
 
@@ -30,7 +31,8 @@ const placeholderImg = (text) =>
 
 const HomeKomikCard = ({ comic }) => {
   const { slug, title, poster, chapter, type, rating } = comic;
-  const posterUrl = poster ? proxyImage(poster) : placeholderImg(title);
+  const highRes = getHighResPoster(poster);
+  const posterUrl = highRes ? proxyImage(highRes) : placeholderImg(title);
   return (
     <Link to={`/komik/${slug}`} className="anime-card card" title={title}>
       <div className="card-image-wrapper">
@@ -41,8 +43,9 @@ const HomeKomikCard = ({ comic }) => {
           className="poster"
           loading="lazy"
           decoding="async"
-          width={200}
-          height={280}
+          width={320}
+          height={480}
+          sizes="(max-width: 480px) 44vw, (max-width: 768px) 28vw, (max-width: 1024px) 18vw, 158px"
           referrerPolicy="no-referrer"
           onError={(e) => { const f = placeholderImg(title); if (e.target.src !== f) e.target.src = f; }}
         />
@@ -195,7 +198,7 @@ const Home = () => {
       if (isDonghua) {
         return (
           <div className="home-rail-card" key={anime.slug ?? idx}>
-            <AnimeCard anime={{ ...anime, animeId: anime.slug, provider: 'donghua' }} index={idx} statusOverride={statusOverride} providerHint="Donghua" />
+            <AnimeCard anime={{ ...anime, animeId: anime.slug, provider: 'donghua' }} index={idx} statusOverride={statusOverride} providerHint="Donghua" priority={idx < 4} />
           </div>
         );
       }
@@ -207,7 +210,7 @@ const Home = () => {
       else if (hasSame) providerHint = 'Samehadaku';
       return (
         <div className="home-rail-card" key={anime.animeId ?? anime.slug ?? idx}>
-          <AnimeCard anime={{ ...anime, provider: hasOtak ? 'otakudesu' : (hasSame ? 'samehadaku' : anime.provider) }} index={idx} statusOverride={statusOverride} providerHint={providerHint} />
+          <AnimeCard anime={{ ...anime, provider: hasOtak ? 'otakudesu' : (hasSame ? 'samehadaku' : anime.provider) }} index={idx} statusOverride={statusOverride} providerHint={providerHint} priority={idx < 4} />
         </div>
       );
     });
@@ -256,7 +259,7 @@ const Home = () => {
                 <Link to={`/watch/${item.episodeId}`} state={{ provider: item.provider, backAnimeId: item.animeId }} className="anime-card card">
                   <div className="card-image-wrapper">
                     <span className="anime-card-badge anime-card-badge--ongoing">Lanjut</span>
-                    {item.poster ? <img src={item.poster} alt={item.animeTitle} className="poster" loading="lazy" decoding="async" /> : <div className="home-watch-placeholder"><Icon name="play" size={24} /></div>}
+                    {item.poster ? <img src={getHighResPoster(item.poster)} alt={item.animeTitle} className="poster" loading="lazy" decoding="async" width={320} height={480} sizes="(max-width: 480px) 44vw, (max-width: 768px) 28vw, (max-width: 1024px) 18vw, 158px" /> : <div className="home-watch-placeholder"><Icon name="play" size={24} /></div>}
                     <div className="card-overlay"><span className="play-icon" aria-hidden="true"><Icon name="play" size={20} /></span></div>
                     {item.currentTime > 0 && item.duration > 0 && (
                       <div className="home-progress-track">

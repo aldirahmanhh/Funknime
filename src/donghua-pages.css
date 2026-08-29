@@ -164,9 +164,14 @@
   width: 200px;
   aspect-ratio: 2/3;
   object-fit: cover;
+  object-position: center top;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
   display: block;
+  image-rendering: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  filter: none;
 }
 .dd-hero__badge {
   position: absolute;
