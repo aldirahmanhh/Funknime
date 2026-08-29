@@ -70,6 +70,15 @@ export default async function handler(req, res) {
   }
 
   // Only allow known comic/manga hosts (exact or suffix match for subdomains)
+  // i2.wp.com is WordPress Photon — can proxy arbitrary hosts via path like
+  // /attacker.com/evil.jpg. Restrict to bacakomik paths only to prevent indirect SSRF.
+  if (parsed.hostname === 'i2.wp.com' || parsed.hostname.endsWith('.i2.wp.com')) {
+    if (!parsed.pathname.startsWith('/bacakomik.')) {
+      logError('Blocked i2.wp.com non-bacakomik path:', parsed.pathname);
+      return res.status(403).json({ error: 'Host not allowed' });
+    }
+  }
+
   const isAllowed = 
     ALLOWED_HOSTS.has(parsed.hostname) ||
     Array.from(ALLOWED_HOSTS).some(h => parsed.hostname.endsWith(`.${h}`));
