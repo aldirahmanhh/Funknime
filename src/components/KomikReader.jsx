@@ -1,8 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { comicAPI } from '../services/api';
 import Icon from './Icon';
 import './KomikReader.css';
+import {addKomikHistory, parseChapterNum} from '../utils/komikHistory';
 
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
 const devWarn = (...args) => { if (isDev) console.warn('[KomikReader]', ...args); };
@@ -16,6 +18,7 @@ const proxyImage = (url) => {
 
 const KomikReader = () => {
   const { chapterSlug } = useParams();
+  const komikSlug = chapterSlug?.split('-chapter-')[0];
   const navigate = useNavigate();
 
   const [chapter, setChapter] = useState(null);
@@ -37,7 +40,21 @@ const KomikReader = () => {
       setLoadedImages(new Set());
       try {
         const res = await comicAPI.getComicChapter(chapterSlug, { signal: ctrl.signal });
-        if (!cancelled) setChapter(res);
+        if (!cancelled) {
+          setChapter(res);
+          addKomikHistory({
+            komikSlug,
+            komikTitle: res.title || komikSlug,
+            poster: '',
+            chapterSlug,
+            chapterTitle: res.title || chapterSlug,
+            chapterNum: parseChapterNum(chapterSlug),
+            totalImages: res.images?.length || 0,
+            lastPageIndex: 0,
+            scrollProgress: 0,
+            timestamp: Date.now()
+          });
+        }
       } catch (err) {
         if (!cancelled && err?.name !== 'AbortError') {
           devWarn('Chapter error:', err);
@@ -58,8 +75,40 @@ const KomikReader = () => {
   const prevSlug = nav.prev ?? null;
   const nextSlug = nav.next ?? null;
 
-  const goPrev = useCallback(() => { if (prevSlug) navigate(`/komik/read/${prevSlug}`); }, [prevSlug, navigate]);
-  const goNext = useCallback(() => { if (nextSlug) navigate(`/komik/read/${nextSlug}`); }, [nextSlug, navigate]);
+  const goPrev = useCallback(() => {
+    if (prevSlug) {
+      addKomikHistory({
+        komikSlug,
+        komikTitle: chapter?.title || komikSlug,
+        poster: '',
+        chapterSlug: prevSlug,
+        chapterTitle: chapter?.title || komikSlug,
+        chapterNum: parseChapterNum(prevSlug),
+        totalImages: images.length,
+        lastPageIndex: currentImage,
+        scrollProgress: 0,
+        timestamp: Date.now()
+      });
+      navigate(`/komik/read/${prevSlug}`);
+    }
+  }, [prevSlug, navigate, komikSlug, chapter?.title, currentImage, images.length]);
+  const goNext = useCallback(() => {
+    if (nextSlug) {
+      addKomikHistory({
+        komikSlug,
+        komikTitle: chapter?.title || komikSlug,
+        poster: '',
+        chapterSlug: nextSlug,
+        chapterTitle: chapter?.title || komikSlug,
+        chapterNum: parseChapterNum(nextSlug),
+        totalImages: images.length,
+        lastPageIndex: currentImage,
+        scrollProgress: 0,
+        timestamp: Date.now()
+      });
+      navigate(`/komik/read/${nextSlug}`);
+    }
+  }, [nextSlug, navigate, komikSlug, chapter?.title, currentImage, images.length]);
 
   const onImageLoad = (idx) => setLoadedImages((s) => new Set(s).add(idx));
 
@@ -77,6 +126,94 @@ const KomikReader = () => {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [mode, currentImage, images.length, goPrev, goNext]);
+
+  useEffect(() => {
+    if (mode !== 'horizontal') return;
+    let timeoutId;
+    const handleImageChange = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        addKomikHistory({
+          komikSlug,
+          komikTitle: chapter?.title || komikSlug,
+          poster: '',
+          chapterSlug,
+          chapterTitle: chapter?.title || komikSlug,
+          chapterNum: parseChapterNum(chapterSlug),
+          totalImages: images.length,
+          lastPageIndex: currentImage,
+          scrollProgress: 0,
+          timestamp: Date.now()
+        });
+      }, 100);
+    };
+    handleImageChange();
+    return () => clearTimeout(timeoutId);
+  }, [mode, currentImage, chapterSlug, images.length]);
+
+  useEffect(() => {
+    if (mode !== 'vertical') return;
+    let timeoutId;
+    const debounce = (fn, delay) => {
+      clearTimeout(timeoutId);
+      return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn.apply(this, args), delay);
+      };
+    };
+    const handleScroll = debounce(() => {
+      if (typeof window === 'undefined') return;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const innerHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+      const scrollProgress = Math.max(0, Math.min(100, (scrollY / (scrollHeight - innerHeight)) * 100));
+      addKomikHistory({
+        komikSlug,
+        komikTitle: chapter?.title || komikSlug,
+        poster: '',
+        chapterSlug,
+        chapterTitle: chapter?.title || komikSlug,
+        chapterNum: parseChapterNum(chapterSlug),
+        totalImages: images.length,
+        lastPageIndex: currentImage,
+        scrollProgress,
+        timestamp: Date.now()
+      });
+    }, 150);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
+  }, [mode, chapterSlug, images.length]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      addKomikHistory({
+        komikSlug,
+        komikTitle: chapter?.title || komikSlug,
+        poster: '',
+        chapterSlug,
+        chapterTitle: chapter?.title || komikSlug,
+        chapterNum: parseChapterNum(chapterSlug),
+        totalImages: images.length,
+        lastPageIndex: currentImage,
+        scrollProgress: mode === 'vertical' ? ((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100 || 0) : 0,
+        timestamp: Date.now()
+      });
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        handleBeforeUnload();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [komikSlug, chapter?.title, chapterSlug, images.length, currentImage, mode]);
 
   if (loading) {
     return (

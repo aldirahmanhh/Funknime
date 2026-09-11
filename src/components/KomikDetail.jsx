@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { comicAPI } from '../services/api';
+import { getKomikHistory, parseChapterNum } from '../utils/komikHistory';
 import Icon from './Icon';
 import './KomikDetail.css';
 
@@ -125,6 +126,13 @@ const KomikDetail = () => {
     window.addEventListener('keydown', handleKeyNav);
     return () => window.removeEventListener('keydown', handleKeyNav);
   }, [handleKeyNav]);
+
+  const lastRead = useMemo(() => {
+    try {
+      const h = getKomikHistory();
+      return h.find((x) => x.komikSlug === slug) || null;
+    } catch { return null; }
+  }, [slug]);
 
   if (loading) {
     return (
@@ -260,7 +268,20 @@ const KomikDetail = () => {
                   Baca Terbaru
                 </Link>
               )}
+              {lastRead?.chapterSlug && lastRead.chapterSlug !== firstChapterSlug && lastRead.chapterSlug !== latestChapterSlug && (
+                <Link to={`/komik/read/${lastRead.chapterSlug}`} className="btn btn-secondary kd-cta__btn" style={{ borderColor: 'var(--accent)' }}>
+                  <Icon name="book" size={16} /> Lanjut {parseChapterNum(lastRead.chapterSlug) ? `Chapter ${parseChapterNum(lastRead.chapterSlug)}` : 'Chapter'}
+                </Link>
+              )}
             </div>
+            {lastRead?.chapterSlug && (
+              <div className="kd-continue" style={{ marginTop: 'var(--space-3)', display: 'flex', gap: 'var(--space-2)', alignItems: 'center', flexWrap: 'wrap' }}>
+                <span className="chip chip--accent" style={{ fontSize: '0.75rem' }}><Icon name="clock" size={12} /> Terakhir dibaca</span>
+                <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                  {lastRead.chapterTitle || lastRead.chapterSlug} {lastRead.totalImages ? `· ${lastRead.lastPageIndex ? `${lastRead.lastPageIndex + 1}/${lastRead.totalImages} hal` : `${lastRead.totalImages} hal`} ` : ''}{lastRead.scrollProgress ? `· ${Math.round(lastRead.scrollProgress)}%` : ''}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -309,9 +330,10 @@ const KomikDetail = () => {
               const chapNum = (ch.slug || '').match(/-chapter-(\d+(?:[.-]\d+)?)$/i);
               const num = chapNum ? chapNum[1] : null;
               const isNew = idx < 3 && !chaptersAsc;
+              const isLastRead = lastRead?.chapterSlug === ch.slug;
               return (
                 <li key={ch.slug ?? idx} className="kd-ch-item">
-                  <Link to={`/komik/read/${ch.slug}`} className="kd-ch-btn">
+                  <Link to={`/komik/read/${ch.slug}`} className={`kd-ch-btn${isLastRead ? ' kd-ch-btn--active' : ''}`} style={isLastRead ? { borderColor: 'var(--accent)', background: 'var(--accent-soft)' } : undefined}>
                     {num && <span className="kd-ch-btn__num num">{num}</span>}
                     <span className="kd-ch-btn__title">{label}</span>
                     {isNew && <span className="kd-ch-btn__new chip chip--accent">baru</span>}

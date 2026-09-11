@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { animeAPI } from '../services/api';
 import { addToWatchHistory, updateWatchProgress, getWatchProgress } from '../utils/watchHistory';
+import { addDonghuaHistory, updateDonghuaProgress, getDonghuaProgress } from '../utils/donghuaHistory';
 import { createPlayer } from '@videojs/react';
 import { VideoSkin, Video, videoFeatures } from '@videojs/react/video';
 import '@videojs/react/video/skin.css';
@@ -30,13 +31,15 @@ const Watch = () => {
   const [switchLabel, setSwitchLabel] = useState('');
   const [videoFailed, setVideoFailed] = useState(false);
   const videoElRef = useRef(null);
+  const isDonghuaRef = useRef(false);
   const saveTimerRef = useRef(null);
 
   const saveProgress = useCallback(() => {
     if (!episodeId) return;
     const vid = videoElRef.current;
     if (vid && vid.currentTime > 5) {
-      updateWatchProgress(episodeId, vid.currentTime, vid.duration);
+      if (isDonghuaRef.current) updateDonghuaProgress(episodeId, vid.currentTime, vid.duration);
+      else updateWatchProgress(episodeId, vid.currentTime, vid.duration);
     }
   }, [episodeId]);
 
@@ -105,7 +108,8 @@ const Watch = () => {
           setSelectedQuality('Streaming');
           if (dd.server.qualities[0]?.serverList?.[0]) setSelectedServer(dd.server.qualities[0].serverList[0]);
           if (data.donghua_details) {
-            addToWatchHistory({ animeId: data.donghua_details.slug, episodeId, animeTitle: data.donghua_details.title, episodeTitle: data.episode, poster: data.donghua_details.poster, provider: 'donghua' });
+            addDonghuaHistory({ animeId: data.donghua_details.slug, episodeId, animeTitle: data.donghua_details.title, episodeTitle: data.episode, poster: data.donghua_details.poster, provider: 'donghua' });
+            isDonghuaRef.current = true;
           }
           setLoading(false); return;
         }
@@ -139,6 +143,7 @@ const Watch = () => {
             const animeRes = await animeAPI.getAnimeDetail(normalized.animeId);
             if (cancelled) return;
             setAnimeData(animeRes?.data || null);
+            isDonghuaRef.current = false;
             addToWatchHistory({ animeId: animeRes?.data?.animeId || normalized.animeId, episodeId, animeTitle: animeRes?.data?.title || normalized.title || episodeId, episodeTitle: normalized.title || episodeId, poster: animeRes?.data?.poster || animeRes?.data?.poster_url || '', provider: usedProvider || 'otakudesu' });
           } catch {
             // Ignore history save errors
@@ -164,7 +169,11 @@ const Watch = () => {
     if (!vid) return;
     retryCountRef.current = 0;
 
-    const savedTime = getWatchProgress(episodeId);
+    const doSave = (t, d) => {
+      if (isDonghuaRef.current) updateDonghuaProgress(episodeId, t, d);
+      else updateWatchProgress(episodeId, t, d);
+    };
+    const savedTime = isDonghuaRef.current ? getDonghuaProgress(episodeId) : getWatchProgress(episodeId);
 
     const onLoaded = () => {
       if (savedTime > 5) vid.currentTime = savedTime;
@@ -172,17 +181,17 @@ const Watch = () => {
       retryCountRef.current = 0;
     };
     const onPause = () => {
-      if (vid.currentTime > 5) updateWatchProgress(episodeId, vid.currentTime, vid.duration);
+      if (vid.currentTime > 5) doSave(vid.currentTime, vid.duration);
     };
     const onPlay = () => {
       if (!saveTimerRef.current) {
         saveTimerRef.current = setInterval(() => {
-          if (vid.currentTime > 5) updateWatchProgress(episodeId, vid.currentTime, vid.duration);
+          if (vid.currentTime > 5) doSave(vid.currentTime, vid.duration);
         }, 5000);
       }
     };
     const onEnded = () => {
-      if (vid.currentTime > 5) updateWatchProgress(episodeId, vid.currentTime, vid.duration);
+      if (vid.currentTime > 5) doSave(vid.currentTime, vid.duration);
     };
 
     const onError = () => {
@@ -191,7 +200,7 @@ const Watch = () => {
 
       if (retryCountRef.current < 3) {
         retryCountRef.current++;
-        if (lastPos > 5) updateWatchProgress(episodeId, lastPos, vid.duration);
+        if (lastPos > 5) doSave(lastPos, vid.duration);
         setTimeout(() => {
           try {
             vid.load();

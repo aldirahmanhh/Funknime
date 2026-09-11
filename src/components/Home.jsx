@@ -6,6 +6,8 @@ import AnimeCard from './AnimeCard';
 import AnimeCarousel from './AnimeCarousel';
 import Footer from './Footer';
 import { getWatchHistory, formatTime } from '../utils/watchHistory';
+import { getDonghuaHistory, formatTime as fmtDong } from '../utils/donghuaHistory';
+import { getKomikHistory, parseChapterNum } from '../utils/komikHistory';
 import { mergeAnimeLists } from '../utils/animeUtils';
 import { getHighResPoster } from '../utils/imageOptim';
 import Icon from './Icon';
@@ -70,6 +72,8 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [watchHistory] = useState(() => getWatchHistory());
+  const [donghuaHistory] = useState(() => getDonghuaHistory());
+  const [komikHistory] = useState(() => getKomikHistory());
   const [topDonors, setTopDonors] = useState([]);
   const [komikLoading, setKomikLoading] = useState(false);
 
@@ -275,6 +279,76 @@ const Home = () => {
                 </Link>
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* Donghua History */}
+      {donghuaHistory.length > 0 && (
+        <section className="section home-rail">
+          <div className="section-header home-rail-header">
+            <h2 className="section-title">Lanjut Donghua</h2>
+            <Link to="/history?tab=donghua" className="view-all">Lihat semua <Icon name="arrow-right" size={14} /></Link>
+          </div>
+          <div className="home-rail-scroll">
+            {donghuaHistory.slice(0, 8).map((item, idx) => (
+              <div className="home-rail-card" key={`${item.animeId}-${item.episodeId}-${idx}`}>
+                <Link to={`/watch/${item.episodeId}`} state={{ provider: 'donghua', backAnimeId: item.animeId }} className="anime-card card">
+                  <div className="card-image-wrapper">
+                    <span className="anime-card-badge anime-card-badge--ongoing">Donghua · Lanjut</span>
+                    {item.poster ? <img src={getHighResPoster(item.poster)} alt={item.animeTitle} className="poster" loading="lazy" decoding="async" width={320} height={480} sizes="(max-width: 480px) 44vw, (max-width: 768px) 28vw, (max-width: 1024px) 18vw, 158px" referrerPolicy="no-referrer" onError={(e)=>{e.target.style.opacity='0.5'}} /> : <div className="home-watch-placeholder"><Icon name="monitor" size={24} /></div>}
+                    <div className="card-overlay"><span className="play-icon" aria-hidden="true"><Icon name="play" size={20} /></span></div>
+                    {item.currentTime > 0 && item.duration > 0 && (
+                      <div className="home-progress-track">
+                        <div className="home-progress-fill" style={{ width: `${Math.min((item.currentTime / item.duration) * 100, 100)}%` }} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="anime-info">
+                    <h3>{item.animeTitle}</h3>
+                    <div className="meta"><span className="episode-count">{item.episodeTitle || 'Episode'}</span></div>
+                    {item.currentTime > 0 && <div className="home-watch-time"><Icon name="clock" size={11} /> <span className="num">{fmtDong(item.currentTime)}</span></div>}
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Komik History */}
+      {komikHistory.length > 0 && (
+        <section className="section home-rail">
+          <div className="section-header home-rail-header">
+            <h2 className="section-title">Lanjut Baca</h2>
+            <Link to="/history?tab=komik" className="view-all">Lihat semua <Icon name="arrow-right" size={14} /></Link>
+          </div>
+          <div className="home-rail-scroll">
+            {komikHistory.slice(0, 8).map((item, idx) => {
+              const chNum = parseChapterNum(item.chapterSlug) || '?';
+              const progress = item.totalImages ? `${(item.lastPageIndex ?? 0) + 1}/${item.totalImages} hal` : '';
+              return (
+                <div className="home-rail-card" key={`${item.komikSlug}-${item.chapterSlug}-${idx}`}>
+                  <Link to={`/komik/read/${item.chapterSlug}`} className="anime-card card">
+                    <div className="card-image-wrapper">
+                      <span className="anime-card-badge anime-card-badge--ongoing">Baca · Ch {chNum}</span>
+                      {item.poster ? <img src={proxyImage(item.poster)} alt={item.komikTitle} className="poster" loading="lazy" decoding="async" width={320} height={480} sizes="(max-width: 480px) 44vw, (max-width: 768px) 28vw, (max-width: 1024px) 18vw, 158px" referrerPolicy="no-referrer" onError={(e)=>{e.target.style.opacity='0.5'}} /> : <div className="home-watch-placeholder"><Icon name="book" size={24} /></div>}
+                      <div className="card-overlay"><span className="play-icon" aria-hidden="true"><Icon name="book" size={20} /></span></div>
+                      {item.scrollProgress > 0 && (
+                        <div className="home-progress-track">
+                          <div className="home-progress-fill" style={{ width: `${Math.min(item.scrollProgress, 100)}%` }} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="anime-info">
+                      <h3>{item.komikTitle}</h3>
+                      <div className="meta"><span className="episode-count">{item.chapterTitle || `Chapter ${chNum}`}</span></div>
+                      {progress && <div className="home-watch-time"><Icon name="clock" size={11} /> <span className="num">{progress}</span></div>}
+                    </div>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}
