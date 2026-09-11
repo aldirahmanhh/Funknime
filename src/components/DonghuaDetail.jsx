@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { animeAPI } from '../services/api';
+import { getDonghuaHistory, formatTime } from '../utils/donghuaHistory';
 import Icon from './Icon';
 import './DonghuaDetail.css';
 
@@ -99,6 +100,13 @@ const DonghuaDetail = () => {
 
   const isOngoing = status?.toLowerCase().includes('ongoing');
 
+  const lastWatch = (() => {
+    try {
+      const h = getDonghuaHistory();
+      return h.find((x) => x.animeId === slug) || null;
+    } catch { return null; }
+  })();
+
   devLog('[DonghuaDetail] data:', donghua);
 
   return (
@@ -194,6 +202,19 @@ const DonghuaDetail = () => {
                     Episode Terbaru
                   </Link>
                 )}
+                {lastWatch?.episodeId && lastWatch.episodeId !== firstSlug && lastWatch.episodeId !== latestSlug && (
+                  <Link to={`/watch/${lastWatch.episodeId}`} className="btn btn-secondary" style={{ borderColor: 'var(--accent)' }}>
+                    <Icon name="clock" size={16} /> Lanjut {lastWatch.episodeTitle || lastWatch.episodeId}
+                  </Link>
+                )}
+              </div>
+            )}
+            {lastWatch?.episodeId && lastWatch.currentTime > 5 && (
+              <div className="dd-continue" style={{ marginTop: 'var(--space-3)', display: 'flex', gap: 'var(--space-2)', alignItems: 'center', flexWrap: 'wrap' }}>
+                <span className="chip chip--accent" style={{ fontSize: '0.75rem' }}><Icon name="clock" size={12} /> Terakhir ditonton</span>
+                <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                  {lastWatch.episodeTitle || lastWatch.episodeId} · {formatTime(lastWatch.currentTime)}{lastWatch.duration ? ` / ${formatTime(lastWatch.duration)}` : ''}
+                </span>
               </div>
             )}
           </div>
