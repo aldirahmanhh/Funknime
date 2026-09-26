@@ -114,6 +114,15 @@ const Watch = () => {
           if (cancelled) return;
           try {
             const result = await p.fn();
+            // Donghua endpoint returns a junk stub (empty servers, tutorial
+            // title) for non-donghua slugs — `[]` is truthy, so validate it
+            // strictly, otherwise every anime episode dies here.
+            if (p.name === 'donghua') {
+              const dServers = result?.streaming?.servers;
+              if (!Array.isArray(dServers) || dServers.length === 0) continue;
+              if (isJunkTitle(result?.episode)) continue;
+              data = result; usedProvider = p.name; break;
+            }
             if (result?.streaming?.servers || result?.data?.defaultStreamingUrl || result?.data?.servers || result?.data?.server) {
               data = result; usedProvider = p.name; break;
             }
@@ -124,11 +133,8 @@ const Watch = () => {
 
         if (usedProvider === 'donghua' && data.streaming) {
           if (cancelled) return;
-          // Junk pseudo-episodes (shortlink tutorials, [ADS] stubs) have no
-          // playable servers — fail with a message instead of a dead spinner.
-          if (isJunkTitle(data.episode)) {
-            throw new Error('Episode tidak valid atau tidak tersedia.');
-          }
+          // (Junk/empty donghua stubs are already rejected in the provider
+          // loop above so other providers still get a chance.)
           const dServers = Array.isArray(data.streaming.servers) ? data.streaming.servers : [];
           // Prefer a server whose host allows framing on our domain.
           const dPlayable = dServers.filter((s) => s.url && !isBlockedEmbedUrl(s.url));
