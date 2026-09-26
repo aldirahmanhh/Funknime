@@ -29,6 +29,20 @@ const isDirectVideoUrl = (url) => {
   return /\.(mp4|m3u8|webm|mkv|ogv|mov)$/.test(clean);
 };
 
+// Hosts verified (2026-09-26) to send `frame-ancestors` limited to
+// otakudesu/desustream domains, so their embeds can NEVER render inside an
+// iframe on our domain. Auto-pick must prefer other servers (vidhide,
+// mega, ...) and only fall back to these when nothing else resolves.
+const BLOCKED_EMBED_HOSTS = ['desustream.com', 'desustream.net', 'desustream.info', 'desustream.me'];
+const isBlockedEmbedUrl = (url) => {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return BLOCKED_EMBED_HOSTS.some((h) => host === h || host.endsWith(`.${h}`));
+  } catch {
+    return false;
+  }
+};
+
 const Watch = () => {
   const { episodeId } = useParams();
   const navigate = useNavigate();
@@ -116,8 +130,11 @@ const Watch = () => {
             throw new Error('Episode tidak valid atau tidak tersedia.');
           }
           const dServers = Array.isArray(data.streaming.servers) ? data.streaming.servers : [];
-          const dDefaultUrl = data.streaming.main_url?.url || dServers[0]?.url || '';
-          if (!dDefaultUrl && dServers.length === 0) {
+          // Prefer a server whose host allows framing on our domain.
+          const dPlayable = dServers.filter((s) => s.url && !isBlockedEmbedUrl(s.url));
+          const dPick = dPlayable[0] || dServers[0] || null;
+          const dDefaultUrl = dPick?.url || data.streaming.main_url?.url || '';
+          if (!dDefaultUrl) {
             throw new Error('Server streaming tidak tersedia untuk episode ini. Coba episode lain.');
           }
           const dd = {
@@ -129,7 +146,8 @@ const Watch = () => {
           setEpisodeData(dd);
           setVideoUrl(dd.defaultStreamingUrl);
           setSelectedQuality('Streaming');
-          if (dd.server.qualities[0]?.serverList?.[0]) setSelectedServer(dd.server.qualities[0].serverList[0]);
+          if (dPick) setSelectedServer({ title: dPick.name, url: dPick.url });
+          else if (dd.server.qualities[0]?.serverList?.[0]) setSelectedServer(dd.server.qualities[0].serverList[0]);
           if (data.donghua_details) {
             const entry = { animeId: data.donghua_details.slug, episodeId, animeTitle: data.donghua_details.title, episodeTitle: data.episode, poster: data.donghua_details.poster, provider: 'donghua' };
             // Never persist scraped non-episode posts (shortlink tutorials, etc.)
@@ -154,15 +172,31 @@ const Watch = () => {
         }
 
         setEpisodeData(normalized);
-        const hasServers = normalized?.server?.qualities?.some(q => q.serverList?.length > 0);
-        if (!normalized?.defaultStreamingUrl && !hasServers) {
-          throw new Error('Server streaming tidak tersedia untuk episode ini. Coba episode lain.');
+        const quals = normalized?.server?.qualities?.filter(q => q.serverList?.length > 0) || [];
+        // Smart initial server: skip empty qualities (e.g. 360p with no
+        // servers), resolve candidate URLs in parallel, and prefer a host
+        // that allows framing on our domain over the blocked default.
+        setSwitching(true);
+        setSwitchLabel('Mencari server...');
+        let mounted = false;
+        if (quals.length > 0) {
+          const pick = await pickPlayableServer(quals[0].serverList);
+          if (cancelled) return;
+          if (pick) {
+            setSelectedQuality(quals[0].title);
+            setSelectedServer({ ...pick.server, url: pick.url });
+            setVideoUrl(pick.url);
+            mounted = true;
+          }
         }
-        if (normalized?.defaultStreamingUrl) setVideoUrl(normalized.defaultStreamingUrl);
-        if (normalized?.server?.qualities?.length > 0) {
-          const fq = normalized.server.qualities[0];
-          setSelectedQuality(fq.title);
-          if (fq.serverList?.[0]) setSelectedServer(fq.serverList[0]);
+        if (!mounted && normalized?.defaultStreamingUrl) {
+          setSelectedQuality(quals[0]?.title || selectedQuality);
+          if (quals[0]?.serverList?.[0]) setSelectedServer(quals[0].serverList[0]);
+          setVideoUrl(normalized.defaultStreamingUrl);
+        }
+        setSwitching(false);
+        if (!mounted && !normalized?.defaultStreamingUrl) {
+          throw new Error('Server streaming tidak tersedia untuk episode ini. Coba episode lain.');
         }
 
         if (cancelled) return;
@@ -324,37 +358,59 @@ const Watch = () => {
     return () => clearTimeout(timer);
   }, [videoUrl, switching]);
 
-  const handleServerSelect = (server) => {
+  // Resolve a server entry to a playable URL (episode payloads only carry
+  // serverId/href; the real URL comes from /server/:id).
+  const resolveServerUrl = async (server) => {
+    if (server?.url) return server.url;
+    if (server?.href) {
+      const sid = server.serverId || server.href.split('/').pop();
+      try {
+        const d = await animeAPI.getStreamingServer(sid);
+        return d?.data?.url || null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  // Try servers in order; the first URL whose host allows framing on our
+  // domain wins. Falls back to the first resolvable URL when all are blocked.
+  const pickPlayableServer = async (servers) => {
+    const resolved = await Promise.all(
+      (servers || []).map(async (s) => ({ server: s, url: await resolveServerUrl(s) }))
+    );
+    const usable = resolved.filter((r) => r.url);
+    return usable.find((r) => !isBlockedEmbedUrl(r.url)) || usable[0] || null;
+  };
+
+  const handleServerSelect = (server, siblings = []) => {
     saveProgress();
     setSwitching(true);
     setSwitchLabel(server.title || 'Server');
-    if (server.href) {
-      const sid = server.serverId || server.href.split('/').pop();
-      animeAPI.getStreamingServer(sid).then(d => {
-        if (d?.data?.url) setVideoUrl(d.data.url);
-        else setSwitching(false);
-      }).catch(() => {
-        if (episodeData?.defaultStreamingUrl) setVideoUrl(episodeData.defaultStreamingUrl);
-        setSwitching(false);
-      });
-    } else if (server.url) {
-      setVideoUrl(server.url);
-    } else {
-      setSwitching(false);
-    }
     setVideoFailed(false);
     setSelectedServer(server);
+    const queue = siblings.length > 0 ? siblings : [server];
+    const ordered = [server, ...queue.filter((s) => s !== server)];
+    pickPlayableServer(ordered).then((pick) => {
+      if (pick) {
+        setSelectedServer({ ...pick.server, url: pick.url });
+        setVideoUrl(pick.url);
+      } else if (episodeData?.defaultStreamingUrl) {
+        setVideoUrl(episodeData.defaultStreamingUrl);
+      }
+      setSwitching(false);
+    }).catch(() => {
+      if (episodeData?.defaultStreamingUrl) setVideoUrl(episodeData.defaultStreamingUrl);
+      setSwitching(false);
+    });
   };
 
   const handleQualityChange = (quality) => {
     setSelectedQuality(quality);
-    setSwitching(true);
-    setSwitchLabel(quality);
     const servers = episodeData?.server?.qualities?.find(q => q.title === quality)?.serverList;
     if (servers?.length > 0) {
-      handleServerSelect(servers.find(s => s.title?.toLowerCase().includes('ondesu')) || servers[0]);
-    } else {
-      setSwitching(false);
+      handleServerSelect(servers[0], servers);
     }
   };
 
@@ -459,10 +515,11 @@ const Watch = () => {
           </div>
         )}
         <div className="server-list">
-          {episodeData?.server?.qualities?.find(q => q.title === selectedQuality)?.serverList?.map(s => (
-            <button key={s.serverId || s.title} type="button" className={`server-btn ${selectedServer?.title === s.title ? 'active' : ''}`} onClick={() => handleServerSelect(s)}>{s.title}</button>
+          {(episodeData?.server?.qualities?.find(q => q.title === selectedQuality)?.serverList || []).map(s => (
+            <button key={s.serverId || s.title} type="button" className={`server-btn ${selectedServer?.title === s.title ? 'active' : ''}`} onClick={() => handleServerSelect(s, episodeData.server.qualities.find(q => q.title === selectedQuality)?.serverList || [])}>{s.title}</button>
           ))}
         </div>
+        <p className="error-hint" style={{ marginTop: 'var(--space-2)' }}>Jika video tidak muncul, coba server atau kualitas lain.</p>
       </div>
 
       <div className="episode-navigation">
