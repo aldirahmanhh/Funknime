@@ -4,6 +4,7 @@ import { animeAPI } from '../services/api';
 import { addToWatchHistory, updateWatchProgress, getWatchProgress } from '../utils/watchHistory';
 import { addDonghuaHistory, updateDonghuaProgress, getDonghuaProgress } from '../utils/donghuaHistory';
 import { isJunkHistoryEntry, isJunkTitle } from '../utils/historyFactory';
+import { normalizeKey } from '../utils/animeUtils';
 import { createPlayer } from '@videojs/react';
 import { VideoSkin, Video, videoFeatures } from '@videojs/react/video';
 import '@videojs/react/video/skin.css';
@@ -43,6 +44,39 @@ const isBlockedEmbedUrl = (url) => {
   }
 };
 
+// ── Cross-provider episode mapping (provider switcher) ──
+// Episode slugs are provider-specific, so switching provider means:
+// title + episode number → search on target → best title match → detail →
+// same episode number. Used only on explicit user switch.
+const ANIME_PROVIDERS = [
+  { id: 'otakudesu', label: 'Otakudesu' },
+  { id: 'samehadaku', label: 'Samehadaku' },
+  { id: 'stream', label: 'Stream' },
+];
+
+const parseEpisodeNumber = (title) => {
+  if (typeof title === 'number') return title;
+  const m = String(title || '').match(/episode\s+(\d+)/i);
+  return m ? parseInt(m[1], 10) : null;
+};
+
+const stripEpisodeSuffix = (title) =>
+  String(title || '').replace(/\s*episode\s+\d+.*$/i, '').trim();
+
+const TITLE_STOPWORDS = new Set(['sub', 'indo', 'subtitle', 'indonesia', 'tv']);
+const titleTokens = (s) =>
+  normalizeKey({ title: s }).replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
+    .filter((t) => t && !TITLE_STOPWORDS.has(t));
+
+// Token-overlap score in [0,1]; tolerant to Part/Cour/Season naming diffs.
+const titleMatchScore = (query, candidate) => {
+  const q = titleTokens(query);
+  const c = new Set(titleTokens(candidate));
+  if (q.length === 0 || c.size === 0) return 0;
+  const hit = q.filter((t) => c.has(t)).length;
+  return hit / Math.max(q.length, c.size);
+};
+
 const Watch = () => {
   const { episodeId } = useParams();
   const navigate = useNavigate();
@@ -58,6 +92,8 @@ const Watch = () => {
   const [switchLabel, setSwitchLabel] = useState('');
   const [videoFailed, setVideoFailed] = useState(false);
   const [playerNonce, setPlayerNonce] = useState(0);
+  const [activeProvider, setActiveProvider] = useState(null);
+  const [providerError, setProviderError] = useState(null);
   const videoElRef = useRef(null);
   const isDonghuaRef = useRef(false);
   const saveTimerRef = useRef(null);
@@ -87,6 +123,8 @@ const Watch = () => {
     setAnimeData(null);
     setVideoUrl('');
     setError(null);
+    setProviderError(null);
+    setActiveProvider(null);
     setLoading(true);
     setVideoFailed(false);
     setSwitching(false);
@@ -168,6 +206,7 @@ const Watch = () => {
             if (!isJunkHistoryEntry(entry)) addDonghuaHistory(entry);
             isDonghuaRef.current = true;
           }
+          setActiveProvider('donghua');
           setLoading(false); return;
         }
 
@@ -186,6 +225,7 @@ const Watch = () => {
         }
 
         setEpisodeData(normalized);
+        if (usedProvider && usedProvider !== 'donghua') setActiveProvider(usedProvider);
         const quals = normalized?.server?.qualities?.filter(q => q.serverList?.length > 0) || [];
         // Smart initial server: skip empty qualities (e.g. 360p with no
         // servers), resolve candidate URLs in parallel, and prefer a host
@@ -221,6 +261,7 @@ const Watch = () => {
             if (cancelled) return;
             setAnimeData(animeRes?.data || null);
             isDonghuaRef.current = false;
+            setActiveProvider(usedProvider || 'otakudesu');
             const animeEntry = { animeId: animeRes?.data?.animeId || normalized.animeId, episodeId, animeTitle: animeRes?.data?.title || normalized.title || episodeId, episodeTitle: normalized.title || episodeId, poster: animeRes?.data?.poster || animeRes?.data?.poster_url || '', provider: usedProvider || 'otakudesu' };
             if (!isJunkHistoryEntry(animeEntry)) addToWatchHistory(animeEntry);
           } catch {
@@ -449,6 +490,76 @@ const Watch = () => {
     }
   };
 
+  // Cross-provider switch: map current anime + episode number onto the
+  // target provider (search → best title match → detail → same episode),
+  // then navigate. Keeps the current player untouched on failure.
+  const handleProviderSwitch = async (target) => {
+    if (!target || target === activeProvider || switching) return;
+    const label = ANIME_PROVIDERS.find((p) => p.id === target)?.label || target;
+    const epNum = parseEpisodeNumber(episodeData?.title || episodeData?.episode);
+    if (epNum == null) {
+      setProviderError('Nomor episode tidak terdeteksi, tidak bisa pindah provider.');
+      return;
+    }
+    const query = animeData?.title || stripEpisodeSuffix(episodeData?.title) || stripEpisodeSuffix(episodeData?.episode);
+    if (!query) {
+      setProviderError('Judul anime tidak diketahui, tidak bisa pindah provider.');
+      return;
+    }
+    setProviderError(null);
+    setSwitching(true);
+    setSwitchLabel(`Mencari di ${label}...`);
+    try {
+      const searchItems = (prov, res) => {
+        if (prov === 'stream') {
+          if (Array.isArray(res)) return res;
+          return Array.isArray(res?.data) ? res.data : [];
+        }
+        const d = res?.data || res;
+        return d?.animeList || [];
+      };
+      const itemId = (it) => it?.slug || it?.animeId || null;
+      let items = searchItems(target, await animeAPI.search(query, target));
+      if (items.length === 0) {
+        // Retry with progressively shorter keywords ("sakamoto days part 2"
+        // → "sakamoto days part" → "sakamoto days") until something hits.
+        const toks = titleTokens(query);
+        for (let n = toks.length - 1; n >= 2 && items.length === 0; n--) {
+          const short = toks.slice(0, n).join(' ');
+          items = searchItems(target, await animeAPI.search(short, target));
+        }
+      }
+      const ranked = items
+        .map((it) => ({ it, score: titleMatchScore(query, it?.title || '') }))
+        .filter((r) => itemId(r.it) && r.score >= 0.4)
+        .sort((a, b) => b.score - a.score);
+      if (ranked.length === 0) throw new Error(`Tidak ditemukan di ${label}.`);
+      const detailByProvider =
+        target === 'samehadaku' ? animeAPI.getAnimeDetailSamehadaku
+        : target === 'stream' ? animeAPI.getAnimeDetailStream
+        : animeAPI.getAnimeDetail;
+      const detailRes = await detailByProvider(itemId(ranked[0].it));
+      const d = detailRes?.data || {};
+      const epList = target === 'stream' ? d.episodes || [] : d.episodeList || d.episodes || [];
+      const numOf = (ep) => {
+        if (typeof ep?.eps === 'number') return ep.eps;
+        const n = parseInt(ep?.eps ?? ep?.episodeNumber ?? ep?.number ?? '', 10);
+        if (!Number.isNaN(n)) return n;
+        const t = ep?.title ?? ep?.eps_title ?? '';
+        if (typeof t === 'number') return t;
+        const m = String(t).match(/(\d+)/);
+        return m ? parseInt(m[1], 10) : null;
+      };
+      const match = epList.find((ep) => numOf(ep) === epNum);
+      const newSlug = match?.episodeId || match?.eps_slug || match?.slug || null;
+      if (!newSlug) throw new Error(`Episode ${epNum} tidak ada di ${label}.`);
+      navigate(`/watch/${newSlug}`, { state: { provider: target } });
+    } catch (e) {
+      setProviderError(e?.message || `Gagal pindah ke ${label}.`);
+      setSwitching(false);
+    }
+  };
+
   const toEmbedUrl = (url) => {
     if (!url) return url;
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
@@ -561,6 +672,23 @@ const Watch = () => {
       </div>
 
       <div className="server-selector">
+        {episodeData && !episodeData.donghua_details && (
+          <div className="provider-tabs" role="group" aria-label="Pilih sumber provider">
+            {ANIME_PROVIDERS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                className={`quality-tab ${activeProvider === p.id ? 'active' : ''}`}
+                aria-pressed={activeProvider === p.id}
+                disabled={switching}
+                onClick={() => handleProviderSwitch(p.id)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {providerError && <p className="error-hint" role="alert">{providerError}</p>}
         {visibleQualities.length > 0 && (
           <div className="quality-tabs">
             {visibleQualities.map(q => (

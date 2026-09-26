@@ -165,6 +165,14 @@
   letter-spacing: 0.04em;
   margin-right: var(--space-2);
 }
+.provider-tabs { display: flex; gap: var(--space-2); margin-bottom: var(--space-2); flex-wrap: wrap; align-items: center; }
+.provider-tabs::before {
+  content: 'Sumber';
+  font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-right: var(--space-2);
+}
+.provider-tabs .quality-tab:disabled { opacity: 0.5; cursor: wait; }
 .quality-tab {
   height: 30px;
   padding: 0 14px;
