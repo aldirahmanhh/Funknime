@@ -16,6 +16,18 @@ const devLog = (...args) => { if (isDev) console.log(...args); };
 
 const Player = createPlayer({ features: videoFeatures });
 
+// Streaming URLs from the API (desustream, vidhide, filedon, ...) are HTML
+// embed pages, NOT direct video files. Feeding them to <video>/Video.js
+// always errors. Only .mp4/.m3u8/.webm (or blob:) may use the native player;
+// everything else must render as an iframe immediately instead of failing
+// through 3 video-error retries first.
+const isDirectVideoUrl = (url) => {
+  if (!url || typeof url !== 'string') return false;
+  if (url.startsWith('blob:')) return true;
+  const clean = url.split('?')[0].split('#')[0].toLowerCase();
+  return /\.(mp4|m3u8|webm|mkv|ogv|mov)$/.test(clean);
+};
+
 const Watch = () => {
   const { episodeId } = useParams();
   const navigate = useNavigate();
@@ -341,7 +353,8 @@ const Watch = () => {
     return url;
   };
 
-  const useVideoJs = videoUrl && !videoFailed;
+  const useVideoJs = videoUrl && isDirectVideoUrl(videoUrl) && !videoFailed;
+  const useIframe = videoUrl && (!isDirectVideoUrl(videoUrl) || videoFailed);
 
   if (loading) return <div className="loading-container main-container"><div className="spinner" /><p>Memuat video...</p></div>;
 
@@ -364,7 +377,7 @@ const Watch = () => {
     );
   }
 
-  const iframeSrc = videoFailed ? toEmbedUrl(videoUrl) : null;
+  const iframeSrc = useIframe ? toEmbedUrl(videoUrl) : null;
   const backId = animeData?.slug ?? animeData?.animeId ?? animeData?.id ?? episodeData?.animeId ?? episodeData?.animeSlug;
   const hasBack = backId != null && String(backId).trim() !== '';
 
