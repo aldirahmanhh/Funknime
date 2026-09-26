@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { animeAPI } from '../services/api';
 import { getDonghuaHistory, formatTime } from '../utils/donghuaHistory';
+import { isJunkTitle } from '../utils/historyFactory';
 import Icon from './Icon';
 import './DonghuaDetail.css';
 
@@ -84,7 +85,10 @@ const DonghuaDetail = () => {
   const duration    = donghua.duration ?? null;
   const epCount     = donghua.episodes_count ?? null;
   const genres      = donghua.genres ?? donghua.genreList ?? [];
-  const episodes    = donghua.episodes_list ?? donghua.episodes ?? donghua.episodeList ?? [];
+  const episodes    = (donghua.episodes_list ?? donghua.episodes ?? donghua.episodeList ?? [])
+    // Drop scraped non-episode posts (shortlink tutorials, [ADS] stubs) so
+    // users can't open them — and they never reach watch history.
+    .filter((ep) => !isJunkTitle(ep.episode ?? ep.title ?? ''));
 
   const firstEp  = episodes.length > 0 ? episodes[episodes.length - 1] : null;
   const latestEp = episodes.length > 0 ? episodes[0] : null;

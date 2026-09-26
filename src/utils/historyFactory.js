@@ -22,6 +22,35 @@ export const formatTime = (seconds) => {
 };
 
 /**
+ * Junk-title guard. Provider scrapes occasionally leak non-episode posts
+ * (e.g. "Tutorial Cara Melewati Shortlink di sankanime", "[ADS]" stubs)
+ * into episode lists / episode payloads. Saving those pollutes watch
+ * history with items the user never actually watched, so they must be
+ * filtered at write time, at read time (self-heal), and from episode lists.
+ */
+const JUNK_TITLE_PATTERN = /shortlink|melewati|\[ads\]/i;
+
+/**
+ * @param {string} title
+ * @returns {boolean} true when the title looks like a scraped non-episode post
+ */
+export const isJunkTitle = (title) =>
+  typeof title === 'string' && JUNK_TITLE_PATTERN.test(title);
+
+/**
+ * @param {Object} item - history entry
+ * @returns {boolean} true when the entry is missing identity or has a junk title
+ */
+export const isJunkHistoryEntry = (item) => {
+  if (!item || typeof item !== 'object') return true;
+  const hasId = Boolean(item.animeId || item.episodeId || item.komikSlug || item.chapterSlug);
+  if (!hasId) return true;
+  const title = `${item.animeTitle || item.komikTitle || ''} ${item.episodeTitle || item.chapterTitle || ''}`;
+  if (!title.trim()) return true;
+  return isJunkTitle(title);
+};
+
+/**
  * Create a history store instance.
  * @param {string} key - localStorage key
  * @param {number} [max=100] - maximum items to keep
@@ -141,6 +170,23 @@ export const createHistoryStore = (key, max = DEFAULT_MAX_ITEMS, opts = {}) => {
   };
 
   /**
+   * Remove entries matching a predicate (e.g. self-heal junk entries).
+   * @param {(item: Object) => boolean} predicate - return true to REMOVE
+   */
+  const purgeEntries = (predicate) => {
+    if (typeof window === 'undefined' || typeof predicate !== 'function') return 0;
+    try {
+      const history = getHistory();
+      const clean = history.filter((h) => !predicate(h));
+      const removed = history.length - clean.length;
+      if (removed > 0) _save(clean);
+      return removed;
+    } catch {
+      return 0;
+    }
+  };
+
+  /**
    * Clear all history for this store
    */
   const clearHistory = () => {
@@ -154,6 +200,7 @@ export const createHistoryStore = (key, max = DEFAULT_MAX_ITEMS, opts = {}) => {
     updateProgress,
     getProgress,
     clearHistory,
+    purgeEntries,
     formatTime,
   };
 };

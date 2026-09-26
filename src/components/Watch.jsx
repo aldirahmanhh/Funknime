@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { animeAPI } from '../services/api';
 import { addToWatchHistory, updateWatchProgress, getWatchProgress } from '../utils/watchHistory';
 import { addDonghuaHistory, updateDonghuaProgress, getDonghuaProgress } from '../utils/donghuaHistory';
+import { isJunkHistoryEntry } from '../utils/historyFactory';
 import { createPlayer } from '@videojs/react';
 import { VideoSkin, Video, videoFeatures } from '@videojs/react/video';
 import '@videojs/react/video/skin.css';
@@ -120,7 +121,9 @@ const Watch = () => {
           setSelectedQuality('Streaming');
           if (dd.server.qualities[0]?.serverList?.[0]) setSelectedServer(dd.server.qualities[0].serverList[0]);
           if (data.donghua_details) {
-            addDonghuaHistory({ animeId: data.donghua_details.slug, episodeId, animeTitle: data.donghua_details.title, episodeTitle: data.episode, poster: data.donghua_details.poster, provider: 'donghua' });
+            const entry = { animeId: data.donghua_details.slug, episodeId, animeTitle: data.donghua_details.title, episodeTitle: data.episode, poster: data.donghua_details.poster, provider: 'donghua' };
+            // Never persist scraped non-episode posts (shortlink tutorials, etc.)
+            if (!isJunkHistoryEntry(entry)) addDonghuaHistory(entry);
             isDonghuaRef.current = true;
           }
           setLoading(false); return;
@@ -156,7 +159,8 @@ const Watch = () => {
             if (cancelled) return;
             setAnimeData(animeRes?.data || null);
             isDonghuaRef.current = false;
-            addToWatchHistory({ animeId: animeRes?.data?.animeId || normalized.animeId, episodeId, animeTitle: animeRes?.data?.title || normalized.title || episodeId, episodeTitle: normalized.title || episodeId, poster: animeRes?.data?.poster || animeRes?.data?.poster_url || '', provider: usedProvider || 'otakudesu' });
+            const animeEntry = { animeId: animeRes?.data?.animeId || normalized.animeId, episodeId, animeTitle: animeRes?.data?.title || normalized.title || episodeId, episodeTitle: normalized.title || episodeId, poster: animeRes?.data?.poster || animeRes?.data?.poster_url || '', provider: usedProvider || 'otakudesu' };
+            if (!isJunkHistoryEntry(animeEntry)) addToWatchHistory(animeEntry);
           } catch {
             // Ignore history save errors
           }
