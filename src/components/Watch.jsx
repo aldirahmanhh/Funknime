@@ -56,7 +56,9 @@ const ANIME_PROVIDERS = [
 
 const parseEpisodeNumber = (title) => {
   if (typeof title === 'number') return title;
-  const m = String(title || '').match(/episode\s+(\d+)/i);
+  // Strict: "Episode 12" / "Ep 12" / "Eps.12". NEVER loose first-digits —
+  // anime names like "Lv999", "Kaiju No. 8", "Season 1" would poison it.
+  const m = String(title || '').match(/e?p(?:isode)?s?\.?\s*(\d+)/i);
   return m ? parseInt(m[1], 10) : null;
 };
 
@@ -169,7 +171,7 @@ const Watch = () => {
               if (isJunkTitle(result?.episode)) continue;
               data = result; usedProvider = p.name; break;
             }
-            if (result?.streaming?.servers || result?.data?.defaultStreamingUrl || result?.data?.servers || result?.data?.server) {
+            if (result?.streaming?.servers || result?.data?.defaultStreamingUrl || result?.data?.servers || result?.data?.server || result?.data?.stream_links?.length) {
               data = result; usedProvider = p.name; break;
             }
           } catch (e) { lastError = e; }
@@ -223,6 +225,22 @@ const Watch = () => {
           });
           normalized = { ...raw, defaultStreamingUrl: raw.defaultStreamingUrl || raw.servers[0]?.url, server: { qualities: Array.from(qm.entries()).map(([q, sl]) => ({ title: q, serverList: sl })) } };
         }
+        // Stream provider shape: stream_links [{server, url}] + next/prev slugs.
+        if (raw && !normalized.server && Array.isArray(raw.stream_links) && raw.stream_links.length > 0) {
+          const list = raw.stream_links
+            .map((l) => ({ title: l.server || 'Server', url: l.url }))
+            .filter((s) => s.url);
+          normalized = {
+            ...raw,
+            animeId: raw.animeId || (episodeId || '').replace(/-episode-\d+.*$/, ''),
+            defaultStreamingUrl: list[0]?.url,
+            server: { qualities: [{ title: 'Streaming', serverList: list }] },
+            navigation: {
+              previous_episode: raw.prev_slug ? { slug: raw.prev_slug } : null,
+              next_episode: raw.next_slug ? { slug: raw.next_slug } : null,
+            },
+          };
+        }
 
         setEpisodeData(normalized);
         if (usedProvider && usedProvider !== 'donghua') setActiveProvider(usedProvider);
@@ -255,19 +273,29 @@ const Watch = () => {
 
         if (cancelled) return;
 
+        // Best-effort anime detail (back-link/poster); history saves regardless.
+        let detailForHistory = null;
         if (normalized?.animeId) {
           try {
             const animeRes = await animeAPI.getAnimeDetail(normalized.animeId);
             if (cancelled) return;
             setAnimeData(animeRes?.data || null);
-            isDonghuaRef.current = false;
-            setActiveProvider(usedProvider || 'otakudesu');
-            const animeEntry = { animeId: animeRes?.data?.animeId || normalized.animeId, episodeId, animeTitle: animeRes?.data?.title || normalized.title || episodeId, episodeTitle: normalized.title || episodeId, poster: animeRes?.data?.poster || animeRes?.data?.poster_url || '', provider: usedProvider || 'otakudesu' };
-            if (!isJunkHistoryEntry(animeEntry)) addToWatchHistory(animeEntry);
+            detailForHistory = animeRes?.data || null;
           } catch {
-            // Ignore history save errors
+            // Ignore detail errors (e.g. cross-provider IDs)
           }
         }
+        isDonghuaRef.current = false;
+        setActiveProvider(usedProvider || 'otakudesu');
+        const animeEntry = {
+          animeId: detailForHistory?.animeId || normalized?.animeId || episodeId,
+          episodeId,
+          animeTitle: detailForHistory?.title || stripEpisodeSuffix(normalized?.title) || episodeId,
+          episodeTitle: normalized?.title || episodeId,
+          poster: detailForHistory?.poster || detailForHistory?.poster_url || normalized?.poster || '',
+          provider: usedProvider || 'otakudesu',
+        };
+        if (!isJunkHistoryEntry(animeEntry)) addToWatchHistory(animeEntry);
       } catch (err) {
         if (!cancelled) setError(err?.message ?? String(err));
       } finally {
@@ -547,12 +575,47 @@ const Watch = () => {
         if (!Number.isNaN(n)) return n;
         const t = ep?.title ?? ep?.eps_title ?? '';
         if (typeof t === 'number') return t;
-        const m = String(t).match(/(\d+)/);
-        return m ? parseInt(m[1], 10) : null;
+        const s = String(t);
+        // Strict episode-pattern first ("Episode 12"); trailing number next
+        // ("Ep.12 (End)"). Loose first-digits is banned: anime names like
+        // "Season 1", "Lv999", "Kaiju No. 8" would match the wrong number and
+        // find() would land on the newest episode instead.
+        const strict = s.match(/e?p(?:isode)?s?\.?\s*(\d+)/i);
+        if (strict) return parseInt(strict[1], 10);
+        const trail = s.match(/(\d+)\D*$/);
+        if (trail) return parseInt(trail[1], 10);
+        return null;
       };
       const match = epList.find((ep) => numOf(ep) === epNum);
       const newSlug = match?.episodeId || match?.eps_slug || match?.slug || null;
       if (!newSlug) throw new Error(`Episode ${epNum} tidak ada di ${label}.`);
+      // Verify before navigating: fetch the mapped episode and confirm its
+      // own number matches. Guards against slug/number mismatches in API data.
+      const fetchEpisodeByProvider =
+        target === 'samehadaku' ? animeAPI.getEpisodeDetailSamehadaku
+        : target === 'stream' ? animeAPI.getEpisodeDetailStream
+        : animeAPI.getEpisodeDetail;
+      let epCheck = null;
+      try {
+        epCheck = await fetchEpisodeByProvider(newSlug);
+      } catch {
+        epCheck = null;
+      }
+      const checkPayload = epCheck?.data || epCheck || {};
+      const hasPlayable = !!(
+        checkPayload.defaultStreamingUrl || checkPayload.url ||
+        checkPayload.server || checkPayload.servers ||
+        checkPayload.stream_links?.length || checkPayload.download_links?.length ||
+        checkPayload.streaming?.servers?.length
+      );
+      if (!epCheck || !hasPlayable) {
+        throw new Error(`Episode ${epNum} tidak bisa dibuka di ${label}.`);
+      }
+      const checkTitle = checkPayload.title || epCheck?.episode || '';
+      const checkNum = parseEpisodeNumber(checkTitle);
+      if (checkNum != null && checkNum !== epNum) {
+        throw new Error(`Episode tidak cocok di ${label} (dapat episode ${checkNum}).`);
+      }
       navigate(`/watch/${newSlug}`, { state: { provider: target } });
     } catch (e) {
       setProviderError(e?.message || `Gagal pindah ke ${label}.`);
