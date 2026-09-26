@@ -15,6 +15,22 @@ import './Home.css';
 
 const DAY_ORDER = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
+// requestIdleCallback isn't universal; fall back to setTimeout so deferred
+// fetches still run instead of throwing (which would nuke the whole page).
+const scheduleIdle = (cb, timeout = 2500) => {
+  if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+    return window.requestIdleCallback(cb, { timeout });
+  }
+  return setTimeout(cb, Math.min(timeout, 800));
+};
+const cancelIdle = (id) => {
+  if (typeof window !== 'undefined' && typeof window.cancelIdleCallback === 'function') {
+    window.cancelIdleCallback(id);
+  } else {
+    clearTimeout(id);
+  }
+};
+
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
 const proxyImage = (url) => {
   if (!url) return '';
@@ -76,6 +92,8 @@ const Home = () => {
   const [komikHistory] = useState(() => getKomikHistory());
   const [topDonors, setTopDonors] = useState([]);
   const [komikLoading, setKomikLoading] = useState(false);
+  const [komikError, setKomikError] = useState(null);
+  const [komikRetry, setKomikRetry] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,14 +109,9 @@ const Home = () => {
         setHomeData({ ongoing: otakOngoing, completed: otakCompleted });
         setLoading(false);
 
-        requestIdleCallback(
+        scheduleIdle(
           () => { if (!cancelled) fetchSecondary(otakOngoing, otakCompleted); },
-          { timeout: 2000 },
-        );
-
-        requestIdleCallback(
-          () => { if (!cancelled) fetchKomik(); },
-          { timeout: 4000 },
+          2000,
         );
       } catch (err) {
         if (!cancelled) setError(err?.message ?? 'Gagal memuat data');
@@ -130,43 +143,56 @@ const Home = () => {
       if (scheduleRes?.data) setScheduleData(scheduleRes);
     };
 
-    const fetchKomik = async () => {
-      setKomikLoading(true);
-      try {
-        const [latestRes, populerRes] = await Promise.all([
-          comicAPI.getComicTerbaru(1).catch(() => ({ comics: [] })),
-          comicAPI.getComicPopuler().catch(() => ({ comics: [] })),
-        ]);
-        if (!cancelled) {
-          setKomikData({
-            latest: latestRes.comics || [],
-            populer: populerRes.comics || [],
-          });
-        }
-      } catch {
-        // Silently fail
-      } finally {
-        if (!cancelled) setKomikLoading(false);
-      }
-    };
-
     fetchCritical();
 
-    const idleId = requestIdleCallback(
+    const idleId = scheduleIdle(
       () => {
         fetch('/api/trakteer?action=supports&limit=10&page=1')
           .then((r) => r.json())
           .then((d) => { if (d?.result?.data) setTopDonors(d.result.data); })
           .catch(() => {});
       },
-      { timeout: 5000 },
+      5000,
     );
 
     return () => {
       cancelled = true;
-      cancelIdleCallback(idleId);
+      cancelIdle(idleId);
     };
   }, []);
+
+  // Komik loads in its own effect (retryable) instead of being buried in the
+  // main effect: previously a transient failure left {latest:[],populer:[]}
+  // with no message and no way to retry, so the section looked "gone".
+  useEffect(() => {
+    let cancelled = false;
+    const fetchKomik = async () => {
+      setKomikLoading(true);
+      setKomikError(null);
+      try {
+        const [latestRes, populerRes] = await Promise.all([
+          comicAPI.getComicTerbaru(1).catch(() => ({ comics: [] })),
+          comicAPI.getComicPopuler().catch(() => ({ comics: [] })),
+        ]);
+        if (cancelled) return;
+        const latest = latestRes.comics || [];
+        const populer = populerRes.comics || [];
+        setKomikData({ latest, populer });
+        if (latest.length === 0 && populer.length === 0) {
+          setKomikError('Komik gagal dimuat. Coba lagi.');
+        }
+      } catch {
+        if (!cancelled) {
+          setKomikData({ latest: [], populer: [] });
+          setKomikError('Komik gagal dimuat. Coba lagi.');
+        }
+      } finally {
+        if (!cancelled) setKomikLoading(false);
+      }
+    };
+    const idleId = scheduleIdle(() => { if (!cancelled) fetchKomik(); }, 2500);
+    return () => { cancelled = true; cancelIdle(idleId); };
+  }, [komikRetry]);
 
   if (loading) {
     return (
@@ -447,8 +473,15 @@ const Home = () => {
                 </div>
               </div>
             )}
-            {!komikData && !komikLoading && (
-              <p className="home-rail-empty">Komik akan dimuat setelah konten utama selesai.</p>
+            {!komikLoading && komikLatest.length === 0 && komikPopuler.length === 0 && (
+              <div className="home-rail">
+                <p className="home-rail-empty">{komikError || 'Belum ada data komik.'}</p>
+                <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 'var(--space-4)' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setKomikRetry((n) => n + 1)}>
+                    <Icon name="refresh" size={14} /> Muat ulang komik
+                  </button>
+                </div>
+              </div>
             )}
           </>
         )}
