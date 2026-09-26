@@ -105,8 +105,15 @@ const Watch = () => {
           const primary = allProviders.find(p => p.name === stateProvider);
           const rest = allProviders.filter(p => p.name !== stateProvider);
           providers = primary ? [primary, ...rest] : rest;
-        } else {
+        } else if (/-subtitle-indonesia$/.test(episodeId || '')) {
+          // Donghua-style slug — donghua endpoint first (default order).
           providers = allProviders;
+        } else {
+          // Anime-style slug (`-sub-indo`) — skip the donghua stub attempt
+          // and go straight to anime providers; donghua stays as fallback.
+          const donghua = allProviders.find(p => p.name === 'donghua');
+          const rest = allProviders.filter(p => p.name !== 'donghua');
+          providers = [...rest, donghua];
         }
 
         let data = null, usedProvider = null, lastError = null;
@@ -460,6 +467,16 @@ const Watch = () => {
   const iframeSrc = useIframe ? toEmbedUrl(videoUrl) : null;
   const backId = animeData?.slug ?? animeData?.animeId ?? animeData?.id ?? episodeData?.animeId ?? episodeData?.animeSlug;
   const hasBack = backId != null && String(backId).trim() !== '';
+  const currentServers = episodeData?.server?.qualities?.find(q => q.title === selectedQuality)?.serverList || [];
+
+  // Slow-embed escape hatch: jump to the next server in the current quality.
+  const handleTryNextServer = () => {
+    if (currentServers.length < 2) return;
+    const key = (s) => s?.serverId || s?.title;
+    const idx = currentServers.findIndex((s) => key(s) === key(selectedServer));
+    const next = currentServers[(idx + 1) % currentServers.length];
+    handleServerSelect(next, currentServers);
+  };
 
   return (
     <div className="watch-page main-container">
@@ -501,7 +518,13 @@ const Watch = () => {
               </VideoSkin>
             </Player.Provider>
           ) : iframeSrc ? (
-            <EmbedPlayer src={iframeSrc} title={episodeData.title} onLoad={() => setSwitching(false)} />
+            <EmbedPlayer
+              key={iframeSrc}
+              src={iframeSrc}
+              title={episodeData.title}
+              onLoad={() => setSwitching(false)}
+              onTryNext={currentServers.length > 1 ? handleTryNextServer : undefined}
+            />
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
               <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Buka Video <Icon name="external-link" size={14} /></a>
@@ -521,8 +544,8 @@ const Watch = () => {
           </div>
         )}
         <div className="server-list">
-          {(episodeData?.server?.qualities?.find(q => q.title === selectedQuality)?.serverList || []).map(s => (
-            <button key={s.serverId || s.title} type="button" className={`server-btn ${selectedServer?.title === s.title ? 'active' : ''}`} onClick={() => handleServerSelect(s, episodeData.server.qualities.find(q => q.title === selectedQuality)?.serverList || [])}>{s.title}</button>
+          {currentServers.map(s => (
+            <button key={s.serverId || s.title} type="button" className={`server-btn ${selectedServer?.title === s.title ? 'active' : ''}`} onClick={() => handleServerSelect(s, currentServers)}>{s.title}</button>
           ))}
         </div>
         <p className="error-hint" style={{ marginTop: 'var(--space-2)' }}>Jika video tidak muncul, coba server atau kualitas lain.</p>
