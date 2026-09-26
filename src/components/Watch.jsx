@@ -57,6 +57,7 @@ const Watch = () => {
   const [switching, setSwitching] = useState(false);
   const [switchLabel, setSwitchLabel] = useState('');
   const [videoFailed, setVideoFailed] = useState(false);
+  const [playerNonce, setPlayerNonce] = useState(0);
   const videoElRef = useRef(null);
   const isDonghuaRef = useRef(false);
   const saveTimerRef = useRef(null);
@@ -389,12 +390,29 @@ const Watch = () => {
 
   // Try servers in order; the first URL whose host allows framing on our
   // domain wins. Falls back to the first resolvable URL when all are blocked.
-  const pickPlayableServer = async (servers) => {
+  // Host preference: mega.nz embeds are currently the most reliable player;
+  // vidhide (odvidhide) has been observed with 20s+ TTFB and dead play
+  // buttons, so it stays as fallback, not first pick.
+  const PREFERRED_EMBED_HOSTS = ['mega.nz'];
+  const hostScore = (url) => {
+    try {
+      const host = new URL(url).hostname.toLowerCase();
+      if (PREFERRED_EMBED_HOSTS.some((h) => host === h || host.endsWith(`.${h}`))) return 0;
+      return 1;
+    } catch {
+      return 2;
+    }
+  };
+  const pickPlayableServer = async (servers, { honorFirst = false } = {}) => {
     const resolved = await Promise.all(
       (servers || []).map(async (s) => ({ server: s, url: await resolveServerUrl(s) }))
     );
     const usable = resolved.filter((r) => r.url);
-    return usable.find((r) => !isBlockedEmbedUrl(r.url)) || usable[0] || null;
+    // Explicit user click: honor it when the URL is usable and frameable.
+    if (honorFirst && usable[0] && !isBlockedEmbedUrl(usable[0].url)) return usable[0];
+    const frameable = usable.filter((r) => !isBlockedEmbedUrl(r.url));
+    frameable.sort((a, b) => hostScore(a.url) - hostScore(b.url));
+    return frameable[0] || usable[0] || null;
   };
 
   const handleServerSelect = (server, siblings = []) => {
@@ -405,12 +423,16 @@ const Watch = () => {
     setSelectedServer(server);
     const queue = siblings.length > 0 ? siblings : [server];
     const ordered = [server, ...queue.filter((s) => s !== server)];
-    pickPlayableServer(ordered).then((pick) => {
+    pickPlayableServer(ordered, { honorFirst: true }).then((pick) => {
       if (pick) {
         setSelectedServer({ ...pick.server, url: pick.url });
         setVideoUrl(pick.url);
+        // Force iframe remount even when the URL is unchanged, so every
+        // click visibly reloads the player instead of looking dead.
+        setPlayerNonce((n) => n + 1);
       } else if (episodeData?.defaultStreamingUrl) {
         setVideoUrl(episodeData.defaultStreamingUrl);
+        setPlayerNonce((n) => n + 1);
       }
       setSwitching(false);
     }).catch(() => {
@@ -468,6 +490,9 @@ const Watch = () => {
   const backId = animeData?.slug ?? animeData?.animeId ?? animeData?.id ?? episodeData?.animeId ?? episodeData?.animeSlug;
   const hasBack = backId != null && String(backId).trim() !== '';
   const currentServers = episodeData?.server?.qualities?.find(q => q.title === selectedQuality)?.serverList || [];
+  // Hide qualities with no servers (e.g. 360p with an empty list) so users
+  // never land on a quality tab that has nothing clickable.
+  const visibleQualities = (episodeData?.server?.qualities || []).filter(q => q.serverList?.length > 0);
 
   // Slow-embed escape hatch: jump to the next server in the current quality.
   const handleTryNextServer = () => {
@@ -519,7 +544,7 @@ const Watch = () => {
             </Player.Provider>
           ) : iframeSrc ? (
             <EmbedPlayer
-              key={iframeSrc}
+              key={`${iframeSrc}::${playerNonce}`}
               src={iframeSrc}
               title={episodeData.title}
               onLoad={() => setSwitching(false)}
@@ -536,9 +561,9 @@ const Watch = () => {
       </div>
 
       <div className="server-selector">
-        {episodeData?.server?.qualities?.length > 0 && (
+        {visibleQualities.length > 0 && (
           <div className="quality-tabs">
-            {episodeData.server.qualities.map(q => (
+            {visibleQualities.map(q => (
               <button key={q.title} type="button" className={`quality-tab ${selectedQuality === q.title ? 'active' : ''}`} onClick={() => handleQualityChange(q.title)}>{q.title}</button>
             ))}
           </div>
