@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { animeAPI } from '../services/api';
 import { addToWatchHistory, updateWatchProgress, getWatchProgress } from '../utils/watchHistory';
 import { addDonghuaHistory, updateDonghuaProgress, getDonghuaProgress } from '../utils/donghuaHistory';
-import { isJunkHistoryEntry } from '../utils/historyFactory';
+import { isJunkHistoryEntry, isJunkTitle } from '../utils/historyFactory';
 import { createPlayer } from '@videojs/react';
 import { VideoSkin, Video, videoFeatures } from '@videojs/react/video';
 import '@videojs/react/video/skin.css';
@@ -110,10 +110,20 @@ const Watch = () => {
 
         if (usedProvider === 'donghua' && data.streaming) {
           if (cancelled) return;
+          // Junk pseudo-episodes (shortlink tutorials, [ADS] stubs) have no
+          // playable servers — fail with a message instead of a dead spinner.
+          if (isJunkTitle(data.episode)) {
+            throw new Error('Episode tidak valid atau tidak tersedia.');
+          }
+          const dServers = Array.isArray(data.streaming.servers) ? data.streaming.servers : [];
+          const dDefaultUrl = data.streaming.main_url?.url || dServers[0]?.url || '';
+          if (!dDefaultUrl && dServers.length === 0) {
+            throw new Error('Server streaming tidak tersedia untuk episode ini. Coba episode lain.');
+          }
           const dd = {
             episode: data.episode,
-            defaultStreamingUrl: data.streaming.main_url?.url || data.streaming.servers[0]?.url,
-            server: { qualities: [{ title: 'Streaming', serverList: data.streaming.servers.map(s => ({ title: s.name, url: s.url })) }] },
+            defaultStreamingUrl: dDefaultUrl,
+            server: { qualities: [{ title: 'Streaming', serverList: dServers.map(s => ({ title: s.name, url: s.url })) }] },
             navigation: data.navigation, donghua_details: data.donghua_details,
           };
           setEpisodeData(dd);
@@ -144,6 +154,10 @@ const Watch = () => {
         }
 
         setEpisodeData(normalized);
+        const hasServers = normalized?.server?.qualities?.some(q => q.serverList?.length > 0);
+        if (!normalized?.defaultStreamingUrl && !hasServers) {
+          throw new Error('Server streaming tidak tersedia untuk episode ini. Coba episode lain.');
+        }
         if (normalized?.defaultStreamingUrl) setVideoUrl(normalized.defaultStreamingUrl);
         if (normalized?.server?.qualities?.length > 0) {
           const fq = normalized.server.qualities[0];
